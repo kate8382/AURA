@@ -1,0 +1,171 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AURA per-case schema",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "case_id",
+    "category",
+    "scenarios",
+    "confidence",
+    "legal_risk",
+    "behavioral_patterns",
+    "cross_check",
+    "deception_threshold"
+  ],
+  "properties": {
+    "export_date": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "anonymized": {
+      "type": "boolean"
+    },
+    "case_id": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "text"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "triggers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "confidence_raw": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "suggested_action": {
+      "type": "string"
+    },
+    "legal_risk": {
+      "type": "object",
+      "required": [
+        "short_summary",
+        "full_text"
+      ],
+      "properties": {
+        "short_summary": {
+          "type": "string"
+        },
+        "full_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "behavioral_patterns": {
+      "type": "object",
+      "required": [
+        "short_summary",
+        "full_text"
+      ],
+      "properties": {
+        "short_summary": {
+          "type": "string"
+        },
+        "full_text": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "cross_check": {
+      "type": "object",
+      "required": [
+        "short_summary",
+        "questions"
+      ],
+      "properties": {
+        "short_summary": {
+          "type": "string"
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "full_text"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "full_text": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "deception_threshold": {
+      "type": "object",
+      "required": [
+        "short_summary",
+        "full_text"
+      ],
+      "properties": {
+        "short_summary": {
+          "type": "string"
+        },
+        "full_text": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
