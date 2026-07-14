@@ -66,6 +66,18 @@ export async function recalc(filePath: string, preserveExisting = false, minFloo
     return null;
   }
 
+  // Backwards-compatible handling for legacy files that use `legal_intent_logs`
+  if ((data as any).legal_intent_logs && typeof (data as any).legal_intent_logs === 'object') {
+    const logs = (data as any).legal_intent_logs || {};
+    for (const table of Object.keys(logs)) {
+      const entries: Entry[] = logs[table] || [];
+      for (const e of entries) updateCase(e);
+    }
+    (data as any).legal_intent_logs = logs;
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+    return { count, changes };
+  }
+
   // Determine where case objects live inside the file and update them
   // Common patterns observed:
   // 1) wrapper with category arrays: { "MANIPULATION": [ { case... } ] }
@@ -99,10 +111,11 @@ export async function recalc(filePath: string, preserveExisting = false, minFloo
 
 // Parses command-line arguments for file path, dry-run mode, and preserve-existing flag.
 export function parseArgs(argv: string[]) {
-  const result: { file: string; dryRun: boolean; preserve: boolean } = { file: 'premium_matrices', dryRun: false, preserve: false };
+  const defaultDir = process.env.CASES_DIR || 'public_cases';
+  const result: { file: string; dryRun: boolean; preserve: boolean } = { file: defaultDir, dryRun: false, preserve: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--file' || a === '-f') { result.file = argv[++i]; continue; }
+    if (a === '--file' || a === '-f' || a === '--dir' || a === '-d') { result.file = argv[++i]; continue; }
     if (a === '--dry-run') { result.dryRun = true; continue; }
     if (a === '--preserve-existing') { result.preserve = true; continue; }
   }

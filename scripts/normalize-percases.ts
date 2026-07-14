@@ -151,7 +151,13 @@ async function processFile(filePath: string) {
 }
 
 async function main() {
-  const target = process.argv[2] || 'premium_matrices';
+  const envDir = process.env.CASES_DIR;
+  let target = envDir || process.argv[2] || 'public_cases';
+  const argv = process.argv.slice(2);
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '-d' || a === '--dir') { target = argv[i + 1] || target; }
+  }
   const dry = process.argv.includes('--dry-run');
   if (dry) {
     console.log('Dry-run mode: no files will be written.');

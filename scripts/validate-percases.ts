@@ -22,7 +22,14 @@ async function walk(dir: string, cb: (p: string) => Promise<void>) {
 async function main() {
   const schema = await loadSchema();
   const validate = ajv.compile(schema);
-  const target = process.argv[2] || 'premium_matrices';
+  // directory can be provided as first arg, -d/--dir, or via CASES_DIR env var
+  const envDir = process.env.CASES_DIR;
+  let target = envDir || process.argv[2] || 'public_cases';
+  const argv = process.argv.slice(2);
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '-d' || a === '--dir') { target = argv[i + 1] || target; break; }
+  }
   let errors = 0;
   const invalidFiles: Array<{file:string, errs:any}> = [];
 
