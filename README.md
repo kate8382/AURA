@@ -17,7 +17,7 @@ AURA (AI User Risk Assessment) is an open-core library of structured behavioral 
 ## Repository Structure (recommended)
 
 - `core_matrices/` — curated open-core matrices (3–5 starter cases: behavioral patterns, cross-checks, deception thresholds, grey-zone labels).
-- `premium_matrices/` — expanded enterprise matrices intended for private storage or a separate commercial repo (not committed to public repos).
+- `public_cases/` — the public, curated per-case dataset (the 10 case files currently included in the repository).
 - `scripts/` — developer tooling: `recalc_confidence.ts`, `validate-cases.ts`, and `__tests__/` for unit tests.
 - `research/` — migration target for `kate-notes/` (ideas, actions, drafts, provenance artifacts).
 - Root config files: `package.json`, `tsconfig.json`, `jest.config.cjs`, `case-generator-schema.json`, `case-generator.ts`.
@@ -64,10 +64,17 @@ We welcome contributions to the Open‑Core portion (`core_matrices`, validators
 
 ### Suggested repo documents to add next
 
-- `CONTRIBUTING.md` — contribution guidelines and testing expectations.
-- `GOVERNANCE.md` — decision-making process and maintainership rules for `core_matrices`.
+- `CONTRIBUTING.md` — contribution guidelines and testing expectations (added).
+- `GOVERNANCE.md` — decision-making process and maintainership rules for `core_matrices` (added).
 - `CODE_OF_CONDUCT.md` — community rules and reporting.
-- `LICENSE` — repository license (AGPL-3.0 suggested; not yet added).
+- `LICENSE` — repository license (code is licensed under Apache-2.0).
+
+### License
+
+- Code & tooling: Apache License 2.0 — see `LICENSE` in the repository root.
+- Public dataset (`public_cases/`): Creative Commons Attribution-NonCommercial 4.0 (CC BY-NC 4.0) — see `DATA_LICENSE` in the repository root.
+
+If you plan to use the `public_cases/` dataset for commercial purposes, please contact the maintainers to obtain a commercial license.
 
 ## Roadmap & Research notes
 
