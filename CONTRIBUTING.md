@@ -1,54 +1,63 @@
-CONTRIBUTING to AURA
-=====================
+# Contributing to AURA
 
-Thanks for your interest in contributing. This document describes the minimal workflow for contributions, licensing, and private/premium
-content handling.
+Thank you for your interest in contributing to **AURA**! We welcome contributions from both **AI Safety Researchers** (designing new threat scenarios) and **Software Engineers** (improving our validators, calculators, and pipelines).
 
-Licenses
-- Code (scripts, tooling): Apache-2.0
-- Public cases (content in `public_cases/`): CC BY-NC 4.0
+## How You Can Contribute
 
-If you submit a contribution (code or data), you agree that your contribution will be made available under the repository license above.
+### 1. Adding or Improving Threat Cases (For Domain Experts)
 
-Basic workflow
-1. Fork the repository (if you are an external contributor).
-2. Create a feature branch with a descriptive name: `feature/xyz` or
-   `fix/bug-123`.
-3. Implement changes and add tests where appropriate.
-4. Ensure linters/tests pass locally: `npm install` and `npm test`.
-5. Open a pull request with a clear description and link to related
-   issues. Maintainership will review and request changes if needed.
+You can contribute new grey-zone scenarios to our `public_cases` directory:
 
-Private / Premium content workflow (for maintainers)
-- Keep paid/premium cases in a private branch or private repository.
-  Recommended pattern:
-  - `main` — public, open-core code and `public_cases/` (CC BY-NC 4.0)
-  - `private-cases` — private branch/repo with premium cases (access
-    by contract / commercial license only)
+- Find the appropriate folder: `MANIPULATION`, `FRAUD`, or `ACCESS`.
 
-Creating a private branch (example)
-```bash
-# create a local branch from main
-git checkout -b private-cases
-# do work, add files
-git add path/to/new-case.json
-git commit -m "Add premium case: XYZ"
-# push branch to remote (private repository or protected branch)
-git push origin private-cases
-```
+- Create a new JSON file following the schema in `schemas/per-case-schema.json`.
 
-When collaborating with others privately, share access through a separate private repository or by granting direct access to the
-`private-cases` branch on your Git host (recommended: use a private repo). **Do NOT** push premium content to the public repository.
+- Ensure the prompt texts are **clean, natural human speech** (no in-line metadata or artificial tags).
 
-Contributor License Agreement (optional)
-- If you expect many external contributions or want the right to
-  re-license code/data later, consider using a simple CLA. For now,
-  contributions are accepted under the repository license by default.
+- Map any psychological or tactical patterns to the canonical per-case schema fields: `case_id`, `category`, `scenarios`, `confidence`, `legal_risk`, `behavioral_patterns`, `cross_check`, `deception_threshold`.
 
-Code style and tests
-- Use TypeScript formatting and `ts-node` for scripts.
-- Add unit tests in `scripts/__tests__/` with Jest.
-- Run `npm test` before opening PRs.
+### 2. Enhancing Code and Automation (For Engineers)
 
-Contact
-- For commercial licensing, email: contact@aura-security.io (placeholder)
+We want to keep our pipeline fast and reliable. You can help by:
+
+- Improving the TypeScript case generator or validation scripts in `scripts/`.
+
+- Adding new test cases in Jest to cover edge cases in schema validation.
+
+- Helping build the **Programmatic Prompt Tokenization Engine** (see the Roadmap in [README](./README.md)).
+
+---
+
+## Contribution Workflow
+
+1. **Fork** the repository and create your branch from `main` (e.g., `feature/add-manipulation-cases` or `fix/validator-bug`).
+
+2. Run `npm install` to set up your local environment.
+
+3. Make your changes.
+
+4. **Test your changes:**
+
+- Run typecheck: `npx tsc --noEmit`.
+- Run validation: `npm run validate` (or `npm run validate:percases`).
+- Run unit tests: `npm test`.
+
+Your PR will not be merged if the schema validation, typecheck or unit tests fail.
+
+## Tests & CI
+
+- Location: `scripts/__tests__/` contains Jest unit tests for scripts and generators.
+- Requirement: all tests and schema validations must pass in CI for PR merges (maintainers expect green checks on relevant pipelines).
+
+5. Submit a **Pull Request** with a clear description of what you added/fixed and why it is important for AI safety.
+
+## Licensing of Contributions
+
+By contributing to **AURA**, you agree that:
+
+- Any **code, scripts, or tooling** you submit will be licensed under the **[Apache License 2.0](./LICENSE)**.
+
+- Any **threat cases, matrices, or data** you submit will be licensed under the **[Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](./DATA_LICENSE)**.
+
+---
+*If you have a complex idea or a feature request that doesn't fit into a pull request yet, please feel free to open an **Issue** first so we can discuss it!*
