@@ -1,22 +1,26 @@
 {
-  "name": "aura-test-cases",
+  "name": "AURA-AI_user_risk_assessment",
   "version": "0.1.0",
   "private": true,
   "author": {
     "name": "Ecaterina Sevciuc",
     "email": "e.sevciuc82@gmail.com"
   },
-  "license": "",
+  "license": "Apache-2.0",
+  "dataLicense": "CC-BY-NC-4.0",
   "keywords": [],
   "scripts": {
-    "validate": "node -r ts-node/register scripts/validate-cases.ts",
+    "validate": "node -r ts-node/register scripts/validate-percases.ts public_cases",
     "test": "jest",
+    "test:watch": "jest --watch",
     "recalc:confidence": "node -r ts-node/register scripts/recalc_confidence.ts",
     "recalc:confidence:dry": "node -r ts-node/register scripts/recalc_confidence.ts --dry-run",
     "recalc:confidence:min": "node -r ts-node/register scripts/recalc_confidence.ts --min 0.6",
-    "normalize:percases:dry": "node -r ts-node/register scripts/normalize-percases.ts premium_matrices --dry-run",
-    "normalize:percases": "node -r ts-node/register scripts/normalize-percases.ts premium_matrices",
-    "validate:percases": "node -r ts-node/register scripts/validate-percases.ts premium_matrices"
+    "new-case:dry": "node -r ts-node/register scripts/new-case-template.ts --dry-run",
+    "new-case": "node -r ts-node/register scripts/new-case-template.ts",
+    "normalize:percases:dry": "node -r ts-node/register scripts/normalize-percases.ts public_cases --dry-run",
+    "normalize:percases": "node -r ts-node/register scripts/normalize-percases.ts public_cases",
+    "validate:percases": "node -r ts-node/register scripts/validate-percases.ts public_cases"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",

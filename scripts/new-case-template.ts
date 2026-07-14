@@ -2,55 +2,103 @@ import fs from 'fs/promises';
 import path from 'path';
 
 export type CaseTemplate = {
-  export_date: string;
-  source: string;
-  anonymized: boolean;
   case_id: string;
   category: string;
   scenarios: Array<{ name: string; text: string; triggers: string[] }>;
   confidence: number;
-  confidence_raw?: number;
   suggested_action?: string;
   legal_risk: { short_summary: string; full_text: string[] | string };
   behavioral_patterns: { short_summary: string; full_text: string[] };
   cross_check: { short_summary: string; questions: Array<{ name: string; full_text: string[] }> };
   deception_threshold: { short_summary: string; full_text: any[] };
+  confidence_raw?: number;
 };
 
 export function createTemplate(caseId?: string): CaseTemplate {
-  const id = caseId || `CASE-${Date.now()}`;
+  const id = caseId || `AUTO-CASE-000`;
   return {
-    export_date: new Date().toISOString().split('T')[0],
-    source: 'AURA',
-    anonymized: true,
-    case_id: id,
-    category: '',
-    scenarios: [
+    "case_id": id,
+    "category": "",
+    "scenarios": [
       {
-        name: '',
-        text: '',
-        triggers: []
+        "name": "",
+        "text": "",
+        "triggers": []
+      },
+      {
+        "name": "",
+        "text": "",
+        "triggers": []
+      },
+      {
+        "name": "",
+        "text": "",
+        "triggers": []
       }
     ],
-    confidence: 0.5,
-    confidence_raw: 0.5,
-    suggested_action: '',
-    legal_risk: {
-      short_summary: '',
-      full_text: []
+    "confidence": 0.5,
+    "suggested_action": "cross_check",
+    "legal_risk": {
+      "short_summary": "",
+      "full_text": ""
     },
-    behavioral_patterns: {
-      short_summary: '',
-      full_text: []
+    "behavioral_patterns": {
+      "short_summary": "Behavioral Patterns (Signals)",
+      "full_text": [""]
     },
-    cross_check: {
-      short_summary: '',
-      questions: []
+    "cross_check": {
+      "short_summary": "Cross-Checking",
+      "questions": [
+        {
+          "name": "",
+          "full_text": [
+            "A: ",
+            "B: "
+          ]
+        },
+        {
+          "name": "",
+          "full_text": [
+            "A: ",
+            "B: "
+          ]
+        },
+        {
+          "name": "3. Direct Absurdity Callout",
+          "full_text": [
+            ""
+          ]
+        },
+      ]
     },
-    deception_threshold: {
-      short_summary: '',
-      full_text: []
-    }
+    "deception_threshold": {
+      "short_summary": "Deception Threshold",
+      "full_text": [
+        {
+          "name": "1. Red Flag 1 ()",
+          "full_text": [
+            "A: ",
+            "B: "
+          ]
+        },
+        {
+          "name": "Red Flag 2 (Persona Shift)",
+          "full_text": [
+            "A: ",
+            "B: "
+          ]
+        },
+        {
+          "name": "3. Block Trigger (100% Risk)",
+          "full_text": [
+            "A: ",
+            "B: ",
+            "Action: "
+          ]
+        }
+      ]
+    },
+    "confidence_raw": 0.5
   };
 }
 
