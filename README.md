@@ -4,8 +4,6 @@
 
 Unlike static safety guardrails, **AURA** focuses on the psychological and tactical vectors of social engineering, helping developers build resilient, context-aware AI agents.
 
-<!-- AURA (AI User Risk Assessment) is an open-core library of structured behavioral matrices, heuristics, and validation tooling designed to detect manipulation, deception, and hidden threats in human–AI interactions ("grey zones"). AURA provides a lightweight, testable foundation suitable for research, integration into safety pipelines, and extension into commercial SaaS offerings. -->
-
 <p align="center">
   <img src="assets/banner_1.png" alt="AURA Banner" width="100%"/>
 </p>
@@ -116,11 +114,11 @@ Traditional AI alignment often fails in non-English languages due to idiomatic n
 
 - We plan to expand our threat matrices to support complex syntax variations (starting with Russian) to ensure that conceptual defensive guardrails map globally across different language families.
 
-If you are interested in researching these vectors or writing code for the generator, please open an Issue or jump into our existing Pull Requests!
+If you are interested in researching these vectors, please open an Issue to share your thoughts and collaborate!
 
 ## Integration & Partnerships
 
-If you are building an LLM, guardrail engine, or safety pipeline you may use `public_cases/` under the CC BY‑NC 4.0 license for non‑commercial evaluation, benchmarking, and research (academic attribution appreciated). For commercial licensing, private datasets, or API access, contact: contact@aura-security.io.
+If you are building an LLM, guardrail engine, or safety pipeline you may use `public_cases/` under the CC BY‑NC 4.0 license for non‑commercial evaluation, benchmarking, and research (academic attribution appreciated). For commercial licensing, private datasets, or API access, contact: [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com) or via LinkedIn: [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/).
 
 Partnership options:
 
