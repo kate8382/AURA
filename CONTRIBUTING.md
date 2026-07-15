@@ -1,63 +1,56 @@
 # Contributing to AURA
 
-Thank you for your interest in contributing to **AURA**! We welcome contributions from both **AI Safety Researchers** (designing new threat scenarios) and **Software Engineers** (improving our validators, calculators, and pipelines).
+Thank you for your interest in AURA. To ensure consistent quality, intellectual property control, and a focused product roadmap, **AURA is currently developed and maintained solely by the original author (Kate)**.
 
-## How You Can Contribute
-
-### 1. Adding or Improving Threat Cases (For Domain Experts)
-
-You can contribute new grey-zone scenarios to our `public_cases` directory:
-
-- Find the appropriate folder: `MANIPULATION`, `FRAUD`, or `ACCESS`.
-
-- Create a new JSON file following the schema in `schemas/per-case-schema.json`.
-
-- Ensure the prompt texts are **clean, natural human speech** (no in-line metadata or artificial tags).
-
-- Map any psychological or tactical patterns to the canonical per-case schema fields: `case_id`, `category`, `scenarios`, `confidence`, `legal_risk`, `behavioral_patterns`, `cross_check`, `deception_threshold`.
-
-### 2. Enhancing Code and Automation (For Engineers)
-
-We want to keep our pipeline fast and reliable. You can help by:
-
-- Improving the TypeScript case generator or validation scripts in `scripts/`.
-
-- Adding new test cases in Jest to cover edge cases in schema validation.
-
-- Helping build the **Programmatic Prompt Tokenization Engine** (see the Roadmap in [README](./README.md)).
+At this time we do **not** accept external code contributions, Pull Requests (PRs), or direct database additions. The maintainer will review external feedback and decide whether to incorporate it.
 
 ---
 
-## Contribution Workflow
+## How you can help (without PRs)
 
-1. **Fork** the repository and create your branch from `main` (e.g., `feature/add-manipulation-cases` or `fix/validator-bug`).
+Even though we do not accept direct code or data PRs, community feedback is valuable. Please use Issues for the following:
 
-2. Run `npm install` to set up your local environment.
+### 1) Bug reports & reproducible issues
+- Open an Issue titled `bug: <short description>` with steps to reproduce, expected vs actual behaviour, and any relevant logs or minimal examples.
 
-3. Make your changes.
+### 2) Feature or scenario suggestions
+- Open an Issue titled `idea: <short title>` or use the `idea` label. Provide a concise scenario description, suggested triggers, and why it is important.
+- If the suggestion is accepted, the maintainer may implement, validate, and commit the case; contributors who provided the idea will be credited in release notes on request.
 
-4. **Test your changes:**
-
-- Run typecheck: `npx tsc --noEmit`.
-- Run validation: `npm run validate` (or `npm run validate:percases`).
-- Run unit tests: `npm test`.
-
-Your PR will not be merged if the schema validation, typecheck or unit tests fail.
-
-## Tests & CI
-
-- Location: `scripts/__tests__/` contains Jest unit tests for scripts and generators.
-- Requirement: all tests and schema validations must pass in CI for PR merges (maintainers expect green checks on relevant pipelines).
-
-5. Submit a **Pull Request** with a clear description of what you added/fixed and why it is important for AI safety.
-
-## Licensing of Contributions
-
-By contributing to **AURA**, you agree that:
-
-- Any **code, scripts, or tooling** you submit will be licensed under the **[Apache License 2.0](./LICENSE)**.
-
-- Any **threat cases, matrices, or data** you submit will be licensed under the **[Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](./DATA_LICENSE)**.
+### 3) Integration feedback & evaluation reports
+- If you integrate `public_cases/` into pipelines, share aggregated evaluation metrics (false positives/negatives), environment details, and example inputs (anonymized). This helps improve heuristics.
 
 ---
-*If you have a complex idea or a feature request that doesn't fit into a pull request yet, please feel free to open an **Issue** first so we can discuss it!*
+
+## Private / Commercial Requests
+
+- **Public dataset:** `public_cases/` is available under CC BY‑NC 4.0 for non‑commercial use. Do not expect direct support or PR merges for public cases.
+- **Commercial licensing:** For commercial access to expanded datasets, private branches, or API access, contact: contact@aura-security.io. Commercial arrangements may include NDA, dataset export, or private repository access.
+- **Non‑commercial private testing option:** If you are a non‑commercial developer or researcher and want private‑case testing, we offer a collaborative evaluation: you may provide a sandboxed agent endpoint or temporary access credentials; the maintainer will run private cases locally (no private data will be published) and return evaluation results or trained model artifacts as agreed. Contact via the email above to arrange terms.
+
+---
+
+## Security & data handling
+
+- Do not submit real personal data or sensitive records in Issues or attachments. Public cases should never contain PII.
+- Private datasets (`private_cases/`) are managed by the maintainer; if you supply any sample data for private testing it must be anonymized and provided under an agreed contract.
+
+---
+
+## Testing & expectations
+
+- The repository includes validation tooling and tests. Before suggesting schema changes, run local checks: `npx tsc --noEmit`, `npm run validate` (or `npm run validate:percases`), and `npm test`.
+- Tests are located in `scripts/__tests__/`.
+
+---
+
+## Licensing reminder
+
+- **Software & tooling:** Apache License 2.0 — see `LICENSE`.
+- **Public cases (`public_cases/`):** CC BY‑NC 4.0 — see `DATA_LICENSE`.
+
+If a suggestion is implemented by the maintainer, contributed ideas will be credited in release notes upon request.
+
+---
+
+If you have an idea that doesn't fit as a bug or PR, open an Issue and label it `idea` — the maintainer will review it.

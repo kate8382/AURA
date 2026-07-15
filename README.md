@@ -93,7 +93,7 @@ See the full schema at `schemas/per-case-schema.json` — example minimal valid 
 
 ## Future Roadmap & Collaboration Ideas
 
-We are actively looking for contributors, AI safety researchers, and developers to help scale **AURA**. Here is what we are building next:
+We are actively developing **AURA** as a focused, maintainer‑led project. Below are roadmap highlights and ways external teams can collaborate without direct code contributions.
 
 **1. Programmatic Prompt Tokenization (Data Engineering)**
 
@@ -118,12 +118,21 @@ Traditional AI alignment often fails in non-English languages due to idiomatic n
 
 If you are interested in researching these vectors or writing code for the generator, please open an Issue or jump into our existing Pull Requests!
 
-## LicenseCode & Tooling:
+## Integration & Partnerships
 
-**- code, scripts, or tooling** - **[Apache License 2.0](./LICENSE)**.
+If you are building an LLM, guardrail engine, or safety pipeline you may use `public_cases/` under the CC BY‑NC 4.0 license for non‑commercial evaluation, benchmarking, and research (academic attribution appreciated). For commercial licensing, private datasets, or API access, contact: contact@aura-security.io.
 
-**- threat cases, matrices, or data** - **[Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](./DATA_LICENSE)**.
+Partnership options:
+
+- **Public cases (self‑serve):** Download `public_cases/` and run validations locally with `npm run validate` and tests with `npm test`.
+- **Non‑commercial private testing:** If you are a non‑commercial researcher or developer and need private evaluation, the maintainer can perform a collaborative evaluation pipeline: you provide a sandboxed agent endpoint or temporary access, the maintainer runs private cases locally (no private content is published) and returns evaluation reports or trained artifacts per agreement. Contact via the email above to arrange scope and terms.
+- **Commercial licensing & enterprise access:** NDA + commercial license options available (dataset export, API access, private repo/branch). Contact `contact@aura-security.io` to start discussions.
+
+## License & Tooling
+
+- **Code & tooling:** Apache License 2.0 — see `LICENSE`.
+- **Public dataset (`public_cases/`):** CC BY‑NC 4.0 — see `DATA_LICENSE`.
 
 ## Contribution & Governance
 
-For contribution guidelines and maintainership rules see [CONTRIBUTING.md](CONTRIBUTING.md) and [GOVERNANCE.md](GOVERNANCE.md).
+This repository is maintainer‑led. See [CONTRIBUTING.md](CONTRIBUTING.md) for the feedback/issue process and [GOVERNANCE.md](GOVERNANCE.md) for decision rules.
