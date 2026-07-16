@@ -15,7 +15,7 @@ export type CaseTemplate = {
 };
 
 export function createTemplate(caseId?: string): CaseTemplate {
-  const id = caseId || `AUTO-CASE-000`;
+  const id = caseId || `X-CASE-000`;
   return {
     "case_id": id,
     "category": "",
