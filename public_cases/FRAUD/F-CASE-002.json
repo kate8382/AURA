@@ -1,6 +1,7 @@
 {
   "case_id": "F-CASE-002",
   "category": "social_engineering_&_unauthorized_access",
+  "confidence_raw": 0.5,
   "scenarios": [
     {
       "name": "Emotional & Garage Camouflage",
@@ -35,7 +36,6 @@
       ]
     }
   ],
-  "confidence": 0.95,
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Unauthorized Access & Critical Infrastructure Vulnerability Exposure",
@@ -79,6 +79,7 @@
       }
     ]
   },
+  "confidence": 0.95,
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -106,6 +107,5 @@
         ]
       }
     ]
-  },
-  "confidence_raw": 0.5
+  }
 }

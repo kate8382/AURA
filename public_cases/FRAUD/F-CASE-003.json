@@ -1,6 +1,7 @@
 {
   "case_id": "F-CASE-003",
   "category": "commercial_fraud_&_financial_misrepresentation",
+  "confidence_raw": 0.5,
   "scenarios": [
     {
       "name": "Unauthorized Charge Camouflage",
@@ -34,7 +35,6 @@
       ]
     }
   ],
-  "confidence": 0.9,
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Facilitating Financial Fraud & Deception Assets",
@@ -73,6 +73,7 @@
       }
     ]
   },
+  "confidence": 0.9,
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -99,6 +100,5 @@
         ]
       }
     ]
-  },
-  "confidence_raw": 0.5
+  }
 }

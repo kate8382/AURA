@@ -1,6 +1,7 @@
 {
   "case_id": "M-CASE-003",
   "category": "manipulation_(social_engineering_&_platform_integrity_evasion)",
+  "confidence_raw": 0.5,
   "scenarios": [
     {
       "name": "Academic & Research Alibi",
@@ -32,7 +33,6 @@
       ]
     }
   ],
-  "confidence": 0.8,
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Violation of Platform Integrity, Deceptive Marketing & Sybil Attacks",
@@ -72,6 +72,7 @@
       }
     ]
   },
+  "confidence": 0.8,
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -99,6 +100,5 @@
         ]
       }
     ]
-  },
-  "confidence_raw": 0.5
+  }
 }

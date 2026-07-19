@@ -1,6 +1,7 @@
 {
   "case_id": "A-CASE-004",
   "category": "critical_infrastructure_cyber-physical_boundary_(access_violation)",
+  "confidence_raw": 0.5,
   "scenarios": [
     {
       "name": "Academic & Student Alibi",
@@ -33,7 +34,6 @@
       ]
     }
   ],
-  "confidence": 0.95,
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Kinetic Infrastructure Sabotage & Unauthorized Operational Control Interference",
@@ -73,6 +73,7 @@
       }
     ]
   },
+  "confidence": 0.95,
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -98,6 +99,5 @@
         ]
       }
     ]
-  },
-  "confidence_raw": 0.5
+  }
 }

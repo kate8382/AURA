@@ -1,6 +1,7 @@
 {
   "case_id": "M-CASE-002",
   "category": "harassment,_extortion,_and_reputation_damage_assets",
+  "confidence_raw": 0.5,
   "scenarios": [
     {
       "name": "Whistleblower Camouflage",
@@ -33,7 +34,6 @@
       ]
     }
   ],
-  "confidence": 0.9,
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Generation of Extortion, Blackmail, and Coercive Communication Assets",
@@ -73,6 +73,7 @@
       }
     ]
   },
+  "confidence": 0.9,
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -99,6 +100,5 @@
         ]
       }
     ]
-  },
-  "confidence_raw": 0.5
+  }
 }
