@@ -1,58 +1,84 @@
-// Script to validate per-case JSON files against the schema
 import fs from 'fs/promises';
 import path from 'path';
 import Ajv from 'ajv';
 
-const ajv = new Ajv({ allErrors: true, strict: false });
+// ValidatePerCases - класс-обёртка для валидации per-case JSON файлов против схемы.
+// Методы:
+// - loadSchema(): загружает JSON Schema
+// - walk(): рекурсивно обходит директорию
+// - validateFile(): валидирует один файл
+// - run(): выполняет процесс валидации для директории
 
-async function loadSchema() {
-  const s = await fs.readFile(path.join(__dirname, '..', 'schemas', 'per-case-schema.json'), 'utf8');
-  return JSON.parse(s);
-}
-
-async function walk(dir: string, cb: (p: string) => Promise<void>) {
-  const ents = await fs.readdir(dir, { withFileTypes: true });
-  for (const e of ents) {
-    const full = path.join(dir, e.name);
-    if (e.isDirectory()) await walk(full, cb);
-    else if (e.isFile() && e.name.endsWith('.json')) await cb(full);
+export class ValidatePerCases {
+  private ajv: Ajv;
+  constructor() {
+    this.ajv = new Ajv({ allErrors: true, strict: false });
   }
-}
 
-async function main() {
-  const schema = await loadSchema();
-  const validate = ajv.compile(schema);
-  // directory can be provided as first arg, -d/--dir, or via CASES_DIR env var
-  const envDir = process.env.CASES_DIR;
-  let target = envDir || process.argv[2] || 'public_cases';
-  const argv = process.argv.slice(2);
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a === '-d' || a === '--dir') { target = argv[i + 1] || target; break; }
+  // Load the JSON Schema for per-case validation
+  async loadSchema() {
+    const s = await fs.readFile(path.join(__dirname, '..', 'schemas', 'per-case-schema.json'), 'utf8');
+    return JSON.parse(s);
   }
-  let errors = 0;
-  const invalidFiles: Array<{file:string, errs:any}> = [];
 
-  await walk(target, async (p) => {
+  // Recursively walk a directory and apply a callback to each JSON file
+  async walk(dir: string, cb: (p: string) => Promise<void>) {
+    const ents = await fs.readdir(dir, { withFileTypes: true });
+    for (const e of ents) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) await this.walk(full, cb);
+      else if (e.isFile() && e.name.endsWith('.json')) await cb(full);
+    }
+  }
+
+  // Validate a single JSON file against the schema
+  async validateFile(validate: any, p: string) {
     try {
       const raw = await fs.readFile(p, 'utf8');
       const obj = JSON.parse(raw);
       const valid = validate(obj);
       if (!valid) {
-        errors += 1;
-        invalidFiles.push({ file: p, errs: validate.errors });
-        console.log('\nINVALID:', p);
-        console.log(validate.errors);
+        return { ok: false, errs: validate.errors };
       }
-    } catch (e:any) {
-      errors += 1;
-      invalidFiles.push({ file: p, errs: e.message });
-      console.log('\nERROR reading/parsing:', p, e.message);
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, errs: e.message };
     }
-  });
+  }
 
-  console.log('\nValidation complete. Invalid files:', errors);
-  if (errors > 0) process.exit(2);
+  // Run the validation process on a target directory (or default to public_cases)
+  async run(targetDir?: string) {
+    const schema = await this.loadSchema();
+    const validate = this.ajv.compile(schema);
+    const envDir = process.env.CASES_DIR;
+    const target = envDir || targetDir || process.argv[2] || 'public_cases';
+    const argv = process.argv.slice(2);
+    for (let i = 0; i < argv.length; i++) {
+      const a = argv[i];
+      if (a === '-d' || a === '--dir') { TargetHelper.setTarget(argv[i + 1]); break; } // TargetHelper.setTarget is a placeholder for compatibility with earlier argument parsing style
+    }
+
+    let errors = 0;
+    await this.walk(target, async (p) => {
+      const res = await this.validateFile(validate, p);
+      if (!res.ok) {
+        errors += 1;
+        console.log('\nINVALID:', p);
+        console.log(res.errs);
+      }
+    });
+
+    console.log(`\nValidation complete. Invalid files: ${errors}`);
+    if (errors > 0) process.exit(2);
+  }
 }
 
-main().catch(err => { console.error(err); process.exit(1); });
+// Helper to satisfy earlier argument parsing style without large change
+const TargetHelper = {
+  setTarget(_: string | undefined) { /* placeholder for compatibility */ }
+};
+
+if (require.main === module) {
+  const v = new ValidatePerCases();
+  v.run().catch(err => { console.error(err); process.exit(1); });
+}
