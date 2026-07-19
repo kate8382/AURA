@@ -1,7 +1,7 @@
-import createTemplate from '../new-case-template';
+import { NewCaseTemplate } from '../new-case-template';
 
 test('createTemplate returns required keys and types', () => {
-  const tpl = createTemplate('TEST-1');
+  const tpl = new NewCaseTemplate().createTemplate('TEST-1');
   expect(tpl).toHaveProperty('case_id', 'TEST-1');
   expect(typeof tpl.category).toBe('string');
   expect(Array.isArray(tpl.scenarios)).toBe(true);

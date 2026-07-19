@@ -1,4 +1,4 @@
-import { mapConfidence, recalc, PROMPT_BASE } from '../recalc_confidence';
+import { mapConfidence, RecalcConfidence } from '../recalc_confidence';
 import fs from 'fs';
 import path from 'path';
 
@@ -29,7 +29,7 @@ describe('recalc', () => {
   test('recalc writes new confidence and preserves raw when absent', async () => {
     const payload = { legal_intent_logs: { MANIPULATION: [ { case_id: 'T-1', category: 'manipulation', prompts: [], confidence: 0.2, signal_ids: ['s1','s2'] } ] } };
     fs.writeFileSync(tmp, JSON.stringify(payload, null, 2), 'utf8');
-    const res = await recalc(tmp, false, 0.6);
+    const res = await new RecalcConfidence().recalc(tmp, false, 0.6);
     expect(res.count).toBeGreaterThan(0);
     const out = JSON.parse(fs.readFileSync(tmp, 'utf8'));
     const e = out.legal_intent_logs.MANIPULATION[0];
@@ -40,7 +40,7 @@ describe('recalc', () => {
   test('preserveExisting prevents changes when flag set', async () => {
     const payload = { legal_intent_logs: { MANIPULATION: [ { case_id: 'T-2', category: 'manipulation', prompts: [], confidence: 0.9, signal_ids: ['s1'] } ] } };
     fs.writeFileSync(tmp, JSON.stringify(payload, null, 2), 'utf8');
-    const res = await recalc(tmp, true, 0.6);
+    const res = await new RecalcConfidence().recalc(tmp, true, 0.6);
     expect(res.count).toBe(0);
     const out = JSON.parse(fs.readFileSync(tmp, 'utf8'));
     const e = out.legal_intent_logs.MANIPULATION[0];
