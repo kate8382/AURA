@@ -1,15 +1,11 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-/**
- * NewCaseTemplate
- * Класс генерации шаблона кейса. Гарантирует порядок полей:
- * - `confidence_raw` перед `scenarios`
- * - `confidence` размещается после `cross_check` (значение по-умолчанию 0.95)
- */
+// NewCaseTemplate - класс для создания шаблона нового кейса с каноническим порядком ключей.
 export class NewCaseTemplate {
   createTemplate(caseId?: string) {
     const id = caseId || `X-CASE-000`;
+    // Поля упорядочены намеренно: confidence_raw до scenarios; confidence идёт после cross_check
     const tpl: any = {
       case_id: id,
       category: "",
@@ -43,13 +39,12 @@ export class NewCaseTemplate {
     return tpl;
   }
 
-  // Write the template to a file in the specified output directory. If dryRun is true, just print the path and JSON.
   async writeTemplate(outDir = process.env.CASES_DIR || 'public_cases', caseId?: string, dryRun = false) {
     const tpl = this.createTemplate(caseId);
     const fileName = `${tpl.case_id}.json`;
     const outPath = path.resolve(process.cwd(), outDir, fileName);
     if (dryRun) {
-      console.log("[dry] would write to", outPath);
+      console.log('[dry] would write to', outPath);
       console.log(JSON.stringify(tpl, null, 2));
       return;
     }
