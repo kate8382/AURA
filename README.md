@@ -118,6 +118,12 @@ Traditional AI alignment often fails in non-English languages due to idiomatic n
 
 If you are interested in researching these vectors, please open an Issue to share your thoughts and collaborate!
 
+## Publications & Coverage
+
+- Dev.to — [AURA: AI User Risk Assessment — a behavioral threat‑intelligence framework for AI Safety](https://dev.to/kate8382/aura-ai-user-risk-assessment-a-behavioral-threat-intelligence-framework-for-ai-safety-4h9l)
+- CoderLegion — [AURA: AI User Risk Assessment — a behavioral threat‑intelligence framework for AI Safety](https://coderlegion.com/22768/aura-ai-user-risk-assessment-a-behavioral-threat-intelligence-framework-for-ai-safety)
+- LinkedIn — [Launch post](https://www.linkedin.com/feed/update/urn:li:activity:7483208618545274880/)
+
 ## Integration & Partnerships
 
 If you are building an LLM, guardrail engine, or safety pipeline you may use `public_cases/` under the CC BY‑NC 4.0 license for non‑commercial evaluation, benchmarking, and research (academic attribution appreciated). For commercial licensing, private datasets, or API access, contact: [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com) or via LinkedIn: [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/).
