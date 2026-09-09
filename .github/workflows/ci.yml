@@ -25,7 +25,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Validate cases
-        run: npm run validate || npm run validate:percases || true
+        run: npm run validate
 
       - name: Run tests
         run: npm test --silent
