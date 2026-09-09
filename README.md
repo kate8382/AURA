@@ -72,6 +72,46 @@ To run the custom validator script manually against a specific folder:
 # validate public_cases explicitly
 node -r ts-node/register scripts/validate-percases.ts public_cases
 ```
+
+## Scripts & Configuration (new)
+
+We've added tooling to generate and manage trigger weights and the confidence recalculation pipeline.
+
+- `npm run gen:triggers` — generate `config/trigger-weights.json` from the cases in `public_cases/`.
+  - Implementation: `scripts/generate-trigger-weights.ts` (TypeScript class). It scans all JSON cases, normalizes triggers (trim + lowercase, strips common suffix `request`) and computes per-trigger weights by case-frequency. The generated file is written to `config/trigger-weights.json` (a `.bak` is kept when overwriting).
+  - Usage: you can override the source directory with `CASES_DIR` env var:
+
+```bash
+CASES_DIR=public_cases npm run gen:triggers
+```
+
+- `npm run recalc:confidence` — recalculate `confidence` fields across cases using `config/trigger-weights.json` and other heuristic weights.
+  - Implementation: `scripts/recalc_confidence.ts`. By default it runs over `public_cases/` but you can pass `--dir <path>` or set `CASES_DIR`.
+  - Example:
+
+```bash
+# dry-run
+node -r ts-node/register scripts/recalc_confidence.ts --dry-run --dir public_cases
+
+# apply changes
+npm run recalc:confidence -- --dir public_cases
+```
+
+- Tests: there is a unit test for the generator at `scripts/__tests__/generate-trigger-weights.test.ts` which runs the generator against a temporary `public_cases` structure and validates the produced config.
+
+### How trigger weights are computed
+
+- Triggers are counted per case (unique within a case). The most frequent trigger is mapped to `topWeight` (default 0.05) and other triggers get a linear weight scaled relative to that maximum, with a lower bound `defaultTriggerWeight` (0.01).
+- Final `confidence` for a case is computed as: base (by category) + boost, where `boost = min(maxBoost, totalTriggerWeight + crossCheckWeight*questions + signalIdWeight*signalCount)`.
+- The generator preserves any existing trigger keys from the current `config/trigger-weights.json` to avoid accidentally dropping curated keys.
+
+### Automation
+
+Automating `npm run gen:triggers` is optional but recommended if `public_cases/` changes frequently. Typical options:
+
+- GitHub Actions workflow (schedule or on push to `public_cases/`) to run the generator, commit the updated `config/trigger-weights.json`, and open a PR. This keeps changes reviewable and avoids surprise commits.
+- CI job that runs `npm run gen:triggers` and `npm run recalc:confidence` in a branch for review.
+
 ## Minimal example `public_cases` entry and schema
 
 See the full schema at `schemas/per-case-schema.json` — example minimal valid case (canonical ordering: `confidence_raw` before `scenarios`, `confidence` after `cross_check`):

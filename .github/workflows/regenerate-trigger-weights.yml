@@ -1,0 +1,42 @@
+name: Regenerate trigger-weights
+
+on:
+  schedule:
+    # weekly on Sunday at 03:00 UTC
+    - cron: '0 3 * * 0'
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate trigger weights
+        run: npm run gen:triggers
+
+      - name: Create Pull Request with changes
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: regenerate trigger-weights.json"
+          committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          title: "Regenerate trigger-weights.json"
+          body: |
+            Automated regeneration of `config/trigger-weights.json` from `public_cases/`.
+
+            Run `npm run gen:triggers` locally to reproduce.
+          branch: "auto/regenerate-trigger-weights-${{ github.run_id }}"
+          base: main
+          path: config/trigger-weights.json
