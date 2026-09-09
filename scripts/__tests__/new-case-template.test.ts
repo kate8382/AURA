@@ -17,7 +17,7 @@ test('createTemplate returns required keys and types', () => {
 
 test('writeTemplate writes into matching subfolder by initial letter', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
-  const outDir = path.join(tmp, 'private_cases');
+  const outDir = path.join(tmp, 'public_cases');
   await fs.mkdir(path.join(outDir, 'MANIPULATION'), { recursive: true });
   await fs.mkdir(path.join(outDir, 'ACCESS'), { recursive: true });
 
@@ -35,7 +35,7 @@ test('writeTemplate writes into matching subfolder by initial letter', async () 
 
 test('writeTemplate dry-run does not create file', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
-  const outDir = path.join(tmp, 'private_cases');
+  const outDir = path.join(tmp, 'public_cases');
   await fs.mkdir(path.join(outDir, 'FRAUD'), { recursive: true });
 
   const T = new NewCaseTemplate();
@@ -50,11 +50,11 @@ test('writeTemplate dry-run does not create file', async () => {
 
 test('writeTemplate injects letter into case_id when id not provided', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
-  const outDir = path.join(tmp, 'private_cases');
+  const outDir = path.join(tmp, 'public_cases');
   await fs.mkdir(path.join(outDir, 'ACCESS'), { recursive: true });
 
   const T = new NewCaseTemplate();
-  await T.writeTemplate(outDir, undefined, false, 'A');
+  await T.writeTemplate(outDir, undefined, false, 'A', 0);
 
   const expected = path.join(outDir, 'ACCESS', `A-CASE-000.json`);
   const stat = await fs.stat(expected);
@@ -65,7 +65,7 @@ test('writeTemplate injects letter into case_id when id not provided', async () 
 
 test('auto numbering picks next sequence and creates folder if missing', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
-  const outDir = path.join(tmp, 'private_cases');
+  const outDir = path.join(tmp, 'public_cases');
   // create a folder with existing sequences for M
   const mdir = path.join(outDir, 'M');
   await fs.mkdir(mdir, { recursive: true });
@@ -84,7 +84,7 @@ test('auto numbering picks next sequence and creates folder if missing', async (
 
 test('manual numbering uses provided number and creates letter folder', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
-  const outDir = path.join(tmp, 'private_cases');
+  const outDir = path.join(tmp, 'public_cases');
 
   const T = new NewCaseTemplate();
   await T.writeTemplate(outDir, undefined, false, 'Z', 42, false);

@@ -72,7 +72,7 @@
       }
     ]
   },
-  "confidence": 0.9,
+  "confidence": 1,
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [

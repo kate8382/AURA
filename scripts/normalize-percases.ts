@@ -114,10 +114,10 @@ export class NormalizePerCases {
     }
   }
 
-  // Run the normalization process on a target directory (or default to private_cases)
+  // Run the normalization process on a target directory (or default to public_cases)
   async run(target?: string) {
     const envDir = process.env.CASES_DIR;
-    const dir = envDir || target || process.argv[2] || 'private_cases';
+    const dir = envDir || target || process.argv[2] || 'public_cases';
     const argv = process.argv.slice(2);
     for (let i = 0; i < argv.length; i++) if (argv[i] === '-d' || argv[i] === '--dir') dir && (argv[i+1]);
     const dry = process.argv.includes('--dry-run');

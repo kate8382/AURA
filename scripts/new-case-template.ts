@@ -41,7 +41,7 @@ export class NewCaseTemplate {
     return tpl;
   }
 
-  async writeTemplate(outDir = process.env.CASES_DIR || 'private_cases', caseId?: string, dryRun = false, sectionLetter?: string, seqNumber?: number, autoSeq = false) {
+  async writeTemplate(outDir = process.env.CASES_DIR || 'public_cases', caseId?: string, dryRun = false, sectionLetter?: string, seqNumber?: number, autoSeq = false) {
     const tpl = this.createTemplate(caseId);
     const fileNameBase = `${tpl.case_id}.json`;
     // If outDir exists and contains subdirectories, allow mapping by initial letter
@@ -153,7 +153,7 @@ export class NewCaseTemplate {
 
 if (require.main === module) {
   const argv = process.argv.slice(2);
-  let outDir = process.env.CASES_DIR || 'private_cases';
+  let outDir = process.env.CASES_DIR || 'public_cases';
   let caseId: string | undefined;
   let dry = false;
   let sectionLetter: string | undefined;
