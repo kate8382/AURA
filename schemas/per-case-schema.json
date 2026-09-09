@@ -14,6 +14,13 @@
     "deception_threshold"
   ],
   "properties": {
+    "signal_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Optional list of standardized Signal IDs (e.g. \"SIG-...\") for the case; used by `recalc_confidence` to apply signal-based boosts and by external integrators."
+    },
     "export_date": {
       "type": "string"
     },
