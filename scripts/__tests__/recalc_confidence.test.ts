@@ -1,6 +1,7 @@
 import { mapConfidence, RecalcConfidence } from '../recalc_confidence';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 describe('mapConfidence', () => {
   test('default base', () => {
@@ -46,5 +47,29 @@ describe('recalc', () => {
     const e = out.legal_intent_logs.MANIPULATION[0];
     expect(e.confidence).toBe(0.9);
     expect(typeof e.confidence_raw).toBe('undefined');
+  });
+});
+
+describe('RecalcConfidence fallback signal_ids', () => {
+  test('uses generated signal_ids when missing and updates confidence', async () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-recalc-'));
+    const filePath = path.join(tmp, 'C-1.json');
+    const sample = {
+      case_id: 'C-1',
+      category: 'access',
+      scenarios: [ { triggers: ['authority_claim'] } ]
+    };
+    fs.writeFileSync(filePath, JSON.stringify(sample, null, 2), 'utf8');
+
+    const r = new RecalcConfidence();
+    const res = await r.recalc(filePath, false, 0.5);
+    expect(res).toBeTruthy();
+    const updated = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    // base for 'access' is 0.95; one signal adds 0.01 -> expected 0.96 (rounded)
+    expect(typeof updated.confidence).toBe('number');
+    expect(updated.confidence).toBeGreaterThanOrEqual(0.96);
+
+    // cleanup
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e) {}
   });
 });

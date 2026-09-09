@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { reorderCaseKeys } from './utils';
+import { generateSignalIds } from './generate-trigger-weights';
 
 type Entry = { [k: string]: any };
 
@@ -51,7 +52,7 @@ export class RecalcConfidence {
     const updateCase = (e: Entry) => {
       const old = e.confidence;
       if (preserveExisting && (typeof old === 'number')) return null;
-      const signals: string[] = e.signal_ids || [];
+      const signals: string[] = Array.isArray(e.signal_ids) ? (e.signal_ids as string[]).slice() : generateSignalIds(e.scenarios || []);
       // Build set of unique triggers from scenarios and signal_ids
       const uniqueTriggers = new Set<string>();
       if (Array.isArray(e.scenarios)) {
@@ -61,9 +62,11 @@ export class RecalcConfidence {
           }
         }
       }
-      if (Array.isArray(e.signal_ids)) {
-        for (const t of e.signal_ids) if (typeof t === 'string') uniqueTriggers.add(t.trim().toLowerCase());
-      }
+      // signals are system Signal IDs (e.g. SIG-... ) or explicit signal strings.
+      // Do NOT add them into `uniqueTriggers` used for trigger-weight lookups,
+      // otherwise each signal would also get counted as a default trigger weight.
+      // Signal contribution is accounted for separately via `SIGNAL_ID_WEIGHT` below.
+
       const crossCheckQuestions = (e.cross_check && Array.isArray(e.cross_check.questions)) ? e.cross_check.questions.length : 0;
 
       const rawVal = (typeof e.confidence_raw === 'number') ? e.confidence_raw : (typeof old === 'number') ? old : RecalcConfidence.PROMPT_BASE;
@@ -88,7 +91,7 @@ export class RecalcConfidence {
       }
       // add contributions from cross_check and signal_ids count
       totalWeight += crossCheckQuestions * CROSS_CHECK_WEIGHT;
-      if (Array.isArray(e.signal_ids)) totalWeight += e.signal_ids.length * SIGNAL_ID_WEIGHT;
+      if (Array.isArray(signals)) totalWeight += signals.length * SIGNAL_ID_WEIGHT;
 
       const MAX_BOOST = cfg.maxBoost;
       const boost = Math.min(MAX_BOOST, totalWeight);
