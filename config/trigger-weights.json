@@ -1,0 +1,20 @@
+{
+  "triggerWeights": {
+    "actionable payload": 0.05,
+    "actionable payload request": 0.05,
+    "targeted reconnaissance": 0.04,
+    "artificial urgency": 0.03,
+    "artificial urgency / pressure": 0.03,
+    "compliance evasion": 0.03,
+    "unjustified domain knowledge": 0.02,
+    "false naivety": 0.02,
+    "persona discrepancy": 0.02,
+    "military contractor": 0.02,
+    "emergency logistics": 0.01,
+    "academic": 0.0
+  },
+  "defaultTriggerWeight": 0.01,
+  "crossCheckWeight": 0.005,
+  "signalIdWeight": 0.01,
+  "maxBoost": 0.10
+}

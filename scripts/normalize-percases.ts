@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { reorderCaseKeys } from './utils';
+import { DEFAULT_CONFIDENCE } from './recalc_confidence';
 
 type AnyObj = { [k: string]: any };
 
@@ -74,7 +75,7 @@ export class NormalizePerCases {
         // If confidence_raw missing but confidence present, keep it; otherwise initialize
         if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
         // Ensure confidence default after cross_check if missing
-        if (typeof obj.confidence === 'undefined') obj.confidence = 0.95;
+        if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
 
         const ordered = reorderCaseKeys(obj);
         const merged = { ...metadata, ...ordered };
@@ -102,7 +103,7 @@ export class NormalizePerCases {
         obj = orderedTmp;
       }
       if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
-      if (typeof obj.confidence === 'undefined') obj.confidence = 0.95;
+      if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
       const ordered = reorderCaseKeys(obj);
       const merged = { ...metadata, ...ordered };
       if (this.dry) console.log("[dry] WOULD NORMALIZE", filePath);
@@ -113,10 +114,10 @@ export class NormalizePerCases {
     }
   }
 
-  // Run the normalization process on a target directory (or default to public_cases)
+  // Run the normalization process on a target directory (or default to private_cases)
   async run(target?: string) {
     const envDir = process.env.CASES_DIR;
-    const dir = envDir || target || process.argv[2] || 'public_cases';
+    const dir = envDir || target || process.argv[2] || 'private_cases';
     const argv = process.argv.slice(2);
     for (let i = 0; i < argv.length; i++) if (argv[i] === '-d' || argv[i] === '--dir') dir && (argv[i+1]);
     const dry = process.argv.includes('--dry-run');

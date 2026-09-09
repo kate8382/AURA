@@ -16,8 +16,17 @@ type Entry = { [k: string]: any };
 export class RecalcConfidence {
   static PROMPT_BASE = 0.5;
   static MAP_DEFAULT_BASE = 0.75;
-
+  static DEFAULT_CONFIDENCE = 0.95;
   static mapConfidence(category: string, signalCount: number): number {
+    // Backwards-compatible wrapper: compute base + small signal-based boost
+    const base = RecalcConfidence.getBaseForCategory(category);
+    let boost = 0;
+    if (signalCount > 1) boost = Math.min(0.05, 0.02 * (signalCount - 1));
+    const value = Math.min(1.0, base + boost);
+    return Math.round(value * 100) / 100;
+  }
+
+  static getBaseForCategory(category: string): number {
     const cat = (category || '').toLowerCase();
     let base = RecalcConfidence.MAP_DEFAULT_BASE;
     if (cat.includes('extort') || cat.includes('harass')) base = 0.9;
@@ -25,26 +34,66 @@ export class RecalcConfidence {
     else if (cat.includes('access') || cat.includes('unauthorized') || cat.includes('infrastructure')) base = 0.95;
     else if (cat.includes('manipulation') || cat.includes('platform')) base = 0.8;
     else if (cat.includes('espionage') || cat.includes('insider')) base = 0.95;
-
-    let boost = 0;
-    if (signalCount > 1) boost = Math.min(0.05, 0.02 * (signalCount - 1));
-    const value = Math.min(1.0, base + boost);
-    return Math.round(value * 100) / 100;
+    return base;
   }
 
   // Note: canonical ordering handled by shared utility `reorderCaseKeys`
-  async recalc(filePath: string, preserveExisting = false, minFloor = 0.6): Promise<{ count: number; changes: Array<[string, any, any]> }> {
+  async recalc(filePath: string, preserveExisting = false, minFloor = 0.5): Promise<{ count: number; changes: Array<[string, any, any]> }> {
     const raw = await fs.readFile(filePath, 'utf8');
     const data = JSON.parse(raw);
     const changes: Array<[string, any, any]> = [];
     let count = 0;
 
+    // Load config via helper (file + ENV)
+    const { loadTriggerConfig } = await import('./config');
+    const cfg = loadTriggerConfig();
+
     const updateCase = (e: Entry) => {
       const old = e.confidence;
       if (preserveExisting && (typeof old === 'number')) return null;
       const signals: string[] = e.signal_ids || [];
+      // Build set of unique triggers from scenarios and signal_ids
+      const uniqueTriggers = new Set<string>();
+      if (Array.isArray(e.scenarios)) {
+        for (const s of e.scenarios) {
+          if (s && Array.isArray(s.triggers)) {
+            for (const t of s.triggers) if (typeof t === 'string') uniqueTriggers.add(t.trim().toLowerCase());
+          }
+        }
+      }
+      if (Array.isArray(e.signal_ids)) {
+        for (const t of e.signal_ids) if (typeof t === 'string') uniqueTriggers.add(t.trim().toLowerCase());
+      }
+      const crossCheckQuestions = (e.cross_check && Array.isArray(e.cross_check.questions)) ? e.cross_check.questions.length : 0;
+
       const rawVal = (typeof e.confidence_raw === 'number') ? e.confidence_raw : (typeof old === 'number') ? old : RecalcConfidence.PROMPT_BASE;
-      let newVal = RecalcConfidence.mapConfidence(e.category || '', signals.length);
+
+      // Get base by category
+      const base = RecalcConfidence.getBaseForCategory(e.category || '');
+
+      // Weighted mapping for triggers (loaded from config/trigger-weights.json or ENV)
+      const TRIGGER_WEIGHTS = cfg.triggerWeights;
+
+      const DEFAULT_TRIGGER_WEIGHT = cfg.defaultTriggerWeight;
+      const CROSS_CHECK_WEIGHT = cfg.crossCheckWeight; // per question
+      const SIGNAL_ID_WEIGHT = cfg.signalIdWeight; // per signal_id if present
+
+      let totalWeight = 0;
+      for (const trig of Array.from(uniqueTriggers)) {
+        let found = false;
+        for (const key of Object.keys(TRIGGER_WEIGHTS)) {
+          if (trig === key) { totalWeight += TRIGGER_WEIGHTS[key]; found = true; break; }
+        }
+        if (!found) totalWeight += DEFAULT_TRIGGER_WEIGHT;
+      }
+      // add contributions from cross_check and signal_ids count
+      totalWeight += crossCheckQuestions * CROSS_CHECK_WEIGHT;
+      if (Array.isArray(e.signal_ids)) totalWeight += e.signal_ids.length * SIGNAL_ID_WEIGHT;
+
+      const MAX_BOOST = cfg.maxBoost;
+      const boost = Math.min(MAX_BOOST, totalWeight);
+
+      let newVal = Math.min(1.0, Math.round((base + boost) * 100) / 100);
       newVal = Math.round(Math.max(minFloor, newVal) * 100) / 100;
       if (old !== newVal) {
         if (typeof e.confidence_raw === 'undefined') e.confidence_raw = rawVal;
@@ -100,7 +149,7 @@ export class RecalcConfidence {
 
   // parse command-line args and run recalc on a file or directory
   parseArgs(argv: string[]) {
-    const defaultDir = process.env.CASES_DIR || 'public_cases';
+    const defaultDir = process.env.CASES_DIR || 'private_cases';
     const result: { file: string; dryRun: boolean; preserve: boolean } = { file: defaultDir, dryRun: false, preserve: false };
     for (let i = 0; i < argv.length; i++) {
       const a = argv[i];
@@ -115,12 +164,14 @@ export class RecalcConfidence {
   async run() {
     const args = this.parseArgs(process.argv.slice(2));
     let filePath = args.file;
+    // minFloor default may be configured via ENV `MIN_FLOOR`, otherwise default 0.5
+    const envMin = process.env.MIN_FLOOR ? Number(process.env.MIN_FLOOR) : undefined;
     const minFloor = typeof (process.argv.find((a) => a === '--min')) !== 'undefined'
       ? Number(((): string | undefined => {
           const idx = process.argv.indexOf('--min');
           return idx >= 0 ? process.argv[idx + 1] : undefined;
         })())
-      : 0.6;
+      : (typeof envMin === 'number' && !Number.isNaN(envMin) ? envMin : 0.5);
     if (!path.isAbsolute(filePath)) {
       const repoRoot = path.resolve(__dirname, '..');
       filePath = path.resolve(repoRoot, filePath);
@@ -178,6 +229,7 @@ export class RecalcConfidence {
 // Backwards-compatible exports for tests and scripts that expected functions
 export const mapConfidence = RecalcConfidence.mapConfidence;
 export const PROMPT_BASE = RecalcConfidence.PROMPT_BASE;
+export const DEFAULT_CONFIDENCE = RecalcConfidence.DEFAULT_CONFIDENCE;
 
 if (require.main === module) {
   const runner = new RecalcConfidence();
