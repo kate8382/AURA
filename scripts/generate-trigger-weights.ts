@@ -31,6 +31,27 @@ export class GenerateTriggerWeights {
   constructor(repoRoot?: string) {
     this.repoRoot = repoRoot || path.resolve(__dirname, '..');
   }
+  signalMap: Record<string, string> = {};
+
+  loadSignalMapping() {
+    try {
+      const mapPath = path.join(this.repoRoot, 'config', 'signal-mapping.json');
+      if (!fs.existsSync(mapPath)) return;
+      const raw = fs.readFileSync(mapPath, 'utf8');
+      const parsed = JSON.parse(raw);
+      const signals = (parsed && parsed.signals) ? parsed.signals : {};
+      for (const sid of Object.keys(signals)) {
+        const arr = signals[sid] || [];
+        for (const t of arr) {
+          if (typeof t !== 'string') continue;
+          const n = this.normalizeTrigger(t);
+          if (n) this.signalMap[n] = sid;
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
+  }
 
   /**
    * Рекурсивно обходит директорию и возвращает список всех JSON-файлов.
@@ -93,6 +114,27 @@ export class GenerateTriggerWeights {
     // collapse multiple spaces
     s = s.replace(/\s+/g, ' ');
     return s;
+  }
+
+  /**
+   * Generate `signal_ids` from scenarios using the TRIGGER_TO_SIGNAL_MAP.
+   * Returns unique list of signal ids.
+   */
+  generateSignalIdsFromScenarios(scenarios: any[]): string[] {
+    const set = new Set<string>();
+    if (!Array.isArray(scenarios)) return [];
+    // ensure mapping loaded
+    if (!this.signalMap || Object.keys(this.signalMap).length === 0) this.loadSignalMapping();
+    for (const s of scenarios) {
+      if (!s || !Array.isArray(s.triggers)) continue;
+      for (const t of s.triggers) {
+        const n = this.normalizeTrigger(t);
+        if (!n) continue;
+        const sid = (this.signalMap as any)[n];
+        if (sid) set.add(sid);
+      }
+    }
+    return Array.from(set);
   }
 
   /**
@@ -183,8 +225,63 @@ export class GenerateTriggerWeights {
       maxBoost: this.maxBoost
     };
     const outPath = this.writeConfig(out);
+
+    // CLI: optionally apply generated signal_ids back into case files
+    const applySignalIds = process.argv.includes('--apply-signal-ids');
+    if (applySignalIds) {
+      const files2 = this.walkDir(casesDir);
+      let changed = 0;
+      const self = this;
+      for (const f of files2) {
+        try {
+          const raw = fs.readFileSync(f, 'utf8');
+          const parsed = JSON.parse(raw);
+          const before = JSON.stringify(parsed);
+
+          function applyToObject(obj: any) {
+            if (!obj || typeof obj !== 'object') return;
+            if (Array.isArray(obj)) {
+              for (const it of obj) applyToObject(it);
+              return;
+            }
+            // single case
+            if (obj.case_id) {
+              if (!Array.isArray(obj.signal_ids) || obj.signal_ids.length === 0) {
+                const sids = self.generateSignalIdsFromScenarios(obj.scenarios || []);
+                if (sids.length) obj.signal_ids = sids;
+              }
+              return;
+            }
+            for (const k of Object.keys(obj)) {
+              const v = obj[k];
+              if (Array.isArray(v)) {
+                for (const item of v) applyToObject(item);
+              } else if (v && typeof v === 'object') applyToObject(v);
+            }
+          }
+
+          applyToObject(parsed);
+          const after = JSON.stringify(parsed);
+          if (after !== before) {
+            fs.copyFileSync(f, f + '.bak');
+            fs.writeFileSync(f, JSON.stringify(parsed, null, 2), 'utf8');
+            changed++;
+          }
+        } catch (err) {
+          // ignore
+        }
+      }
+      console.log('Applied signal_ids to', changed, 'files');
+    }
     return { outPath, top: entries ? entries.slice(0, 30) : [] };
   }
+}
+
+/**
+ * Exported helper for external use: generate signal ids from scenarios.
+ */
+export function generateSignalIds(scenarios: any[]): string[] {
+  return new GenerateTriggerWeights().generateSignalIdsFromScenarios(scenarios);
 }
 
 if (require.main === module) {

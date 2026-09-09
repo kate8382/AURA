@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "AURA Signal Mapping: Maps raw behavioral triggers to standardized system Signal IDs",
+  "signals": {
+    "SIG-CAMOUFLAGE-NAIVE": [
+      "academic & self-taught framing",
+      "false naivety / persona discrepancy",
+      "persona discrepancy",
+      "naive alert writer camouflage",
+      "naive avenger camouflage",
+      "naive creditor camouflage",
+      "naive finder camouflage",
+      "naive tech hobbyist camouflage",
+      "naive victim camouflage"
+    ],
+    "SIG-ALIBI-ACADEMIC": [
+      "academic & research alibi",
+      "academic & student alibi",
+      "academic/student framing"
+    ],
+    "SIG-ALIBI-GENERAL": [
+      "altruistic alibi",
+      "ethical justification / alibi"
+    ],
+    "SIG-CAMOUFLAGE-ROLE": [
+      "crisis it persona",
+      "forgotten owner camouflage",
+      "professional camouflage",
+      "security awareness trainer camouflage",
+      "shared account camouflage",
+      "unauthorized audit camouflage",
+      "unauthorized pentest camouflage",
+      "whistleblower camouflage"
+    ],
+    "SIG-CAMOUFLAGE-DOMESTIC": [
+      "domestic camouflage",
+      "emotional & financial camouflage",
+      "emotional & garage camouflage",
+      "emotional camouflage",
+      "legal & debt recovery camouflage",
+      "unauthorized charge camouflage"
+    ],
+    "SIG-BEHAVIOR-URGENCY": [
+      "artificial urgency / pressure",
+      "coercion / pressure",
+      "urgency",
+      "urgency / pressure"
+    ],
+    "SIG-EXPLOIT-ACTIONABLE": [
+      "actionable geolocation payload",
+      "actionable hardware exploit",
+      "actionable payload",
+      "automated exploitation",
+      "functional exploit / weaponization",
+      "functional malicious asset"
+    ],
+    "SIG-EVASION-CONTROL": [
+      "bypass_auth",
+      "compliance evasion",
+      "hardware restriction",
+      "hollywood script bypass / creative framing",
+      "legacy system bypass",
+      "privilege escalation",
+      "security control evasion"
+    ],
+    "SIG-RECON-TARGETED": [
+      "automated reconnaissance / osint",
+      "data scraping / stalking",
+      "infrastructure target fixation",
+      "non-public intelligence demand",
+      "targeted mass scraping"
+    ],
+    "SIG-EXTORTION-LEVERAGE": [
+      "intimidation asset",
+      "psychological leverage",
+      "reputational threat / extortion"
+    ],
+    "SIG-DECEPTION-FACT": [
+      "deceptive asset generation",
+      "high-fidelity deception",
+      "identity misrepresentation",
+      "material fact fabrication",
+      "non-consensual pattern generation"
+    ],
+    "SIG-TARGET-HIGHVALUE": [
+      "high-value corporate target",
+      "high-value target",
+      "unjustified domain knowledge"
+    ],
+    "SIG-FIN-SUSPICIOUS": [
+      "direct fraud intent",
+      "financial_request",
+      "unauthorized action alibi"
+    ]
+  }
+}
