@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { reorderCaseKeys } from './utils';
-import { generateSignalIds } from './generate-trigger-weights';
+import { reorderCaseKeys, deriveSignalId } from './utils';
+import GenerateTriggerWeights from './generate-trigger-weights';
 import { DEFAULT_CONFIDENCE } from './recalc_confidence';
 
 type AnyObj = { [k: string]: any };
@@ -82,8 +82,23 @@ export class NormalizePerCases {
         if (process.argv.includes('--apply-signal-ids')) {
           if (!Array.isArray(obj.signal_ids) || obj.signal_ids.length === 0) {
             try {
-              const sids = generateSignalIds(obj.scenarios || []);
-              if (sids && sids.length) obj.signal_ids = sids;
+              const gw = new GenerateTriggerWeights(process.cwd());
+              gw.loadSignalMapping();
+              const sset = new Set<string>();
+              if (Array.isArray(obj.scenarios)) {
+                for (const s of obj.scenarios) {
+                  if (!s || !Array.isArray(s.triggers)) continue;
+                  for (const t of s.triggers) {
+                    const n = gw.normalizeTrigger(t);
+                    if (!n) continue;
+                    const sid = (gw as any).signalMap[n];
+                    if (sid) sset.add(sid);
+                    else sset.add(deriveSignalId(n));
+                  }
+                }
+              }
+              const arr = Array.from(sset);
+              if (arr.length) obj.signal_ids = arr;
             } catch (e) {
               // ignore generate errors
             }
@@ -122,8 +137,23 @@ export class NormalizePerCases {
       if (process.argv.includes('--apply-signal-ids')) {
         if (!Array.isArray(obj.signal_ids) || obj.signal_ids.length === 0) {
           try {
-            const sids = generateSignalIds(obj.scenarios || []);
-            if (sids && sids.length) obj.signal_ids = sids;
+            const gw = new GenerateTriggerWeights(process.cwd());
+            gw.loadSignalMapping();
+            const sset = new Set<string>();
+            if (Array.isArray(obj.scenarios)) {
+              for (const s of obj.scenarios) {
+                if (!s || !Array.isArray(s.triggers)) continue;
+                for (const t of s.triggers) {
+                  const n = gw.normalizeTrigger(t);
+                  if (!n) continue;
+                  const sid = (gw as any).signalMap[n];
+                  if (sid) sset.add(sid);
+                  else sset.add(deriveSignalId(n));
+                }
+              }
+            }
+            const arr = Array.from(sset);
+            if (arr.length) obj.signal_ids = arr;
           } catch (e) {
             // ignore
           }
