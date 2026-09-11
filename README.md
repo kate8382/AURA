@@ -22,12 +22,15 @@ Unlike static safety guardrails, **AURA** focuses on the psychological and tacti
 
 ```AURA/
 ├── assets/                  # Graphics and assets
+├── config/                  # Runtime mappings and generated configs (signal-mapping.json, trigger-weights.json)
+├── docs/                    # Human-facing documentation (including SIGNAL_IDS.md)
 ├── public_cases/            # Curated open-source threat library
 │   ├── ACCESS/              # Privilege escalation, unauthorized OSINT, and credential probing
 │   ├── FRAUD/               # Financial bypass, compliance evasion, and social fraud
 │   └── MANIPULATION/        # Social engineering, gaslighting, and psychological pressure
 ├── schemas/                 # JSON Schemas for validating cases
 └── scripts/                 # Utility tooling (validation, confidence recalculators, tests)
+    └── tools/               # Small helper scripts (collect-triggers, audit-categories)
 ```
 
 ## Quick Start & Testing
@@ -73,20 +76,23 @@ To run the custom validator script manually against a specific folder:
 node -r ts-node/register scripts/validate-percases.ts public_cases
 ```
 
-## Scripts & Configuration (new)
+## Scripts & Configuration
 
 We've added tooling to generate and manage trigger weights and the confidence recalculation pipeline.
 
 - `npm run gen:triggers` — generate `config/trigger-weights.json` from the cases in `public_cases/`.
-  - Implementation: `scripts/generate-trigger-weights.ts` (TypeScript class). It scans all JSON cases, normalizes triggers (trim + lowercase, strips common suffix `request`) and computes per-trigger weights by case-frequency. The generated file is written to `config/trigger-weights.json` (a `.bak` is kept when overwriting).
+  - Implementation: `scripts/generate-trigger-weights.ts` (TypeScript class). It scans all JSON cases, normalizes triggers (trim + lowercase, strips common suffix `request`) and computes per-trigger weights by case-frequency. The generator now loads `config/signal-mapping.json` as the canonical mapping for `signal_id` ↔ triggers. The generated file is written to `config/trigger-weights.json` (a `.bak` is kept when overwriting).
   - Usage: you can override the source directory with `CASES_DIR` env var:
 
 ```bash
 CASES_DIR=public_cases npm run gen:triggers
 ```
 
+- `npm run gen:triggers:apply` — run the generator and apply `signal_ids` into case files (creates `.bak` files). Use this only when you want `signal_ids` persisted in-source for audit/integration.
+
 - `npm run recalc:confidence` — recalculate `confidence` fields across cases using `config/trigger-weights.json` and other heuristic weights.
   - Implementation: `scripts/recalc_confidence.ts`. By default it runs over `public_cases/` but you can pass `--dir <path>` or set `CASES_DIR`.
+  - Behavior: the recalculator expands any mapped `signal_ids` (from `config/signal-mapping.json`) into normalized triggers for weight calculation; unmapped `signal_ids` contribute via the `signalIdWeight` fallback. This avoids double-counting mapped signals while preserving a fallback for unmapped ones.
   - Example:
 
 ```bash
@@ -97,12 +103,19 @@ node -r ts-node/register scripts/recalc_confidence.ts --dry-run --dir public_cas
 npm run recalc:confidence -- --dir public_cases
 ```
 
-- Tests: there is a unit test for the generator at `scripts/__tests__/generate-trigger-weights.test.ts` which runs the generator against a temporary `public_cases` structure and validates the produced config.
+- `npm run collect:triggers` — collect unique normalized triggers from `public_cases/` and write them to `tmp/collected-triggers.json`.
+- `npm run audit:categories` — run a simple category-vs-directory audit and write results to `tmp/audit-output.json`.
+
+Signal IDs and mappings
+- Reference: the signal ID mapping is documented in [docs/SIGNAL_IDS.md](docs/SIGNAL_IDS.md).
+- The canonical mapping file is `config/signal-mapping.json` and the generator/recalculator consults it at runtime. See `docs/SIGNAL_IDS.md` for workflow: collecting triggers, editing `config/signal-mapping.json`, and regenerating weights.
+
+Tests: there is a unit test for the generator at `scripts/__tests__/generate-trigger-weights.test.ts` and tests for `recalc_confidence` at `scripts/__tests__/recalc_confidence.test.ts`.
 
 ### How trigger weights are computed
 
 - Triggers are counted per case (unique within a case). The most frequent trigger is mapped to `topWeight` (default 0.05) and other triggers get a linear weight scaled relative to that maximum, with a lower bound `defaultTriggerWeight` (0.01).
-- Final `confidence` for a case is computed as: base (by category) + boost, where `boost = min(maxBoost, totalTriggerWeight + crossCheckWeight*questions + signalIdWeight*signalCount)`.
+- Final `confidence` for a case is computed as: base (by category) + boost, where `boost = min(maxBoost, totalTriggerWeight + crossCheckWeight*questions + signalIdWeight*unmappedSignalCount)`.
 - The generator preserves any existing trigger keys from the current `config/trigger-weights.json` to avoid accidentally dropping curated keys.
 
 ### Automation
@@ -166,13 +179,19 @@ If you are interested in researching these vectors, please open an Issue to shar
 
 ## Integration & Partnerships
 
-If you are building an LLM, guardrail engine, or safety pipeline you may use `public_cases/` under the CC BY‑NC 4.0 license for non‑commercial evaluation, benchmarking, and research (academic attribution appreciated). For commercial licensing, private datasets, or API access, contact: [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com) or via LinkedIn: [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/).
+## Integration & Partnerships
 
-Partnership options:
+If you are building an LLM, guardrail engine, or safety pipeline, you may use `public_cases/` under the CC BY‑NC 4.0 license for non‑commercial evaluation, benchmarking, and research.
+
+Partnership & Access Options:
 
 - **Public cases (self‑serve):** Download `public_cases/` and run validations locally with `npm run validate` and tests with `npm test`.
-- **Non‑commercial private testing:** If you are a non‑commercial researcher or developer and need private evaluation, the maintainer can perform a collaborative evaluation pipeline: you provide a sandboxed agent endpoint or temporary access, the maintainer runs private cases locally (no private content is published) and returns evaluation reports or trained artifacts per agreement. Contact via the email above to arrange scope and terms.
-- **Commercial licensing & enterprise access:** NDA + commercial license options available (dataset export, API access, private repo/branch). Contact the maintainer at [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com) or via LinkedIn: [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/). You may also open an Issue to start the conversation.
+- **Non‑commercial private testing:** For researchers requiring private evaluation, we offer a sandboxed evaluation pipeline where private cases are run locally without publishing sensitive content.
+- **Commercial licensing & enterprise access:** NDA, commercial licensing, dataset exports, and private API access options are available upon request.
+
+For commercial licenses, private datasets, or collaborative research, reach out via:
+- **Email:** [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com)
+- **LinkedIn:** [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/)
 
 ## License & Tooling
 
