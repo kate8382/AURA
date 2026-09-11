@@ -49,11 +49,32 @@ export class RecalcConfidence {
     const { loadTriggerConfig } = await import('./config');
     const cfg = loadTriggerConfig();
 
+    // Load signal mapping (signal_id -> [triggers]) if present
+    let signalMapping: Record<string, string[]> = {};
+    try {
+      const mapPath = path.resolve(__dirname, '..', 'config', 'signal-mapping.json');
+      const rawMap = await fs.readFile(mapPath, 'utf8').catch(() => null);
+      if (rawMap) {
+        const parsed = JSON.parse(rawMap);
+        signalMapping = (parsed && parsed.signals) ? parsed.signals : {};
+      }
+    } catch (err) {
+      signalMapping = {};
+    }
+
+    const normalize = (t: unknown) => {
+      if (!t || typeof t !== 'string') return null;
+      let s = t.trim().toLowerCase();
+      s = s.replace(/\s+request$/i, '');
+      s = s.replace(/\s+/g, ' ');
+      return s;
+    };
+
     const updateCase = (e: Entry) => {
       const old = e.confidence;
       if (preserveExisting && (typeof old === 'number')) return null;
       const signals: string[] = Array.isArray(e.signal_ids) ? (e.signal_ids as string[]).slice() : generateSignalIds(e.scenarios || []);
-      // Build set of unique triggers from scenarios and signal_ids
+      // Build set of unique triggers from scenarios
       const uniqueTriggers = new Set<string>();
       if (Array.isArray(e.scenarios)) {
         for (const s of e.scenarios) {
@@ -62,10 +83,25 @@ export class RecalcConfidence {
           }
         }
       }
-      // signals are system Signal IDs (e.g. SIG-... ) or explicit signal strings.
-      // Do NOT add them into `uniqueTriggers` used for trigger-weight lookups,
-      // otherwise each signal would also get counted as a default trigger weight.
-      // Signal contribution is accounted for separately via `SIGNAL_ID_WEIGHT` below.
+      // Resolve signal_ids: if they map to known triggers (via signalMapping),
+      // expand them into `uniqueTriggers` so trigger-weights apply. For signals
+      // without mapping, count them for fallback SIGNAL_ID_WEIGHT.
+      let unmappedSignalCount = 0;
+      if (Array.isArray(signals)) {
+        for (const sidRaw of signals) {
+          if (typeof sidRaw !== 'string') continue;
+          const sid = sidRaw;
+          const mapped = Array.isArray(signalMapping[sid]) ? signalMapping[sid] : [];
+          if (mapped.length) {
+            for (const mt of mapped) {
+              const n = normalize(mt);
+              if (n) uniqueTriggers.add(n);
+            }
+          } else {
+            unmappedSignalCount++;
+          }
+        }
+      }
 
       const crossCheckQuestions = (e.cross_check && Array.isArray(e.cross_check.questions)) ? e.cross_check.questions.length : 0;
 
@@ -89,9 +125,9 @@ export class RecalcConfidence {
         }
         if (!found) totalWeight += DEFAULT_TRIGGER_WEIGHT;
       }
-      // add contributions from cross_check and signal_ids count
+      // add contributions from cross_check and unmapped signal_ids (fallback)
       totalWeight += crossCheckQuestions * CROSS_CHECK_WEIGHT;
-      if (Array.isArray(signals)) totalWeight += signals.length * SIGNAL_ID_WEIGHT;
+      if (unmappedSignalCount > 0) totalWeight += unmappedSignalCount * SIGNAL_ID_WEIGHT;
 
       const MAX_BOOST = cfg.maxBoost;
       const boost = Math.min(MAX_BOOST, totalWeight);
