@@ -2,6 +2,17 @@
   "case_id": "A-CASE-002",
   "category": "unauthorized_osint_tracking_&_cyber-stalking",
   "confidence_raw": 0.5,
+  "signal_ids": [
+    "SIG-CAMOUFLAGE-ROLE",
+    "SIG-CAMOUFLAGE-DOMESTIC",
+    "SIG-DECEPTION-FACT",
+    "SIG-RECON-TARGETED",
+    "SIG-ALIBI-GENERAL",
+    "SIG-EVASION-CONTROL",
+    "SIG-EXPLOIT-ACTIONABLE",
+    "SIG-CAMOUFLAGE-NAIVE",
+    "SIG-TARGET-HIGHVALUE"
+  ],
   "scenarios": [
     {
       "name": "Shared Account Camouflage",
