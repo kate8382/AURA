@@ -22,9 +22,9 @@
     "normalize:percases": "node -r ts-node/register scripts/normalize-percases.ts public_cases",
     "validate:percases": "node -r ts-node/register scripts/validate-percases.ts public_cases",
     "gen:triggers": "node -r ts-node/register scripts/generate-trigger-weights.ts",
-    "collect:triggers": "node scripts/collect-triggers.js",
-    "audit:categories": "node scripts/audit-categories.js",
-    "gen:triggers:apply": "node -r ts-node/register scripts/generate-trigger-weights.ts -- --apply-signal-ids"
+    "gen:triggers:apply": "node -r ts-node/register scripts/generate-trigger-weights.ts -- --apply-signal-ids",
+    "collect:triggers": "node scripts/tools/collect-triggers.js",
+    "audit:categories": "node scripts/tools/audit-categories.js"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
