@@ -45,7 +45,7 @@ Unlike static safety guardrails, **AURA** focuses on the psychological and tacti
 
 Clone the repository and install the developer dependencies:
 
-```Bash
+```bash
 
 npm install
 ```
@@ -78,39 +78,17 @@ node -r ts-node/register scripts/validate-percases.ts public_cases
 
 ## Scripts & Configuration
 
-We've added tooling to generate and manage trigger weights and the confidence recalculation pipeline.
+Short developer reference — full details in [docs/SCRIPTS.md](docs/SCRIPTS.md).
 
-- `npm run gen:triggers` — generate `config/trigger-weights.json` from the cases in `public_cases/`.
-  - Implementation: `scripts/generate-trigger-weights.ts` (TypeScript class). It scans all JSON cases, normalizes triggers (trim + lowercase, strips common suffix `request`) and computes per-trigger weights by case-frequency. The generator now loads `config/signal-mapping.json` as the canonical mapping for `signal_id` ↔ triggers. The generated file is written to `config/trigger-weights.json` (a `.bak` is kept when overwriting).
-  - Usage: you can override the source directory with `CASES_DIR` env var:
+- `npm run gen:triggers` — generate `config/trigger-weights.json` from `public_cases/`.
+- `npm run gen:triggers:apply` — generate and apply `signal_ids` into case files (creates `.bak`).
+- `npm run recalc:confidence` — recompute `confidence` fields (see docs for dry-run flags and options).
+- `npm run collect:triggers` — collect normalized triggers into `tmp/collected-triggers.json`.
+- `npm run audit:categories` — run category-vs-directory audit into `tmp/audit-output.json`.
 
-```bash
-CASES_DIR=public_cases npm run gen:triggers
-```
-
-- `npm run gen:triggers:apply` — run the generator and apply `signal_ids` into case files (creates `.bak` files). Use this only when you want `signal_ids` persisted in-source for audit/integration.
-
-- `npm run recalc:confidence` — recalculate `confidence` fields across cases using `config/trigger-weights.json` and other heuristic weights.
-  - Implementation: `scripts/recalc_confidence.ts`. By default it runs over `public_cases/` but you can pass `--dir <path>` or set `CASES_DIR`.
-  - Behavior: the recalculator expands any mapped `signal_ids` (from `config/signal-mapping.json`) into normalized triggers for weight calculation; unmapped `signal_ids` contribute via the `signalIdWeight` fallback. This avoids double-counting mapped signals while preserving a fallback for unmapped ones.
-  - Example:
-
-```bash
-# dry-run
-node -r ts-node/register scripts/recalc_confidence.ts --dry-run --dir public_cases
-
-# apply changes
-npm run recalc:confidence -- --dir public_cases
-```
-
-- `npm run collect:triggers` — collect unique normalized triggers from `public_cases/` and write them to `tmp/collected-triggers.json`.
-- `npm run audit:categories` — run a simple category-vs-directory audit and write results to `tmp/audit-output.json`.
-
-Signal IDs and mappings
+**Signal IDs and mappings**
 - Reference: the signal ID mapping is documented in [docs/SIGNAL_IDS.md](docs/SIGNAL_IDS.md).
-- The canonical mapping file is `config/signal-mapping.json` and the generator/recalculator consults it at runtime. See `docs/SIGNAL_IDS.md` for workflow: collecting triggers, editing `config/signal-mapping.json`, and regenerating weights.
-
-Tests: there is a unit test for the generator at `scripts/__tests__/generate-trigger-weights.test.ts` and tests for `recalc_confidence` at `scripts/__tests__/recalc_confidence.test.ts`.
+- The canonical mapping file is `config/signal-mapping.json` and the generator/recalculator consults it at runtime. See `docs/SIGNAL_IDS.md` for the recommended workflow: collecting triggers, editing `config/signal-mapping.json`, and regenerating weights.
 
 ### How trigger weights are computed
 
@@ -176,8 +154,6 @@ If you are interested in researching these vectors, please open an Issue to shar
 - Dev.to — [AURA: AI User Risk Assessment — a behavioral threat‑intelligence framework for AI Safety](https://dev.to/kate8382/aura-ai-user-risk-assessment-a-behavioral-threat-intelligence-framework-for-ai-safety-4h9l)
 - CoderLegion — [AURA: AI User Risk Assessment — a behavioral threat‑intelligence framework for AI Safety](https://coderlegion.com/22768/aura-ai-user-risk-assessment-a-behavioral-threat-intelligence-framework-for-ai-safety)
 - LinkedIn — [Launch post](https://www.linkedin.com/feed/update/urn:li:activity:7483208618545274880/)
-
-## Integration & Partnerships
 
 ## Integration & Partnerships
 
