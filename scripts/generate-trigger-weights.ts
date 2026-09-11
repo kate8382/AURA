@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { deriveSignalId } from './utils';
 
 type CountMap = { [k: string]: number };
 
@@ -132,6 +133,11 @@ export class GenerateTriggerWeights {
         if (!n) continue;
         const sid = (this.signalMap as any)[n];
         if (sid) set.add(sid);
+        else {
+          // fallback: deterministically derive a SID from the normalized trigger
+          const fid = deriveSignalId(n);
+          if (fid) set.add(fid);
+        }
       }
     }
     return Array.from(set);

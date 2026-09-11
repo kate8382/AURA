@@ -12,6 +12,7 @@ export class NewCaseTemplate {
       case_id: id,
       category: "",
       confidence_raw: PROMPT_BASE,
+      signal_ids: [],
       scenarios: [
         { name: "", text: "", triggers: [] },
         { name: "", text: "", triggers: [] },

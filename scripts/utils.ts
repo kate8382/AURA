@@ -13,6 +13,7 @@ export function reorderCaseKeys(obj: AnyObj): AnyObj {
   add('case_id', obj.case_id);
   add('category', obj.category);
   add('confidence_raw', obj.confidence_raw);
+  add('signal_ids', obj.signal_ids);
   add('scenarios', obj.scenarios);
   add('suggested_action', obj.suggested_action);
   add('legal_risk', obj.legal_risk);
@@ -22,4 +23,15 @@ export function reorderCaseKeys(obj: AnyObj): AnyObj {
   add('deception_threshold', obj.deception_threshold);
   for (const k of Object.keys(obj)) if (!Object.prototype.hasOwnProperty.call(ordered, k)) ordered[k] = obj[k];
   return ordered;
+}
+
+// deriveSignalId: deterministic SID from a normalized trigger string
+export function deriveSignalId(trigger: string): string {
+  if (!trigger || typeof trigger !== 'string') return '';
+  // uppercase, replace non-alphanumeric with hyphens, collapse hyphens
+  let s = trigger.trim().toUpperCase();
+  s = s.replace(/[^A-Z0-9]+/g, '-');
+  s = s.replace(/(^-|-$)+/g, '');
+  s = s.replace(/-+/g, '-');
+  return `SIG-TRIG-${s}`;
 }

@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { reorderCaseKeys } from './utils';
+import { generateSignalIds } from './generate-trigger-weights';
 import { DEFAULT_CONFIDENCE } from './recalc_confidence';
 
 type AnyObj = { [k: string]: any };
@@ -77,6 +78,18 @@ export class NormalizePerCases {
         // Ensure confidence default after cross_check if missing
         if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
 
+        // Optionally generate signal_ids for the case when requested
+        if (process.argv.includes('--apply-signal-ids')) {
+          if (!Array.isArray(obj.signal_ids) || obj.signal_ids.length === 0) {
+            try {
+              const sids = generateSignalIds(obj.scenarios || []);
+              if (sids && sids.length) obj.signal_ids = sids;
+            } catch (e) {
+              // ignore generate errors
+            }
+          }
+        }
+
         const ordered = reorderCaseKeys(obj);
         const merged = { ...metadata, ...ordered };
         const newName = `${base}-${i+1}.json`;
@@ -104,6 +117,18 @@ export class NormalizePerCases {
       }
       if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
       if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
+
+      // Optionally generate signal_ids for the case when requested
+      if (process.argv.includes('--apply-signal-ids')) {
+        if (!Array.isArray(obj.signal_ids) || obj.signal_ids.length === 0) {
+          try {
+            const sids = generateSignalIds(obj.scenarios || []);
+            if (sids && sids.length) obj.signal_ids = sids;
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
       const ordered = reorderCaseKeys(obj);
       const merged = { ...metadata, ...ordered };
       if (this.dry) console.log("[dry] WOULD NORMALIZE", filePath);
