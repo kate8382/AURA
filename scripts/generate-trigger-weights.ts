@@ -193,10 +193,12 @@ export class GenerateTriggerWeights {
             }
           }
         }
-        if (Array.isArray((c as any).signal_ids)) for (const t of (c as any).signal_ids) {
-          const n = this.normalizeTrigger(t);
-          if (n) uniq.add(n);
-        }
+        // Do NOT include `signal_ids` here — signal IDs are a separate concept (identifiers),
+        // not human-readable trigger text. Including them pollutes `trigger-weights.json` with
+        // SID-like keys (e.g. "SIG-...") which breaks downstream expectations.
+        // If you need to account for mapped signals, expand them into trigger text via
+        // `signal-mapping.json` elsewhere (recalc pipeline). For weight generation we only
+        // count `scenarios[].triggers`.
         for (const trig of uniq) counts[trig] = (counts[trig] || 0) + 1;
       }
     }
@@ -209,6 +211,10 @@ export class GenerateTriggerWeights {
         const parsed = JSON.parse(raw);
         if (parsed && parsed.triggerWeights && typeof parsed.triggerWeights === 'object') {
           for (const k of Object.keys(parsed.triggerWeights)) {
+            // Skip legacy or SID-like keys (e.g. keys that start with 'sig-') when preserving
+            // so we don't keep signal_id tokens in the trigger-weights output. Only preserve
+            // human-readable trigger keys.
+            if (/^sig[-_]/i.test(k)) continue;
             if (!(k in counts)) counts[k] = 0;
           }
         }
