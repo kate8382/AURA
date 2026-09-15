@@ -4,4 +4,4 @@ dist/
 .venv/
 Prompt.md
 tmp/
-config/*.bak
+config/*.bakTODOs.md
