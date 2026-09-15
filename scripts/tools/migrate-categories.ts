@@ -13,7 +13,7 @@ export class MigrateCategories {
    * @param root optional repository root; defaults to parent of this script
    */
   constructor(root?: string) {
-    this.root = root ? path.resolve(root) : path.resolve(__dirname, '..');
+    this.root = root ? path.resolve(root) : path.resolve(__dirname, '..', '..');
     this.casesDir = path.join(this.root, 'public_cases');
   }
 

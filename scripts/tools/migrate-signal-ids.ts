@@ -17,7 +17,7 @@ function oldToNewKey(old: string): string {
 function humanDescription(key: string): string {
   // key like "camouflage:naive" -> "Camouflage: naive"
   const [cat, sub] = key.split(':');
-  const cap = (s: string) => s.split(/[_\s]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  const cap = (s: string) => s.split(/[_\s]+/).map(w => w.charAt(0) + w.slice(1)).join(' ');
   return `${cap(cat)}: ${cap(sub)}`;
 }
 
@@ -46,7 +46,7 @@ async function walkJsonFiles(dir: string): Promise<string[]> {
 
 async function main() {
   const dry = process.argv.includes('--dry-run');
-  const repoRoot = path.resolve(__dirname, '..');
+  const repoRoot = path.resolve(__dirname, '..', '..');
   const mappingPath = path.join(repoRoot, 'config', 'signal-mapping.json');
   const casesDir = path.join(repoRoot, 'public_cases');
 
