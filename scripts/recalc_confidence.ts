@@ -49,8 +49,8 @@ export class RecalcConfidence {
     const { loadTriggerConfig } = await import('./config');
     const cfg = loadTriggerConfig();
 
-    // Load signal mapping (signal_id -> [triggers]) if present
-    let signalMapping: Record<string, string[]> = {};
+    // Load signal mapping (signal_id -> [triggers] or { id, description, triggers }) if present
+    let signalMapping: Record<string, any> = {};
     try {
       const mapPath = path.resolve(__dirname, '..', 'config', 'signal-mapping.json');
       const rawMap = await fs.readFile(mapPath, 'utf8').catch(() => null);
@@ -74,14 +74,13 @@ export class RecalcConfidence {
       const old = e.confidence;
       if (preserveExisting && (typeof old === 'number')) return null;
       const signals: string[] = Array.isArray(e.signal_ids) ? (e.signal_ids as string[]).slice() : generateSignalIds(e.scenarios || []);
-      // Build set of unique triggers from scenarios
+      // Build set of unique triggers from scenarios (defensive typing)
       const uniqueTriggers = new Set<string>();
-      if (Array.isArray(e.scenarios)) {
-        for (const s of e.scenarios) {
-          if (s && Array.isArray(s.triggers)) {
-            for (const t of s.triggers) if (typeof t === 'string') uniqueTriggers.add(t.trim().toLowerCase());
-          }
-        }
+      const scenariosArr: any[] = Array.isArray(e.scenarios) ? e.scenarios : [];
+      for (const s of scenariosArr) {
+        if (!s || typeof s !== 'object') continue;
+        const triggersArr: any[] = Array.isArray((s as any).triggers) ? (s as any).triggers : [];
+        for (const t of triggersArr) if (typeof t === 'string') uniqueTriggers.add(t.trim().toLowerCase());
       }
       // Resolve signal_ids: if they map to known triggers (via signalMapping),
       // expand them into `uniqueTriggers` so trigger-weights apply. For signals
@@ -91,7 +90,8 @@ export class RecalcConfidence {
         for (const sidRaw of signals) {
           if (typeof sidRaw !== 'string') continue;
           const sid = sidRaw;
-          const mapped = Array.isArray(signalMapping[sid]) ? signalMapping[sid] : [];
+          const entry: any = signalMapping[sid];
+          const mapped: string[] = Array.isArray(entry) ? entry : (entry && Array.isArray(entry.triggers) ? entry.triggers : []);
           if (mapped.length) {
             for (const mt of mapped) {
               const n = normalize(mt);

@@ -1,17 +1,18 @@
 {
   "case_id": "M-CASE-002",
+  "domain": "manipulation",
   "category": "harassment,_extortion,_and_reputation_damage_assets",
   "confidence_raw": 0.5,
   "signal_ids": [
-    "SIG-CAMOUFLAGE-ROLE",
-    "SIG-DECEPTION-FACT",
-    "SIG-EXTORTION-LEVERAGE",
-    "SIG-BEHAVIOR-URGENCY",
-    "SIG-CAMOUFLAGE-DOMESTIC",
-    "SIG-EVASION-CONTROL",
-    "SIG-CAMOUFLAGE-NAIVE",
-    "SIG-TARGET-HIGHVALUE",
-    "SIG-EXPLOIT-ACTIONABLE"
+    "camouflage:role",
+    "deception:fact",
+    "extortion:leverage",
+    "behavior:urgency",
+    "camouflage:domestic",
+    "evasion:control",
+    "camouflage:naive",
+    "target:highvalue",
+    "exploit:actionable"
   ],
   "scenarios": [
     {

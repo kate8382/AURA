@@ -5,36 +5,40 @@
   "additionalProperties": true,
   "required": [
     "case_id",
+    "domain",
     "category",
+    "confidence_raw",
+    "signal_ids",
     "scenarios",
-    "confidence",
+    "suggested_action",
     "legal_risk",
     "behavioral_patterns",
     "cross_check",
+    "confidence",
     "deception_threshold"
   ],
   "properties": {
+    "case_id": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Optional top-level domain for the case (one of 'access', 'fraud', 'manipulation'). This is intended to be a short, machine-friendly grouping for filtering and routing."
+    },
+    "category": {
+      "type": "string"
+    },
+    "confidence_raw": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
     "signal_ids": {
       "type": "array",
       "items": {
         "type": "string"
       },
       "description": "Optional list of standardized Signal IDs (e.g. \"SIG-...\") for the case; used by `recalc_confidence` to apply signal-based boosts and by external integrators."
-    },
-    "export_date": {
-      "type": "string"
-    },
-    "source": {
-      "type": "string"
-    },
-    "anonymized": {
-      "type": "boolean"
-    },
-    "case_id": {
-      "type": "string"
-    },
-    "category": {
-      "type": "string"
     },
     "scenarios": {
       "type": "array",
@@ -61,16 +65,6 @@
         },
         "additionalProperties": true
       }
-    },
-    "confidence": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 1
-    },
-    "confidence_raw": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 1
     },
     "suggested_action": {
       "type": "string"
@@ -155,6 +149,11 @@
       },
       "additionalProperties": true
     },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
     "deception_threshold": {
       "type": "object",
       "required": [
@@ -173,6 +172,15 @@
         }
       },
       "additionalProperties": true
+    },
+    "export_date": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "anonymized": {
+      "type": "boolean"
     }
   }
 }

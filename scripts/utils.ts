@@ -5,12 +5,13 @@ type AnyObj = { [k: string]: any };
  * Центральная утилита для формирования канонического порядка полей в per-case JSON.
  * Порядок:
  *  case_id, category, confidence_raw, scenarios, suggested_action, legal_risk,
- *  behavioral_patterns, cross_check, confidence, deception_threshold, ...rest
+  behavioral_patterns, cross_check, confidence, deception_threshold, ...rest
  */
 export function reorderCaseKeys(obj: AnyObj): AnyObj {
   const ordered: AnyObj = {};
   const add = (k: string, v: any) => { if (typeof v !== 'undefined') ordered[k] = v; };
   add('case_id', obj.case_id);
+  add('domain', obj.domain);
   add('category', obj.category);
   add('confidence_raw', obj.confidence_raw);
   add('signal_ids', obj.signal_ids);

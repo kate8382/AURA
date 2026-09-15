@@ -58,13 +58,17 @@ npm run audit:categories
 
 4) Signal mapping
 
-- Canonical mapping file: `config/signal-mapping.json` (format: `signal_id` → array of normalized triggers).
+- Canonical mapping file: `config/signal-mapping.json`.
+- New format: mapping uses compact namespaced keys (for example `camouflage:naive`) where each key maps to an object with `id`, `description`, and a `triggers` array. The generator and recalculator expand mapped keys into normalized triggers when computing weights.
 - See [SIGNAL_IDS.md](./SIGNAL_IDS.md) for the recommended workflow to collect triggers and update the mapping.
 
 5) Files and outputs
 
 - Generated configs and intermediate outputs are written to `config/` and `tmp/`. Add `tmp/` to
   `.gitignore` (already recommended) to avoid checking generated artifacts into Git.
+- One-off migration helpers live in `scripts/tools/`. Relevant npm shortcuts were added:
+  - `npm run migrate:categories` — migrate legacy `category` field into `domain` + human `category` label in `public_cases/`.
+  - `npm run migrate:signals` — preview and apply signal ID compaction and update `public_cases.signal_ids`.
 
 6) Automation suggestions
 

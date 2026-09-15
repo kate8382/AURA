@@ -1,17 +1,18 @@
 {
   "case_id": "A-CASE-002",
+  "domain": "access",
   "category": "unauthorized_osint_tracking_&_cyber-stalking",
   "confidence_raw": 0.5,
   "signal_ids": [
-    "SIG-CAMOUFLAGE-ROLE",
-    "SIG-CAMOUFLAGE-DOMESTIC",
-    "SIG-DECEPTION-FACT",
-    "SIG-RECON-TARGETED",
-    "SIG-ALIBI-GENERAL",
-    "SIG-EVASION-CONTROL",
-    "SIG-EXPLOIT-ACTIONABLE",
-    "SIG-CAMOUFLAGE-NAIVE",
-    "SIG-TARGET-HIGHVALUE"
+    "camouflage:role",
+    "camouflage:domestic",
+    "deception:fact",
+    "recon:targeted",
+    "alibi:general",
+    "evasion:control",
+    "exploit:actionable",
+    "camouflage:naive",
+    "target:highvalue"
   ],
   "scenarios": [
     {

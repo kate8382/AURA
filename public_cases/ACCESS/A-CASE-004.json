@@ -1,17 +1,18 @@
 {
   "case_id": "A-CASE-004",
+  "domain": "access",
   "category": "critical_infrastructure_cyber-physical_boundary_(access_violation)",
   "confidence_raw": 0.5,
   "signal_ids": [
-    "SIG-ALIBI-ACADEMIC",
-    "SIG-RECON-TARGETED",
-    "SIG-ALIBI-GENERAL",
-    "SIG-CAMOUFLAGE-ROLE",
-    "SIG-EVASION-CONTROL",
-    "SIG-EXPLOIT-ACTIONABLE",
-    "SIG-BEHAVIOR-URGENCY",
-    "SIG-CAMOUFLAGE-NAIVE",
-    "SIG-TARGET-HIGHVALUE"
+    "alibi:academic",
+    "recon:targeted",
+    "alibi:general",
+    "camouflage:role",
+    "evasion:control",
+    "exploit:actionable",
+    "behavior:urgency",
+    "camouflage:naive",
+    "target:highvalue"
   ],
   "scenarios": [
     {

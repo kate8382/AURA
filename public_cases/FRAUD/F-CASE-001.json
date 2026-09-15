@@ -1,15 +1,16 @@
 {
   "case_id": "F-CASE-001",
-  "category": "fraud/brand_impersonation",
+  "domain": "fraud",
+  "category": "brand_impersonation",
   "confidence_raw": 0.5,
   "signal_ids": [
-    "SIG-EVASION-CONTROL",
-    "SIG-DECEPTION-FACT",
-    "SIG-EXPLOIT-ACTIONABLE",
-    "SIG-CAMOUFLAGE-ROLE",
-    "SIG-ALIBI-GENERAL",
-    "SIG-CAMOUFLAGE-NAIVE",
-    "SIG-TARGET-HIGHVALUE"
+    "evasion:control",
+    "deception:fact",
+    "exploit:actionable",
+    "camouflage:role",
+    "alibi:general",
+    "camouflage:naive",
+    "target:highvalue"
   ],
   "scenarios": [
     {

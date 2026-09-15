@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env
 .venv/
-Prompt.md
 tmp/
-config/*.bak
+config/*.bakTODOs.md
+.github/ISSUE/
+.github/PR/
