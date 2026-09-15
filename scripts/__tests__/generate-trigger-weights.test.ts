@@ -57,7 +57,7 @@ describe('GenerateTriggerWeights', () => {
       { triggers: ['financial_request'] }
     ];
     const sids = generateSignalIds(scenarios);
-    expect(new Set(sids)).toEqual(new Set(['SIG-BEHAVIOR-URGENCY', 'SIG-FIN-SUSPICIOUS']));
+    expect(new Set(sids)).toEqual(new Set(['behavior:urgency', 'fin:suspicious']));
   });
 
   test('run with --apply-signal-ids writes signal_ids into case files', () => {
@@ -71,7 +71,7 @@ describe('GenerateTriggerWeights', () => {
     // create minimal signal-mapping.json in tmp config so the instance can load it
     const cfgDir = path.join(tmp, 'config');
     fs.mkdirSync(cfgDir, { recursive: true });
-    const mapping = { signals: { 'SIG-BEHAVIOR-URGENCY': ['urgency'], 'SIG-OTHER': ['unknown'] } };
+    const mapping = { signals: { 'behavior:urgency': { id: 'behavior:urgency', triggers: ['urgency'] }, 'fin:suspicious': { id: 'fin:suspicious', triggers: ['financial_request'] }, 'SIG-OTHER': { id: 'SIG-OTHER', triggers: ['unknown'] } } };
     fs.writeFileSync(path.join(cfgDir, 'signal-mapping.json'), JSON.stringify(mapping, null, 2), 'utf8');
 
     const g = new GenerateTriggerWeights(tmp);
@@ -82,7 +82,7 @@ describe('GenerateTriggerWeights', () => {
       expect(res.outPath).toBeTruthy();
       const written = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       expect(Array.isArray(written.signal_ids)).toBe(true);
-      expect(written.signal_ids).toContain('SIG-BEHAVIOR-URGENCY');
+      expect(written.signal_ids).toContain('behavior:urgency');
     } finally {
       process.argv = origArgv;
       // cleanup
