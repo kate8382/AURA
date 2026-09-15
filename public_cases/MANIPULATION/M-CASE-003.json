@@ -4,14 +4,14 @@
   "category": "_(social_engineering_&_platform_integrity_evasion)",
   "confidence_raw": 0.5,
   "signal_ids": [
-    "SIG-ALIBI-ACADEMIC",
-    "SIG-DECEPTION-FACT",
-    "SIG-ALIBI-GENERAL",
-    "SIG-CAMOUFLAGE-NAIVE",
-    "SIG-CAMOUFLAGE-ROLE",
-    "SIG-EVASION-CONTROL",
-    "SIG-EXPLOIT-ACTIONABLE",
-    "SIG-TARGET-HIGHVALUE"
+    "alibi:academic",
+    "deception:fact",
+    "alibi:general",
+    "camouflage:naive",
+    "camouflage:role",
+    "evasion:control",
+    "exploit:actionable",
+    "target:highvalue"
   ],
   "scenarios": [
     {
