@@ -42,7 +42,8 @@ export class GenerateTriggerWeights {
       const parsed = JSON.parse(raw);
       const signals = (parsed && parsed.signals) ? parsed.signals : {};
       for (const sid of Object.keys(signals)) {
-        const arr = signals[sid] || [];
+        const val = signals[sid];
+        const arr = Array.isArray(val) ? val : (val && Array.isArray(val.triggers) ? val.triggers : []);
         for (const t of arr) {
           if (typeof t !== 'string') continue;
           const n = this.normalizeTrigger(t);
