@@ -1,6 +1,6 @@
 {
   "case_id": "A-CASE-002",
-  "category": "unauthorized_osint_tracking_&_cyber-stalking",
+  "category": "access/unauthorized_osint_tracking_&_cyber-stalking",
   "confidence_raw": 0.5,
   "signal_ids": [
     "SIG-CAMOUFLAGE-ROLE",

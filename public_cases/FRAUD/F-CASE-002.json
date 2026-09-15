@@ -1,6 +1,6 @@
 {
   "case_id": "F-CASE-002",
-  "category": "social_engineering_&_unauthorized_access",
+  "category": "fraud/social_engineering_&_unauthorized_access",
   "confidence_raw": 0.5,
   "signal_ids": [
     "SIG-CAMOUFLAGE-DOMESTIC",
