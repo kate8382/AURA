@@ -89,6 +89,7 @@ Short developer reference — full details in [docs/SCRIPTS.md](docs/SCRIPTS.md)
 **Signal IDs and mappings**
 - Reference: the signal ID mapping is documented in [docs/SIGNAL_IDS.md](docs/SIGNAL_IDS.md).
 - The canonical mapping file is `config/signal-mapping.json` and the generator/recalculator consults it at runtime. See `docs/SIGNAL_IDS.md` for the recommended workflow: collecting triggers, editing `config/signal-mapping.json`, and regenerating weights.
+ - Notes on recent changes: signal IDs were compacted to a namespaced key format (for example `camouflage:naive`, `recon:targeted`), where each mapping entry is keyed by the compact signal ID and includes an `id`, a human-readable `description`, and a `triggers` list. One-off migration scripts were added under `scripts/tools/` and exposed as `npm run migrate:categories` and `npm run migrate:signals` for convenience.
 
 ### How trigger weights are computed
 
@@ -112,6 +113,10 @@ See the full schema at `schemas/per-case-schema.json` — example minimal valid 
   "case_id": "EX-CASE-001",
   "category": "manipulation/example",
   "confidence_raw": 0.50,
+  "signal_ids": [
+    "camouflage:naive",
+    "evasion:control"
+  ],
   "scenarios": [{ "name": "Example", "text": "Please share the customer's password" }],
   "suggested_action": "cross_check",
   "legal_risk": { "short_summary": "Potential privacy breach", "full_text": ["May disclose PII"] },
