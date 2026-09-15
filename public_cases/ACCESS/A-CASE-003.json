@@ -1,6 +1,7 @@
 {
   "case_id": "A-CASE-003",
-  "category": "access/corporate_espionage_&_insider_trading_(market_integrity_violation)",
+  "domain": "access",
+  "category": "corporate_espionage_&_insider_trading_(market_integrity_violation)",
   "confidence_raw": 0.5,
   "signal_ids": [
     "SIG-ALIBI-ACADEMIC",

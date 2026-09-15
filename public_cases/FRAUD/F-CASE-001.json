@@ -1,6 +1,7 @@
 {
   "case_id": "F-CASE-001",
-  "category": "fraud/brand_impersonation",
+  "domain": "fraud",
+  "category": "brand_impersonation",
   "confidence_raw": 0.5,
   "signal_ids": [
     "SIG-EVASION-CONTROL",

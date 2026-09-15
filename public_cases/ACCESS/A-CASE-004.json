@@ -1,5 +1,6 @@
 {
   "case_id": "A-CASE-004",
+  "domain": "access",
   "category": "critical_infrastructure_cyber-physical_boundary_(access_violation)",
   "confidence_raw": 0.5,
   "signal_ids": [

@@ -21,6 +21,18 @@
       },
       "description": "Optional list of standardized Signal IDs (e.g. \"SIG-...\") for the case; used by `recalc_confidence` to apply signal-based boosts and by external integrators."
     },
+    "domain": {
+      "type": "string",
+      "description": "Optional top-level domain for the case (one of 'access', 'fraud', 'manipulation'). This is intended to be a short, machine-friendly grouping for filtering and routing."
+    },
+    "category_slug": {
+      "type": "string",
+      "description": "Optional short machine-friendly category key (slug). Prefer ASCII lower-case with underscores. This is distinct from the human-readable `category` label."
+    },
+    "category_label": {
+      "type": "string",
+      "description": "Optional human-readable category label. When migrating from the legacy `category` field, the original value should be preserved here for display."
+    },
     "export_date": {
       "type": "string"
     },
