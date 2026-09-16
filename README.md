@@ -4,17 +4,17 @@
 
 Unlike static safety guardrails, **AURA** focuses on the psychological and tactical vectors of social engineering, helping developers build resilient, context-aware AI agents.
 
-<div align="center">
+<p align="center">
   <img src="assets/banner_1.png" alt="AURA Banner" width="100%"/>
+</p>  
 
-  <br/><br/>
-
+<p align="center">
   <img src="https://github.com/kate8382/AURA/actions/workflows/ci.yml/badge.svg" alt="CI status" />
   <img src="https://img.shields.io/badge/dynamic/json?label=Total%20views&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_views&color=blue" alt="Total views" />
-  <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20views&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_views&color=green" alt="Unique views" />
+  <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20views&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_views&color=orange" alt="Unique views" />
   <img src="https://img.shields.io/badge/dynamic/json?label=Total%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_clones&color=blue" alt="Total clones" />
-  <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_clones&color=green" alt="Unique clones" />
-</div>
+  <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_clones&color=orange" alt="Unique clones" />
+</p>
 
 ## Key Features
 
