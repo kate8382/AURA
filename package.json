@@ -27,7 +27,9 @@
     "audit:categories": "node scripts/tools/audit-categories.js",
     "migrate:categories": "node -r ts-node/register scripts/tools/migrate-categories.ts",
     "migrate:signals": "node -r ts-node/register scripts/tools/migrate-signal-ids.ts",
-    "update:traffic": "node .github/scripts/fetch-traffic-snapshot.js"
+    "update:traffic": "node .github/scripts/fetch-traffic-snapshot.js",
+    "backfill:traffic": "node .github/scripts/backfill-traffic-history.js",
+    "generate:traffic-report": "node .github/scripts/generate-traffic-report.js"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
