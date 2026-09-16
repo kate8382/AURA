@@ -51,11 +51,15 @@ jobs:
             echo "No SVG to convert"
           fi
 
+      - name: Generate traffic summary JSON
+        run: |
+          node .github/scripts/generate-traffic-summary.js
+
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add analytics/traffic-history.csv analytics/traffic-history.svg analytics/traffic-history.png README.md || true
+          git add analytics/traffic-history.csv analytics/traffic-history.svg analytics/traffic-history.png analytics/traffic-summary.json || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

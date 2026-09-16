@@ -4,22 +4,17 @@
 
 Unlike static safety guardrails, **AURA** focuses on the psychological and tactical vectors of social engineering, helping developers build resilient, context-aware AI agents.
 
-<p align="center">
+<div align="center">
   <img src="assets/banner_1.png" alt="AURA Banner" width="100%"/>
-</p>
 
-<!-- Badges: CI and Traffic -->
-<p align="center">
+  <br/><br/>
+
   <img src="https://github.com/kate8382/AURA/actions/workflows/ci.yml/badge.svg" alt="CI status" />
-  &nbsp;
-  <img src="https://img.shields.io/badge/Total%20views-166-blue.svg" alt="Total views" />
-  &nbsp;
-  <img src="https://img.shields.io/badge/Unique%20views-20-green.svg" alt="Unique views" />
-  &nbsp;
-  <img src="https://img.shields.io/badge/Total%20clones-150-blue.svg" alt="Total clones" />
-  &nbsp;
-  <img src="https://img.shields.io/badge/Unique%20clones-62-green.svg" alt="Unique clones" />
-</p>
+  <img src="https://img.shields.io/badge/dynamic/json?label=Total%20views&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_views&color=blue" alt="Total views" />
+  <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20views&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_views&color=green" alt="Unique views" />
+  <img src="https://img.shields.io/badge/dynamic/json?label=Total%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_clones&color=blue" alt="Total clones" />
+  <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_clones&color=green" alt="Unique clones" />
+</div>
 
 ## Key Features
 
@@ -186,18 +181,6 @@ Partnership & Access Options:
 For commercial licenses, private datasets, or collaborative research, reach out via:
 - **Email:** [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com)
 - **LinkedIn:** [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/)
-
-
-<!-- TRAFFIC_CHART_START -->
-
-## Traffic Highlights
-
-- **Total views:** 166 (20 unique)
-- **Total clones:** 150 (62 unique)
-
-[View Full Analytics & Raw Data](analytics/)
-
-<!-- TRAFFIC_CHART_END -->
 
 ## License & Tooling
 
