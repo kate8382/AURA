@@ -1,0 +1,64 @@
+name: Traffic History Report (CSV + PNG)
+
+on:
+  push:
+    paths:
+      - 'analytics/traffic-history.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: traffic-history-report
+  cancel-in-progress: true
+
+jobs:
+  build-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install librsvg for SVG→PNG conversion
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+
+      - name: Ensure backfill script is executable
+        run: |
+          chmod +x .github/scripts/backfill-traffic-history.js || true
+
+      - name: Backfill per_day into daily entries
+        run: |
+          node .github/scripts/backfill-traffic-history.js
+
+      - name: Generate CSV, SVG and update README
+        run: |
+          node .github/scripts/generate-traffic-report.js
+
+      - name: Convert SVG to PNG
+        run: |
+          mkdir -p analytics
+          if [ -f analytics/traffic-history.svg ]; then
+            rsvg-convert -o analytics/traffic-history.png analytics/traffic-history.svg
+          else
+            echo "No SVG to convert"
+          fi
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add analytics/traffic-history.csv analytics/traffic-history.svg analytics/traffic-history.png README.md || true
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update traffic report (auto)"
+            git push
+          fi

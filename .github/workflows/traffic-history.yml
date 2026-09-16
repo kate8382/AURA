@@ -1,0 +1,62 @@
+name: Save Traffic History (views/clones)
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # каждый день, ~09:00 Moldova local
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  save-traffic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare
+        uses: actions/checkout@v4
+
+      - name: Fetch and append traffic snapshot
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const path = 'analytics/traffic-history.json';
+            const today = new Date().toISOString().slice(0,10);
+
+            const views = await github.request('GET /repos/{owner}/{repo}/traffic/views', { owner, repo });
+            const clones = await github.request('GET /repos/{owner}/{repo}/traffic/clones', { owner, repo });
+
+            const snapshot = {
+              date: today,
+              views: { count: views.data?.count ?? 0, uniques: views.data?.uniques ?? 0, per_day: views.data?.views ?? [] },
+              clones: { count: clones.data?.count ?? 0, uniques: clones.data?.uniques ?? 0, per_day: clones.data?.clones ?? [] }
+            };
+
+            let current = [];
+            let sha = null;
+            try {
+              const existing = await github.request('GET /repos/{owner}/{repo}/contents/{path}', { owner, repo, path });
+              sha = existing.data.sha;
+              const content = Buffer.from(existing.data.content, existing.data.encoding).toString();
+              current = JSON.parse(content || '[]');
+            } catch (e) {
+              if (e.status && e.status !== 404) throw e;
+            }
+
+            if (!current.find(s => s.date === snapshot.date)) current.push(snapshot);
+
+            const newContent = Buffer.from(JSON.stringify(current, null, 2)).toString('base64');
+
+            const message = (sha ? 'Update traffic-history.json' : 'Create traffic-history.json') + ' (auto)';
+            await github.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+              owner, repo, path,
+              message,
+              content: newContent,
+              sha: sha || undefined,
+              committer: { name: 'github-actions[bot]', email: '41898282+github-actions[bot]@users.noreply.github.com' },
+              author: { name: 'github-actions[bot]', email: '41898282+github-actions[bot]@users.noreply.github.com' }
+            });
+
+      - name: Done
+        run: echo "Traffic snapshot saved"

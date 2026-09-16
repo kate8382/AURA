@@ -174,6 +174,25 @@ For commercial licenses, private datasets, or collaborative research, reach out 
 - **Email:** [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com)
 - **LinkedIn:** [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/)
 
+
+
+
+<!-- TRAFFIC_CHART_START -->
+
+## Traffic history
+
+- **Total views:** 32
+- **Total unique views:** 26
+- **Total clones:** 6
+- **Total unique clones:** 6
+
+![Traffic history](analytics/traffic-history.png)
+
+Download data: [CSV](analytics/traffic-history.csv)
+
+<!-- TRAFFIC_CHART_END -->
+
+
 ## License & Tooling
 
 - **Code & tooling:** Apache License 2.0 — see `LICENSE`.

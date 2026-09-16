@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="240">
+  <rect width="100%" height="100%" fill="#fff"/>
+  <polyline fill="none" stroke="#2b8cbe" stroke-width="2" points="40,93.33333333333334 400,40 760,125.33333333333333" />
+  <!-- X labels -->
+  <text x="40" y="214" font-size="10" text-anchor="middle">2026-09-14</text>
+  <text x="400" y="214" font-size="10" text-anchor="middle">2026-09-15</text>
+  <text x="760" y="214" font-size="10" text-anchor="middle">2026-09-16</text>
+  <!-- Y max -->
+  <text x="10" y="40" font-size="12">max 15</text>
+</svg>

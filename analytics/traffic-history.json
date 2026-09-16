@@ -1,0 +1,35 @@
+[
+  {
+    "date": "2026-09-14",
+    "views": {
+      "count": 10,
+      "uniques": 8
+    },
+    "clones": {
+      "count": 2,
+      "uniques": 2
+    }
+  },
+  {
+    "date": "2026-09-15",
+    "views": {
+      "count": 15,
+      "uniques": 12
+    },
+    "clones": {
+      "count": 3,
+      "uniques": 3
+    }
+  },
+  {
+    "date": "2026-09-16",
+    "views": {
+      "count": 7,
+      "uniques": 6
+    },
+    "clones": {
+      "count": 1,
+      "uniques": 1
+    }
+  }
+]

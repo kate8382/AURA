@@ -26,7 +26,8 @@
     "collect:triggers": "node scripts/tools/collect-triggers.js",
     "audit:categories": "node scripts/tools/audit-categories.js",
     "migrate:categories": "node -r ts-node/register scripts/tools/migrate-categories.ts",
-    "migrate:signals": "node -r ts-node/register scripts/tools/migrate-signal-ids.ts"
+    "migrate:signals": "node -r ts-node/register scripts/tools/migrate-signal-ids.ts",
+    "update:traffic": "node .github/scripts/fetch-traffic-snapshot.js"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
