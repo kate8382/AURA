@@ -177,20 +177,22 @@ For commercial licenses, private datasets, or collaborative research, reach out 
 
 
 
+
 <!-- TRAFFIC_CHART_START -->
 
 ## Traffic history
 
-- **Total views:** 32
-- **Total unique views:** 26
-- **Total clones:** 6
-- **Total unique clones:** 6
+- **Total views:** 166
+- **Total unique views:** 20
+- **Total clones:** 150
+- **Total unique clones:** 62
 
 ![Traffic history](analytics/traffic-history.png)
 
 Download data: [CSV](analytics/traffic-history.csv)
 
 <!-- TRAFFIC_CHART_END -->
+
 
 
 ## License & Tooling
