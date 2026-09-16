@@ -65,7 +65,7 @@ jobs:
       - name: Create Pull Request for report updates
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TRAFFIC_TOKEN }}
           commit-message: "Update traffic report (auto)"
           title: "Update traffic report (auto)"
           body: "Automated update of analytics CSV/PNG/SVG and README."
