@@ -174,10 +174,6 @@ For commercial licenses, private datasets, or collaborative research, reach out 
 - **Email:** [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com)
 - **LinkedIn:** [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/)
 
-
-
-
-
 <!-- TRAFFIC_CHART_START -->
 
 ## Traffic history
@@ -187,13 +183,11 @@ For commercial licenses, private datasets, or collaborative research, reach out 
 - **Total clones:** 150
 - **Total unique clones:** 62
 
-![Traffic history](analytics/traffic-history.png)
+![Traffic history](analytics/traffic-history.svg)
 
 Download data: [CSV](analytics/traffic-history.csv)
 
 <!-- TRAFFIC_CHART_END -->
-
-
 
 ## License & Tooling
 
