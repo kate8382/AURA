@@ -18,6 +18,7 @@ jobs:
       - name: Fetch and append traffic snapshot
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.TRAFFIC_TOKEN }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
