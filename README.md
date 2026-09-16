@@ -8,6 +8,19 @@ Unlike static safety guardrails, **AURA** focuses on the psychological and tacti
   <img src="assets/banner_1.png" alt="AURA Banner" width="100%"/>
 </p>
 
+<!-- Badges: CI and Traffic -->
+<p align="center">
+  <img src="https://github.com/kate8382/AURA/actions/workflows/ci.yml/badge.svg" alt="CI status" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/Total%20views-166-blue.svg" alt="Total views" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/Unique%20views-20-green.svg" alt="Unique views" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/Total%20clones-150-blue.svg" alt="Total clones" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/Unique%20clones-62-green.svg" alt="Unique clones" />
+</p>
+
 ## Key Features
 
 - **Granular Threat Categorization** — Structured cases divided into three core domains: `MANIPULATION`, `FRAUD`, or `ACCESS`.
@@ -174,18 +187,15 @@ For commercial licenses, private datasets, or collaborative research, reach out 
 - **Email:** [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com)
 - **LinkedIn:** [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/)
 
+
 <!-- TRAFFIC_CHART_START -->
 
-## Traffic history
+## Traffic Highlights
 
-- **Total views:** 166
-- **Total unique views:** 20
-- **Total clones:** 150
-- **Total unique clones:** 62
+- **Total views:** 166 (20 unique)
+- **Total clones:** 150 (62 unique)
 
-![Traffic history](analytics/traffic-history.svg)
-
-Download data: [CSV](analytics/traffic-history.csv)
+[View Full Analytics & Raw Data](analytics/)
 
 <!-- TRAFFIC_CHART_END -->
 
