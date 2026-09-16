@@ -60,5 +60,15 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Update traffic report (auto)"
-            git push
+            echo "Committed changes locally — creating a pull request instead of pushing to protected branch"
           fi
+      - name: Create Pull Request for report updates
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Update traffic report (auto)"
+          title: "Update traffic report (auto)"
+          body: "Automated update of analytics CSV/PNG/SVG and README."
+          branch: "auto/traffic-report-${{ github.run_id }}"
+          base: "main"
+          labels: automated,traffic-report
