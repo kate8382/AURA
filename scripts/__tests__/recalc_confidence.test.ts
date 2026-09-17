@@ -36,6 +36,9 @@ describe('recalc', () => {
     const e = out.legal_intent_logs.MANIPULATION[0];
     expect(typeof e.confidence_raw).toBe('number');
     expect(e.confidence).toBeGreaterThanOrEqual(0.6);
+    expect(typeof e.decision).toBe('string');
+    expect(Array.isArray(e.decision_reasons)).toBe(true);
+    expect(e.confidence_raw).toBe(0);
   });
 
   test('preserveExisting prevents changes when flag set', async () => {
@@ -47,6 +50,7 @@ describe('recalc', () => {
     const e = out.legal_intent_logs.MANIPULATION[0];
     expect(e.confidence).toBe(0.9);
     expect(typeof e.confidence_raw).toBe('undefined');
+    expect(typeof e.decision).toBe('undefined');
   });
 });
 
