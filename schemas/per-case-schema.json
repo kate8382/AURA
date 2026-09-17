@@ -15,6 +15,8 @@
     "behavioral_patterns",
     "cross_check",
     "confidence",
+    "decision",
+    "decision_reasons",
     "deception_threshold"
   ],
   "properties": {
@@ -189,6 +191,13 @@
         "block",
         "pending"
       ]
+    },
+    "decision_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Optional list of strings explaining why a decision was made (populated by PolicyEvaluator)."
     },
     "deception_threshold": {
       "type": "object",
