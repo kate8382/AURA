@@ -27,12 +27,12 @@
     "audit:categories": "node scripts/tools/audit-categories.js",
     "migrate:categories": "node -r ts-node/register scripts/tools/migrate-categories.ts",
     "migrate:signals": "node -r ts-node/register scripts/tools/migrate-signal-ids.ts",
+    "decisions:show": "node -r ts-node/register scripts/tools/show-decisions.ts public_cases",
+    "decisions:validate": "node -r ts-node/register scripts/tools/show-decisions.ts --validate public_cases",
     "update:traffic": "node .github/scripts/fetch-traffic-snapshot.js",
     "backfill:traffic": "node .github/scripts/backfill-traffic-history.js",
     "generate:traffic-report": "node .github/scripts/generate-traffic-report.js",
-    "generate:traffic-summary": "node .github/scripts/generate-traffic-summary.js",
-    "decisions:show": "node -r ts-node/register scripts/tools/show-decisions.ts public_cases",
-    "decisions:validate": "node -r ts-node/register scripts/tools/show-decisions.ts --validate public_cases"
+    "generate:traffic-summary": "node .github/scripts/generate-traffic-summary.js"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",

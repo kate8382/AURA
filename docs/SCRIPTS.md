@@ -32,6 +32,7 @@ Notes:
   - Expands any mapped `signal_ids` into normalized triggers for weight calculation.
   - Unmapped `signal_ids` count toward `signalIdWeight` as a fallback (avoids double-counting).
   - Computes `boost = min(MAX_BOOST, totalTriggerWeight + crossCheckWeight*questions + signalIdWeight*unmappedSignalCount)`.
+  - Additionally, `recalc_confidence.ts` now evaluates an operational `decision` for each case and writes `decision` and `decision_reasons` based on a configurable policy (`config/policy.json`). The recalculator preserves an explicit `confidence_raw` when present; otherwise it initializes `confidence_raw` to `0.0` (presumption of innocence).
 
 Usage examples:
 
