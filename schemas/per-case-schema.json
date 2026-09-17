@@ -147,33 +147,6 @@
             },
             "additionalProperties": true
           }
-        },
-        "history": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "question": {
-                "type": "string"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "ok",
-                  "failed",
-                  "pending"
-                ]
-              },
-              "note": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": true
-          }
-        },
-        "evasion_attempts": {
-          "type": "integer",
-          "minimum": 0
         }
       },
       "additionalProperties": true

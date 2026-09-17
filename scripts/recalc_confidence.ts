@@ -1,6 +1,5 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import PolicyEvaluator from './policy/evaluateDecision';
 import { reorderCaseKeys } from './utils';
 import { generateSignalIds } from './generate-trigger-weights';
 
@@ -16,7 +15,7 @@ type Entry = { [k: string]: any };
  * При записи гарантируем порядок ключей: `confidence_raw` перед `scenarios`, `confidence` после `cross_check`.
  */
 export class RecalcConfidence {
-  static PROMPT_BASE = 0.0;
+  static PROMPT_BASE = 0.5;
   static MAP_DEFAULT_BASE = 0.75;
   static DEFAULT_CONFIDENCE = 0.95;
   static mapConfidence(category: string, signalCount: number): number {
@@ -40,7 +39,7 @@ export class RecalcConfidence {
   }
 
   // Note: canonical ordering handled by shared utility `reorderCaseKeys`
-  async recalc(filePath: string, preserveExisting = false, minFloor = 0.0): Promise<{ count: number; changes: Array<[string, any, any]> }> {
+  async recalc(filePath: string, preserveExisting = false, minFloor = 0.5): Promise<{ count: number; changes: Array<[string, any, any]> }> {
     const raw = await fs.readFile(filePath, 'utf8');
     const data = JSON.parse(raw);
     const changes: Array<[string, any, any]> = [];
@@ -49,8 +48,6 @@ export class RecalcConfidence {
     // Load config via helper (file + ENV)
     const { loadTriggerConfig } = await import('./config');
     const cfg = loadTriggerConfig();
-
-    const evaluator = new PolicyEvaluator();
 
     // Load signal mapping (signal_id -> [triggers] or { id, description, triggers }) if present
     let signalMapping: Record<string, any> = {};
@@ -137,26 +134,10 @@ export class RecalcConfidence {
 
       let newVal = Math.min(1.0, Math.round((base + boost) * 100) / 100);
       newVal = Math.round(Math.max(minFloor, newVal) * 100) / 100;
-      const oldDecision = (e as any).decision;
-      if (typeof e.confidence_raw === 'undefined') e.confidence_raw = rawVal;
-      e.confidence = newVal;
-      // evaluate decision based on policy and cross-check history
-      let newDecision = oldDecision;
-      let decisionReasons: string[] = [];
-      try {
-        const decisionRes = evaluator.evaluate(e);
-        if (decisionRes && decisionRes.decision) {
-          newDecision = decisionRes.decision;
-          decisionReasons = decisionRes.reasons || [];
-        }
-      } catch (err) {
-        // swallow policy evaluation errors to avoid blocking recalc
-      }
-      (e as any).decision = newDecision;
-      (e as any).decision_reasons = decisionReasons;
-
-      if (old !== newVal || oldDecision !== newDecision) {
-        changes.push([e.case_id || '<no-id>', { confidence_old: old, decision_old: oldDecision }, { confidence_new: newVal, decision_new: newDecision }]);
+      if (old !== newVal) {
+        if (typeof e.confidence_raw === 'undefined') e.confidence_raw = rawVal;
+        e.confidence = newVal;
+        changes.push([e.case_id || '<no-id>', old, newVal]);
         count += 1;
         return true;
       }
@@ -222,15 +203,14 @@ export class RecalcConfidence {
   async run() {
     const args = this.parseArgs(process.argv.slice(2));
     let filePath = args.file;
-    // minFloor default may be configured via ENV `MIN_FLOOR`, otherwise default 0.0
+    // minFloor default may be configured via ENV `MIN_FLOOR`, otherwise default 0.5
     const envMin = process.env.MIN_FLOOR ? Number(process.env.MIN_FLOOR) : undefined;
     const minFloor = typeof (process.argv.find((a) => a === '--min')) !== 'undefined'
       ? Number(((): string | undefined => {
           const idx = process.argv.indexOf('--min');
           return idx >= 0 ? process.argv[idx + 1] : undefined;
         })())
-      : (typeof envMin === 'number' && !Number.isNaN(envMin) ? envMin : 0.0);
-
+      : (typeof envMin === 'number' && !Number.isNaN(envMin) ? envMin : 0.5);
     if (!path.isAbsolute(filePath)) {
       const repoRoot = path.resolve(__dirname, '..');
       filePath = path.resolve(repoRoot, filePath);
