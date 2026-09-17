@@ -145,33 +145,6 @@
             },
             "additionalProperties": true
           }
-        },
-        "history": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "question": {
-                "type": "string"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "ok",
-                  "failed",
-                  "pending"
-                ]
-              },
-              "note": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": true
-          }
-        },
-        "evasion_attempts": {
-          "type": "integer",
-          "minimum": 0
         }
       },
       "additionalProperties": true
@@ -180,15 +153,6 @@
       "type": "number",
       "minimum": 0,
       "maximum": 1
-    },
-    "decision": {
-      "type": "string",
-      "enum": [
-        "allow",
-        "review",
-        "block",
-        "pending"
-      ]
     },
     "deception_threshold": {
       "type": "object",
