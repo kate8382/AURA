@@ -30,11 +30,9 @@
     "update:traffic": "node .github/scripts/fetch-traffic-snapshot.js",
     "backfill:traffic": "node .github/scripts/backfill-traffic-history.js",
     "generate:traffic-report": "node .github/scripts/generate-traffic-report.js",
-    "generate:traffic-summary": "node .github/scripts/generate-traffic-summary.js"
-  },
-  "decisions": {
-    "show": "node -r ts-node/register scripts/tools/show-decisions.ts public_cases",
-    "validate": "node -r ts-node/register scripts/tools/show-decisions.ts --validate public_cases"
+    "generate:traffic-summary": "node .github/scripts/generate-traffic-summary.js",
+    "decisions:show": "node -r ts-node/register scripts/tools/show-decisions.ts public_cases",
+    "decisions:validate": "node -r ts-node/register scripts/tools/show-decisions.ts --validate public_cases"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
