@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+// Policy evaluation logic for determining decisions based on configured thresholds and triggers.
 type PolicyConfig = {
   review_threshold: number;
   block_threshold: number;
