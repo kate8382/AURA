@@ -2,7 +2,7 @@
   "case_id": "A-CASE-004",
   "domain": "access",
   "category": "critical_infrastructure_cyber-physical_boundary_(access_violation)",
-  "confidence_raw": 0.5,
+  "confidence_raw": 0,
   "signal_ids": [
     "alibi:academic",
     "recon:targeted",
@@ -86,6 +86,7 @@
     ]
   },
   "confidence": 1,
+  "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -111,5 +112,8 @@
         ]
       }
     ]
-  }
+  },
+  "decision_reasons": [
+    "Awaiting cross-check answers"
+  ]
 }

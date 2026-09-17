@@ -53,3 +53,16 @@ export function loadTriggerConfig(): TriggerConfig {
 }
 
 export default loadTriggerConfig;
+
+export function loadPolicyConfig() {
+  try {
+    const p = path.resolve(__dirname, '..', 'config', 'policy.json');
+    if (fs.existsSync(p)) {
+      const raw = fs.readFileSync(p, 'utf8');
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    // ignore
+  }
+  return null;
+}

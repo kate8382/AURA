@@ -2,7 +2,7 @@
   "case_id": "M-CASE-002",
   "domain": "manipulation",
   "category": "harassment,_extortion,_and_reputation_damage_assets",
-  "confidence_raw": 0.5,
+  "confidence_raw": 0,
   "signal_ids": [
     "camouflage:role",
     "deception:fact",
@@ -86,6 +86,7 @@
     ]
   },
   "confidence": 1,
+  "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -112,5 +113,8 @@
         ]
       }
     ]
-  }
+  },
+  "decision_reasons": [
+    "Awaiting cross-check answers"
+  ]
 }

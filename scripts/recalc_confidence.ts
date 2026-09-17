@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import PolicyEvaluator from './policy/evaluateDecision';
 import { reorderCaseKeys } from './utils';
 import { generateSignalIds } from './generate-trigger-weights';
 
@@ -15,7 +16,7 @@ type Entry = { [k: string]: any };
  * При записи гарантируем порядок ключей: `confidence_raw` перед `scenarios`, `confidence` после `cross_check`.
  */
 export class RecalcConfidence {
-  static PROMPT_BASE = 0.5;
+  static PROMPT_BASE = 0.0;
   static MAP_DEFAULT_BASE = 0.75;
   static DEFAULT_CONFIDENCE = 0.95;
   static mapConfidence(category: string, signalCount: number): number {
@@ -39,7 +40,7 @@ export class RecalcConfidence {
   }
 
   // Note: canonical ordering handled by shared utility `reorderCaseKeys`
-  async recalc(filePath: string, preserveExisting = false, minFloor = 0.5): Promise<{ count: number; changes: Array<[string, any, any]> }> {
+  async recalc(filePath: string, preserveExisting = false, minFloor = 0.0): Promise<{ count: number; changes: Array<[string, any, any]> }> {
     const raw = await fs.readFile(filePath, 'utf8');
     const data = JSON.parse(raw);
     const changes: Array<[string, any, any]> = [];
@@ -69,6 +70,8 @@ export class RecalcConfidence {
       s = s.replace(/\s+/g, ' ');
       return s;
     };
+
+    const evaluator = new PolicyEvaluator();
 
     const updateCase = (e: Entry) => {
       const old = e.confidence;
@@ -134,10 +137,26 @@ export class RecalcConfidence {
 
       let newVal = Math.min(1.0, Math.round((base + boost) * 100) / 100);
       newVal = Math.round(Math.max(minFloor, newVal) * 100) / 100;
-      if (old !== newVal) {
-        if (typeof e.confidence_raw === 'undefined') e.confidence_raw = rawVal;
-        e.confidence = newVal;
-        changes.push([e.case_id || '<no-id>', old, newVal]);
+      const oldDecision = (e as any).decision;
+      if (typeof e.confidence_raw === 'undefined') e.confidence_raw = rawVal;
+      e.confidence = newVal;
+      // evaluate decision based on policy and cross-check history
+      let newDecision = oldDecision;
+      let decisionReasons: string[] = [];
+      try {
+        const decisionRes = evaluator.evaluate(e);
+        if (decisionRes && decisionRes.decision) {
+          newDecision = decisionRes.decision;
+          decisionReasons = decisionRes.reasons || [];
+        }
+      } catch (err) {
+        // swallow policy evaluation errors to avoid blocking recalc
+      }
+      (e as any).decision = newDecision;
+      (e as any).decision_reasons = decisionReasons;
+
+      if (old !== newVal || oldDecision !== newDecision) {
+        changes.push([e.case_id || '<no-id>', { confidence_old: old, decision_old: oldDecision }, { confidence_new: newVal, decision_new: newDecision }]);
         count += 1;
         return true;
       }

@@ -21,6 +21,7 @@ export function reorderCaseKeys(obj: AnyObj): AnyObj {
   add('behavioral_patterns', obj.behavioral_patterns);
   add('cross_check', obj.cross_check);
   add('confidence', obj.confidence);
+  add('decision', obj.decision);
   add('deception_threshold', obj.deception_threshold);
   for (const k of Object.keys(obj)) if (!Object.prototype.hasOwnProperty.call(ordered, k)) ordered[k] = obj[k];
   return ordered;
