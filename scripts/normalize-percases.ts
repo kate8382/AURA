@@ -77,6 +77,8 @@ export class NormalizePerCases {
         if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
         // Ensure confidence default after cross_check if missing
         if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
+        // Ensure decision field exists; default to 'pending' when normalizing
+        if (typeof obj.decision === 'undefined') obj.decision = 'pending';
 
         // Optionally generate signal_ids for the case when requested
         if (process.argv.includes('--apply-signal-ids')) {
@@ -132,6 +134,8 @@ export class NormalizePerCases {
       }
       if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
       if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
+      // Ensure decision field exists; default to 'pending' when normalizing
+      if (typeof obj.decision === 'undefined') obj.decision = 'pending';
 
       // Optionally generate signal_ids for the case when requested
       if (process.argv.includes('--apply-signal-ids')) {

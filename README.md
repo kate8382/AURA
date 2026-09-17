@@ -120,7 +120,7 @@ See the full schema at `schemas/per-case-schema.json` — example minimal valid 
 {
   "case_id": "EX-CASE-001",
   "category": "manipulation/example",
-  "confidence_raw": 0.50,
+  "confidence_raw": 0.00,
   "signal_ids": [
     "camouflage:naive",
     "evasion:control"

@@ -2,7 +2,7 @@
   "case_id": "A-CASE-003",
   "domain": "access",
   "category": "corporate_espionage_&_insider_trading_(market_integrity_violation)",
-  "confidence_raw": 0.5,
+  "confidence_raw": 0,
   "signal_ids": [
     "alibi:academic",
     "target:highvalue",
@@ -84,6 +84,7 @@
     ]
   },
   "confidence": 1,
+  "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -111,5 +112,8 @@
         ]
       }
     ]
-  }
+  },
+  "decision_reasons": [
+    "Awaiting cross-check answers"
+  ]
 }
