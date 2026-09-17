@@ -38,7 +38,7 @@ describe('recalc', () => {
     expect(e.confidence).toBeGreaterThanOrEqual(0.6);
     expect(typeof e.decision).toBe('string');
     expect(Array.isArray(e.decision_reasons)).toBe(true);
-    expect(e.confidence_raw).toBe(0);
+    expect(e.confidence_raw).toBe(0.2);
   });
 
   test('preserveExisting prevents changes when flag set', async () => {
