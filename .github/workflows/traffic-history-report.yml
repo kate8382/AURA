@@ -25,11 +25,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install librsvg for SVG→PNG conversion
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y librsvg2-bin
-
       - name: Ensure backfill script is executable
         run: |
           chmod +x .github/scripts/backfill-traffic-history.js || true
@@ -37,19 +32,6 @@ jobs:
       - name: Backfill per_day into daily entries
         run: |
           node .github/scripts/backfill-traffic-history.js
-
-      - name: Generate CSV, SVG and update README
-        run: |
-          node .github/scripts/generate-traffic-report.js
-
-      - name: Convert SVG to PNG
-        run: |
-          mkdir -p analytics
-          if [ -f analytics/traffic-history.svg ]; then
-            rsvg-convert -o analytics/traffic-history.png analytics/traffic-history.svg
-          else
-            echo "No SVG to convert"
-          fi
 
       - name: Generate traffic summary JSON
         run: |
@@ -60,12 +42,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add analytics/traffic-history.csv analytics/traffic-history.svg analytics/traffic-history.png analytics/traffic-summary.json || true
+          git add analytics/traffic-history.json analytics/traffic-summary.json || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             echo "need_push=false" >> $GITHUB_OUTPUT
           else
-            git commit -m "Update traffic report (auto)" --author "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+            git commit -m "Update traffic JSONs (auto)" --author "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
             echo "need_push=true" >> $GITHUB_OUTPUT
           fi
 
@@ -90,9 +72,9 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.TRAFFIC_TOKEN }}
-          commit-message: "Update traffic report (auto)"
-          title: "Update traffic report (auto)"
-          body: "Automated update of analytics CSV/PNG/SVG and README."
+          commit-message: "Update traffic JSONs (auto)"
+          title: "Update traffic JSONs (auto)"
+          body: "Automated update of analytics JSON files (traffic history and summary)."
           branch: "auto/traffic-report-${{ github.run_id }}"
           base: "main"
           labels: automated,traffic-report
