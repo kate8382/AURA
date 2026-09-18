@@ -156,12 +156,23 @@
   {
     "date": "2026-09-16",
     "views": {
-      "count": 7,
-      "uniques": 6
+      "count": 91,
+      "uniques": 1
     },
     "clones": {
-      "count": 1,
+      "count": 79,
+      "uniques": 25
+    }
+  },
+  {
+    "date": "2026-09-17",
+    "views": {
+      "count": 73,
       "uniques": 1
+    },
+    "clones": {
+      "count": 107,
+      "uniques": 49
     }
   }
 ]
