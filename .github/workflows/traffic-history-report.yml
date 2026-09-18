@@ -33,6 +33,10 @@ jobs:
         run: |
           node .github/scripts/backfill-traffic-history.js
 
+      - name: Generate CSV and SVG (local)
+        run: |
+          node .github/scripts/generate-traffic-report.js
+
       - name: Generate traffic summary JSON
         run: |
           node .github/scripts/generate-traffic-summary.js
@@ -42,12 +46,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add analytics/traffic-history.json analytics/traffic-summary.json || true
+          git add analytics/traffic-history.json analytics/traffic-summary.json analytics/traffic-history.csv || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             echo "need_push=false" >> $GITHUB_OUTPUT
           else
-            git commit -m "Update traffic JSONs (auto)" --author "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+            git commit -m "Update traffic data (auto)" --author "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
             echo "need_push=true" >> $GITHUB_OUTPUT
           fi
 

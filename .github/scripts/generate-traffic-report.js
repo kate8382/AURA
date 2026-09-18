@@ -53,6 +53,7 @@ async function main() {
 
   const svg = `<?xml version="1.0" encoding="utf-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">\n  <rect width="100%" height="100%" fill="#fff"/>\n  <polyline fill="none" stroke="#2b8cbe" stroke-width="2" points="${poly}" />\n  <!-- X labels -->\n  ${points.map((p, i) => `<text x="${sx(p.x)}" y="${height - padding + 14}" font-size="10" text-anchor="middle">${p.date || ''}</text>`).join('\n  ')}\n  <!-- Y max -->\n  <text x="10" y="${padding}" font-size="12">max ${maxY}</text>\n</svg>\n`;
 
+  // Write SVG to workspace but do not treat it as a primary artifact to commit
   await fs.writeFile(svgPath, svg, 'utf8');
   console.log('Wrote', svgPath);
 
