@@ -6,8 +6,8 @@ async function main() {
   const repoRoot = path.resolve(__dirname, '..', '..');
   const jsonPath = path.join(repoRoot, 'analytics', 'traffic-history.json');
   const csvPath = path.join(repoRoot, 'analytics', 'traffic-history.csv');
-  const svgPath = path.join(repoRoot, 'analytics', 'traffic-history.svg');
-  const readmePath = path.join(repoRoot, 'README.md');
+  // const svgPath = path.join(repoRoot, 'analytics', 'traffic-history.svg');
+  // const readmePath = path.join(repoRoot, 'README.md');
 
   let data = [];
   try {
@@ -39,6 +39,9 @@ async function main() {
   await fs.writeFile(csvPath, csv, 'utf8');
   console.log('Wrote', csvPath);
 
+  // SVG generation is currently disabled to avoid committing generated images.
+  // If you need the SVG for local debugging, set an env flag or re-enable this block.
+  /*
   // Generate simple SVG plotting total_views over time
   const points = data.map((s, i) => ({ x: i, y: (s.views && s.views.count) || 0, date: s.date }));
   const width = 800;
@@ -56,6 +59,7 @@ async function main() {
   // Write SVG to workspace but do not treat it as a primary artifact to commit
   await fs.writeFile(svgPath, svg, 'utf8');
   console.log('Wrote', svgPath);
+  */
 
   // Write a small traffic summary JSON for dynamic badges
   const summary = {
