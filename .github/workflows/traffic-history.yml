@@ -15,49 +15,91 @@ jobs:
       - name: Prepare
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Ensure fetch script is executable
+        run: |
+          chmod +x .github/scripts/fetch-traffic-snapshot.js || true
+
       - name: Fetch and append traffic snapshot
+        env:
+          GITHUB_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+          GH_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+        run: |
+          node .github/scripts/fetch-traffic-snapshot.js
+
+      - name: Commit changes
+        id: commit_changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add analytics/traffic-history.json || true
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            echo "need_push=false" >> $GITHUB_OUTPUT
+          else
+            git commit -m "Update traffic-history.json (auto)" --author "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+            echo "need_push=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Attempt push to main
+        id: try_push
+        if: steps.commit_changes.outputs.need_push == 'true'
+        env:
+          REPO: ${{ github.repository }}
+          TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+        run: |
+          set -e
+          git remote set-url origin https://${TOKEN}@github.com/${REPO}.git
+          if git push origin HEAD:main; then
+            echo "pushed=true" >> $GITHUB_OUTPUT
+          else
+            echo "pushed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request for history updates
+        if: steps.commit_changes.outputs.need_push == 'true' && steps.try_push.outputs.pushed != 'true'
+        id: create_pr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.TRAFFIC_TOKEN }}
+          commit-message: "Update traffic-history.json (auto)"
+          title: "Update traffic history (auto)"
+          body: "Automated update of analytics traffic-history.json"
+          branch: "auto/traffic-report-${{ github.run_id }}"
+          base: "main"
+          labels: automated,traffic-report
+
+      - name: Auto-merge PR and delete branch
+        if: steps.commit_changes.outputs.need_push == 'true' && steps.try_push.outputs.pushed != 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TRAFFIC_TOKEN }}
           script: |
+            const head = `auto/traffic-report-${process.env.GITHUB_RUN_ID}`;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const path = 'analytics/traffic-history.json';
-            const today = new Date().toISOString().slice(0,10);
-
-            const views = await github.request('GET /repos/{owner}/{repo}/traffic/views', { owner, repo });
-            const clones = await github.request('GET /repos/{owner}/{repo}/traffic/clones', { owner, repo });
-
-            const snapshot = {
-              date: today,
-              views: { count: views.data?.count ?? 0, uniques: views.data?.uniques ?? 0, per_day: views.data?.views ?? [] },
-              clones: { count: clones.data?.count ?? 0, uniques: clones.data?.uniques ?? 0, per_day: clones.data?.clones ?? [] }
-            };
-
-            let current = [];
-            let sha = null;
-            try {
-              const existing = await github.request('GET /repos/{owner}/{repo}/contents/{path}', { owner, repo, path });
-              sha = existing.data.sha;
-              const content = Buffer.from(existing.data.content, existing.data.encoding).toString();
-              current = JSON.parse(content || '[]');
-            } catch (e) {
-              if (e.status && e.status !== 404) throw e;
+            const { data: prs } = await github.rest.pulls.list({ owner, repo, head: `${owner}:${head}`, state: 'open' });
+            if (!prs || prs.length === 0) {
+              core.info(`No open PR found for ${head}`);
+            } else {
+              const pr = prs[0];
+              try {
+                await github.rest.pulls.merge({ owner, repo, pull_number: pr.number, merge_method: 'squash' });
+                core.info(`Merged PR #${pr.number}`);
+              } catch (err) {
+                core.warning(`Merge failed: ${err}`);
+              }
+              try {
+                await github.rest.git.deleteRef({ owner, repo, ref: `heads/${head}` });
+                core.info(`Deleted branch ${head}`);
+              } catch (err) {
+                core.info(`Delete branch failed: ${err}`);
+              }
             }
-
-            if (!current.find(s => s.date === snapshot.date)) current.push(snapshot);
-
-            const newContent = Buffer.from(JSON.stringify(current, null, 2)).toString('base64');
-
-            const message = (sha ? 'Update traffic-history.json' : 'Create traffic-history.json') + ' (auto)';
-            await github.request('PUT /repos/{owner}/{repo}/contents/{path}', {
-              owner, repo, path,
-              message,
-              content: newContent,
-              sha: sha || undefined,
-              committer: { name: 'github-actions[bot]', email: '41898282+github-actions[bot]@users.noreply.github.com' },
-              author: { name: 'github-actions[bot]', email: '41898282+github-actions[bot]@users.noreply.github.com' }
-            });
 
       - name: Done
         run: echo "Traffic snapshot saved"
