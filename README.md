@@ -10,10 +10,10 @@ Unlike static safety guardrails, **AURA** focuses on the psychological and tacti
 
 <p align="center">
   <img src="https://github.com/kate8382/AURA/actions/workflows/ci.yml/badge.svg" alt="CI status" />
-  <img src="https://img.shields.io/badge/dynamic/json?label=Total%20views&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_views&color=blue" alt="Total views" />
-  <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20views&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_views&color=orange" alt="Unique views" />
-  <img src="https://img.shields.io/badge/dynamic/json?label=Total%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_clones&color=blue" alt="Total clones" />
-  <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_clones&color=orange" alt="Unique clones" />
+  <img src="https://img.shields.io/badge/dynamic/json?label=Total%20views&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_views&color=blue&cacheSeconds=60" alt="Total views" />
+  <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20views&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_views&color=orange&cacheSeconds=60" alt="Unique views" />
+  <img src="https://img.shields.io/badge/dynamic/json?label=Total%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_clones&color=blue&cacheSeconds=60" alt="Total clones" />
+  <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_clones&color=orange&cacheSeconds=60" alt="Unique clones" />
 </p>
 
 _Found this project useful or interesting? Drop a ⭐ — plus to your developer karma and a great sign for us that we're on the right track!_
