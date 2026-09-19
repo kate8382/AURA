@@ -51,6 +51,7 @@ async function main() {
 
   try {
     console.log('Fetching traffic for', `${owner}/${repo}`);
+    console.log('Token provided:', !!token);
     const viewsData = await fetchJson(viewsUrl, token);
     const clonesData = await fetchJson(clonesUrl, token);
 
@@ -92,6 +93,9 @@ async function main() {
     await fs.mkdir(path.dirname(jsonPath), { recursive: true });
     await fs.writeFile(jsonPath, JSON.stringify(sortedHistory, null, 2), 'utf8');
     console.log(`Successfully updated traffic history. Total days recorded: ${sortedHistory.length}`);
+    // Detailed log of recent days fetched for debugging
+    const recent = sortedHistory.slice(-10).map(d => ({ date: d.date, views: d.views || {}, clones: d.clones || {} }));
+    console.log('Recent entries (up to 10):', JSON.stringify(recent, null, 2));
   } catch (err) {
     if (err && err.status && (err.status === 401 || err.status === 403)) {
       console.error('GitHub API returned', err.status, '— unauthenticated or insufficient permissions.');
