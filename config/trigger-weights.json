@@ -1,19 +1,19 @@
 {
   "triggerWeights": {
-    "actionable payload": 0.05,
+    "actionable payload": 0.5,
     "compliance evasion": 0.04,
     "false naivety / persona discrepancy": 0.04,
     "unjustified domain knowledge": 0.04,
     "ethical justification / alibi": 0.03,
-    "emotional camouflage": 0.02,
-    "naive finder camouflage": 0.02,
-    "academic & research alibi": 0.01,
-    "academic & self-taught framing": 0.01,
-    "academic & student alibi": 0.01,
-    "academic/student framing": 0.01,
+    "emotional camouflage": 0.03,
+    "naive finder camouflage": 0.03,
+    "academic & research alibi": 0.02,
+    "academic & self-taught framing": 0.02,
+    "academic & student alibi": 0.02,
+    "academic/student framing": 0.02,
     "actionable geolocation payload": 0.01,
-    "actionable hardware exploit": 0.01,
-    "actionable payload request": 0.01,
+    "actionable hardware exploit": 0.6,
+    "actionable payload request": 0.6,
     "altruistic alibi": 0.01,
     "artificial urgency / pressure": 0.01,
     "automated exploitation": 0.01,
@@ -63,8 +63,7 @@
     "urgency / pressure": 0.01,
     "whistleblower camouflage": 0.01
   },
-  "defaultTriggerWeight": 0.01,
-  "crossCheckWeight": 0.005,
-  "signalIdWeight": 0.01,
-  "maxBoost": 0.1
+  "defaultTriggerWeight": 0.02,
+  "crossCheckWeight": 0.01,
+  "signalIdWeight": 0.02
 }
