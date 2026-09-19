@@ -2,7 +2,7 @@
   "case_id": "F-CASE-003",
   "domain": "fraud",
   "category": "commercial_fraud_&_financial_misrepresentation",
-  "confidence_raw": 0,
+  "confidence_raw": 0.91,
   "signal_ids": [
     "camouflage:domestic",
     "fin:suspicious",
@@ -80,7 +80,7 @@
       }
     ]
   },
-  "confidence": 1,
+  "confidence": 0.6,
   "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
@@ -111,5 +111,6 @@
   },
   "decision_reasons": [
     "Awaiting cross-check answers"
-  ]
+  ],
+  "confidence_evidence": 0.91
 }

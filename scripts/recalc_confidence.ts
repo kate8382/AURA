@@ -163,8 +163,13 @@ export class RecalcConfidence {
       let newVal = Math.round(normalized * 100) / 100;
       if (newVal < minFloor) newVal = minFloor;
       const oldDecision = (e as any).decision;
-      // Always set confidence_raw to the computed evidence-derived raw value (honest aggregation)
-      e.confidence_raw = computedRawRounded;
+      // Preserve `confidence_raw` as the user's/initial presumption (auditable):
+      // - if the case already had a `confidence_raw`, keep it
+      // - otherwise use PROMPT_BASE (0.0) to reflect presumption of innocence
+      const preservedRaw = (typeof e.confidence_raw === 'number') ? e.confidence_raw : RecalcConfidence.PROMPT_BASE;
+      e.confidence_raw = preservedRaw;
+      // Store the actual summed evidence separately for audit: `confidence_evidence`
+      (e as any).confidence_evidence = computedRawRounded;
       e.confidence = newVal;
       // evaluate decision based on policy and cross-check history
       let newDecision = oldDecision;
