@@ -114,19 +114,25 @@ export class RecalcConfidence {
       const base = RecalcConfidence.getBaseForCategory(e.category || '');
 
       // Weighted mapping for triggers (loaded from config/trigger-weights.json or ENV)
-      const TRIGGER_WEIGHTS = cfg.triggerWeights;
+      const TRIGGER_WEIGHTS = cfg.triggerWeights || {};
 
-      const DEFAULT_TRIGGER_WEIGHT = cfg.defaultTriggerWeight;
-      const CROSS_CHECK_WEIGHT = cfg.crossCheckWeight; // per question
-      const SIGNAL_ID_WEIGHT = cfg.signalIdWeight; // per signal_id if present
+      const DEFAULT_TRIGGER_WEIGHT = (typeof cfg.defaultTriggerWeight === 'number') ? cfg.defaultTriggerWeight : 0.01;
+      const CROSS_CHECK_WEIGHT = (typeof cfg.crossCheckWeight === 'number') ? cfg.crossCheckWeight : 0.005; // per question
+      const SIGNAL_ID_WEIGHT = (typeof cfg.signalIdWeight === 'number') ? cfg.signalIdWeight : 0.01; // per signal_id if present
+
+      // Normalize trigger weight keys to lowercase for robust matching and coerce values to numbers
+      const normalizedWeights: Record<string, number> = {};
+      for (const k of Object.keys(TRIGGER_WEIGHTS)) {
+        const rawVal = TRIGGER_WEIGHTS[k];
+        const num = Number(rawVal);
+        if (!Number.isNaN(num)) normalizedWeights[String(k).trim().toLowerCase()] = num;
+      }
 
       let totalWeight = 0;
       for (const trig of Array.from(uniqueTriggers)) {
-        let found = false;
-        for (const key of Object.keys(TRIGGER_WEIGHTS)) {
-          if (trig === key) { totalWeight += TRIGGER_WEIGHTS[key]; found = true; break; }
-        }
-        if (!found) totalWeight += DEFAULT_TRIGGER_WEIGHT;
+        const w = normalizedWeights[trig];
+        if (typeof w === 'number') totalWeight += w;
+        else totalWeight += DEFAULT_TRIGGER_WEIGHT;
       }
       // add contributions from cross_check and unmapped signal_ids (fallback)
       totalWeight += crossCheckQuestions * CROSS_CHECK_WEIGHT;
