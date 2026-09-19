@@ -6,9 +6,7 @@ Unlike static safety guardrails, **AURA** focuses on the psychological and tacti
 
 <p align="center">
   <img src="assets/banner_1.png" alt="AURA Banner" width="100%"/>
-</p>  
-
-_Found this project useful or interesting? Drop a ⭐ — plus to your developer karma and a great sign for us that we're on the right track!_
+</p>
 
 <p align="center">
   <img src="https://github.com/kate8382/AURA/actions/workflows/ci.yml/badge.svg" alt="CI status" />
@@ -17,6 +15,8 @@ _Found this project useful or interesting? Drop a ⭐ — plus to your developer
   <img src="https://img.shields.io/badge/dynamic/json?label=Total%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_clones&color=blue" alt="Total clones" />
   <img src="https://img.shields.io/badge/dynamic/json?label=Unique%20clones&url=https://raw.githubusercontent.com/kate8382/AURA/main/analytics/traffic-summary.json&query=$.total_unique_clones&color=orange" alt="Unique clones" />
 </p>
+
+_Found this project useful or interesting? Drop a ⭐ — plus to your developer karma and a great sign for us that we're on the right track!_
 
 ## Key Features
 
