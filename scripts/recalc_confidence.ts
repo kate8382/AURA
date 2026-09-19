@@ -153,11 +153,18 @@ export class RecalcConfidence {
       // Remove artificial global cap so raw reflects true summed evidence
       const computedRaw = totalWeight;
 
-      // Round raw confidence to 2 decimals and apply minFloor lower bound
-      let newVal = Math.round(Math.max(minFloor, computedRaw) * 100) / 100;
+      // Round raw confidence to 2 decimals (honest aggregation)
+      const computedRawRounded = Math.round(computedRaw * 100) / 100;
+
+      // Normalize raw to [0,1] using diminishing-returns function:
+      // normalized = 1 - exp(-alpha * raw)  (alpha default 1.0)
+      const alpha = (typeof cfg.normAlpha === 'number') ? cfg.normAlpha : 1.0;
+      const normalized = 1 - Math.exp(-alpha * computedRaw);
+      let newVal = Math.round(normalized * 100) / 100;
+      if (newVal < minFloor) newVal = minFloor;
       const oldDecision = (e as any).decision;
       // Always set confidence_raw to the computed evidence-derived raw value (honest aggregation)
-      e.confidence_raw = Math.round(computedRaw * 100) / 100;
+      e.confidence_raw = computedRawRounded;
       e.confidence = newVal;
       // evaluate decision based on policy and cross-check history
       let newDecision = oldDecision;
