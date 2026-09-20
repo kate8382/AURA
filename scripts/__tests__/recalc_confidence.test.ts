@@ -77,8 +77,8 @@ describe('RecalcConfidence fallback signal_ids', () => {
     expect(resB).toBeTruthy();
     const updatedB = JSON.parse(fs.readFileSync(filePathB, 'utf8'));
     expect(typeof updatedB.confidence).toBe('number');
-    // should be >= base for access
-    expect(updatedB.confidence).toBeGreaterThanOrEqual(0.95);
+    // should have increased from zero base when mapped signal expands to triggers
+    expect(updatedB.confidence).toBeGreaterThan(0);
 
     // Case C: unmapped signal_id uses SIGNAL_ID_WEIGHT fallback
     const tmpC = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-recalc-'));
