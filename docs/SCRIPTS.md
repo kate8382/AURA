@@ -26,13 +26,31 @@ Notes:
 2) Recalculator: `scripts/recalc_confidence.ts`
 
 - Purpose: recompute `confidence` fields for cases using `config/trigger-weights.json` and
-  other heuristic weights.
+  other heuristic weights. The recalculator is written to be auditable: it records the raw
+  evidence sum in `confidence_raw` (an audit value) and writes a normalized `confidence` in
+  the [0..1] range used by downstream policy and decision logic.
 - Behavior:
   - Loads `config/trigger-weights.json` and `config/signal-mapping.json`.
   - Expands any mapped `signal_ids` into normalized triggers for weight calculation.
   - Unmapped `signal_ids` count toward `signalIdWeight` as a fallback (avoids double-counting).
-  - Computes `boost = min(MAX_BOOST, totalTriggerWeight + crossCheckWeight*questions + signalIdWeight*unmappedSignalCount)`.
-  - Additionally, `recalc_confidence.ts` now evaluates an operational `decision` for each case and writes `decision` and `decision_reasons` based on a configurable policy (`config/policy.json`). The recalculator preserves an explicit `confidence_raw` when present; otherwise it initializes `confidence_raw` to `0.0` (presumption of innocence).
+  - Computes a raw evidence sum (`confidence_raw`) by summing per-case trigger weights, the
+    cross-check contribution (`crossCheckWeight` * number of cross-check questions), and any
+    unmapped `signal_id` fallback contribution. Optionally a category multiplier is applied.
+  - The normalized `confidence` is derived from `confidence_raw` using a diminishing-returns
+    transform to make the score probability-like:
+
+  $$
+  	ext{confidence} = 1 - e^{-\alpha \cdot \text{confidence\_raw}}
+  $$
+
+  where `\alpha` (named `normAlpha` in `config/trigger-weights.json` when present) controls
+  how quickly raw evidence saturates toward 1.0. If `normAlpha` is not provided, a sensible
+  default of `1.0` is used.
+  - The recalculator also evaluates an operational `decision` for each case and writes
+    `decision` and `decision_reasons` based on a configurable policy (`config/policy.json`).
+    If a case already contains `confidence_raw` the recalculator preserves it unless the
+    `--force` behavior is requested — this keeps `confidence_raw` usable as an auditable
+    provenance field.
 
 Usage examples:
 

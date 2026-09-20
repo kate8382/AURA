@@ -116,13 +116,23 @@ Automating `npm run gen:triggers` is optional but recommended if `public_cases/`
 
 ## Minimal example `public_cases` entry and schema
 
-See the full schema at `schemas/per-case-schema.json` — example minimal valid case (canonical ordering: `confidence_raw` before `scenarios`, `confidence` after `cross_check`):
+See the full schema at `schemas/per-case-schema.json`. Important note about `confidence` fields:
+
+- `confidence_raw` is an auditable raw evidence sum (may be absent or greater than 1.0) and is
+  typically persisted at the end of the case object for reviewability.
+- `confidence` is the normalized score in the [0..1] range used by policy and decision logic. It
+  is computed from `confidence_raw` using a diminishing-returns transform:
+
+$$
+	ext{confidence} = 1 - e^{-\alpha \cdot \text{confidence\_raw}}
+$$
+
+Example minimal valid case (note `confidence_raw` placed at the end for auditability):
 
 ```json
 {
   "case_id": "EX-CASE-001",
   "category": "manipulation/example",
-  "confidence_raw": 0.00,  // Presumption of innocence: default raw score is 0.00
   "signal_ids": [
     "camouflage:naive",
     "evasion:control"
@@ -133,8 +143,9 @@ See the full schema at `schemas/per-case-schema.json` — example minimal valid 
   "behavioral_patterns": { "short_summary": "Urgency", "full_text": ["Urgency / Pressure"] },
   "cross_check": { "short_summary": "Ask for provenance", "questions": [] },
   "confidence": 0.95,
-  "decision": "pending"  // Operational decision computed by policy (allow/review/block/pending)
-  "deception_threshold": { "short_summary": "Low", "full_text": [] }
+  "decision": "pending",
+  "deception_threshold": { "short_summary": "Low", "full_text": [] },
+  "confidence_raw": 3.42
 }
 ```
 
