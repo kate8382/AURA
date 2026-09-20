@@ -68,7 +68,7 @@
     "urgency / pressure": 0.01,
     "whistleblower camouflage": 0.01
   },
-  "normAlpha": 0.25,
+  "normAlpha": 0.3,
   "defaultTriggerWeight": 0.02,
   "crossCheckWeight": 0.01,
   "signalIdWeight": 0.02

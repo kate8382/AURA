@@ -82,7 +82,7 @@
       }
     ]
   },
-  "confidence": 0.96,
+  "confidence": 0.76,
   "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
@@ -111,7 +111,7 @@
       }
     ]
   },
-  "confidence_raw": 3.13,
+  "confidence_raw": 4.73,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ]
