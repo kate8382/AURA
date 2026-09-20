@@ -11,7 +11,6 @@ export class NewCaseTemplate {
     const tpl: any = {
       case_id: id,
       category: "",
-      confidence_raw: PROMPT_BASE,
       signal_ids: [],
       scenarios: [
         { name: "", text: "", triggers: [] },
@@ -38,7 +37,10 @@ export class NewCaseTemplate {
           { name: "3. Block Trigger (100% Risk)", full_text: ["A: ", "B: ", "Action: "] }
         ]
       }
-    };
+    } as any;
+    // place audit-only `confidence_raw` at the end of the object so it does not interfere with main schema ordering
+    tpl.confidence_raw = PROMPT_BASE;
+    
     return tpl;
   }
 

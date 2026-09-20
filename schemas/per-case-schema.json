@@ -7,7 +7,6 @@
     "case_id",
     "domain",
     "category",
-    "confidence_raw",
     "signal_ids",
     "scenarios",
     "suggested_action",
@@ -17,7 +16,8 @@
     "confidence",
     "decision",
     "decision_reasons",
-    "deception_threshold"
+    "deception_threshold",
+    "confidence_raw"
   ],
   "properties": {
     "case_id": {
@@ -29,11 +29,6 @@
     },
     "category": {
       "type": "string"
-    },
-    "confidence_raw": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 1
     },
     "signal_ids": {
       "type": "array",
@@ -199,6 +194,10 @@
     },
     "anonymized": {
       "type": "boolean"
+    },
+    "confidence_raw": {
+      "type": "number",
+      "minimum": 0
     }
   }
 }
