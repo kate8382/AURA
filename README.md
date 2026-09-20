@@ -123,9 +123,9 @@ See the full schema at `schemas/per-case-schema.json`. Important note about `con
 - `confidence` is the normalized score in the [0..1] range used by policy and decision logic. It
   is computed from `confidence_raw` using a diminishing-returns transform:
 
-$$
-	ext{confidence} = 1 - e^{-\alpha \cdot \text{confidence\_raw}}
-$$
+**$$
+\text{confidence} = 1 - e^{-\alpha \cdot \text{confidenceRaw}}
+$$**
 
 Example minimal valid case (note `confidence_raw` placed at the end for auditability):
 
