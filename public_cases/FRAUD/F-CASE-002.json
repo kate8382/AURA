@@ -2,7 +2,6 @@
   "case_id": "F-CASE-002",
   "domain": "fraud",
   "category": "social_engineering_&_unauthorized_access",
-  "confidence_raw": 4.75,
   "signal_ids": [
     "camouflage:domestic",
     "evasion:control",
@@ -119,8 +118,8 @@
       }
     ]
   },
+  "confidence_raw": 4.75,
   "decision_reasons": [
     "Awaiting cross-check answers"
-  ],
-  "confidence_evidence": 4.75
+  ]
 }

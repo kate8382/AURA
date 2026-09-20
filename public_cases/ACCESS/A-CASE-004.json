@@ -2,7 +2,6 @@
   "case_id": "A-CASE-004",
   "domain": "access",
   "category": "critical_infrastructure_cyber-physical_boundary_(access_violation)",
-  "confidence_raw": 4.86,
   "signal_ids": [
     "alibi:academic",
     "recon:targeted",
@@ -113,8 +112,8 @@
       }
     ]
   },
+  "confidence_raw": 4.86,
   "decision_reasons": [
     "Awaiting cross-check answers"
-  ],
-  "confidence_evidence": 4.86
+  ]
 }

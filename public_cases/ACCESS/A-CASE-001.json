@@ -2,7 +2,6 @@
   "case_id": "A-CASE-001",
   "domain": "access",
   "category": "unauthorized_access_&_vulnerability_exploitation_(infrastructure_damage)",
-  "confidence_raw": 4.62,
   "signal_ids": [
     "camouflage:naive",
     "target:highvalue",
@@ -103,8 +102,8 @@
       }
     ]
   },
+  "confidence_raw": 4.62,
   "decision_reasons": [
     "Awaiting cross-check answers"
-  ],
-  "confidence_evidence": 4.62
+  ]
 }

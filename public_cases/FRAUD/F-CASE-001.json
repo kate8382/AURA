@@ -2,7 +2,6 @@
   "case_id": "F-CASE-001",
   "domain": "fraud",
   "category": "brand_impersonation",
-  "confidence_raw": 3.13,
   "signal_ids": [
     "evasion:control",
     "deception:fact",
@@ -112,8 +111,8 @@
       }
     ]
   },
+  "confidence_raw": 3.13,
   "decision_reasons": [
     "Awaiting cross-check answers"
-  ],
-  "confidence_evidence": 3.13
+  ]
 }

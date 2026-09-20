@@ -109,6 +109,9 @@ export class NormalizePerCases {
 
         const ordered = reorderCaseKeys(obj);
         const merged = { ...metadata, ...ordered };
+        // Ensure `confidence_raw` appears at the end of the serialized object for auditability
+        if (typeof ordered.confidence_raw !== 'undefined') merged.confidence_raw = ordered.confidence_raw;
+        else if (typeof obj.confidence_raw !== 'undefined') merged.confidence_raw = obj.confidence_raw;
         const newName = `${base}-${i+1}.json`;
         const outPath = path.join(dir, newName);
         if (this.dry) console.log("[dry] WOULD WRITE", outPath);
@@ -165,6 +168,9 @@ export class NormalizePerCases {
       }
       const ordered = reorderCaseKeys(obj);
       const merged = { ...metadata, ...ordered };
+      // Ensure `confidence_raw` appears at the end of the serialized object for auditability
+      if (typeof ordered.confidence_raw !== 'undefined') merged.confidence_raw = ordered.confidence_raw;
+      else if (typeof obj.confidence_raw !== 'undefined') merged.confidence_raw = obj.confidence_raw;
       if (this.dry) console.log("[dry] WOULD NORMALIZE", filePath);
       else {
         await fs.writeFile(filePath, JSON.stringify(merged, null, 2), 'utf8');

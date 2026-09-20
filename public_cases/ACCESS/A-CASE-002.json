@@ -2,7 +2,6 @@
   "case_id": "A-CASE-002",
   "domain": "access",
   "category": "unauthorized_osint_tracking_&_cyber-stalking",
-  "confidence_raw": 4.89,
   "signal_ids": [
     "camouflage:role",
     "camouflage:domestic",
@@ -113,8 +112,8 @@
       }
     ]
   },
+  "confidence_raw": 4.89,
   "decision_reasons": [
     "Awaiting cross-check answers"
-  ],
-  "confidence_evidence": 4.89
+  ]
 }

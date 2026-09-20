@@ -2,7 +2,6 @@
   "case_id": "M-CASE-001",
   "domain": "manipulation",
   "category": "harassment_&_open-source_intelligence_(osint)_misuse",
-  "confidence_raw": 4.19,
   "signal_ids": [
     "camouflage:domestic",
     "recon:targeted",
@@ -112,8 +111,8 @@
       }
     ]
   },
+  "confidence_raw": 4.19,
   "decision_reasons": [
     "Awaiting cross-check answers"
-  ],
-  "confidence_evidence": 4.19
+  ]
 }
