@@ -2,7 +2,6 @@
   "case_id": "A-CASE-001",
   "domain": "access",
   "category": "unauthorized_access_&_vulnerability_exploitation_(infrastructure_damage)",
-  "confidence_raw": 0,
   "signal_ids": [
     "camouflage:naive",
     "target:highvalue",
@@ -72,7 +71,7 @@
       }
     ]
   },
-  "confidence": 1,
+  "confidence": 0.88,
   "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
@@ -103,6 +102,7 @@
       }
     ]
   },
+  "confidence_raw": 7.02,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ]

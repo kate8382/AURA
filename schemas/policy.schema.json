@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AURA Case Policy Schema",
+  "description": "Schema for case objects enriched by recalc_confidence.ts and PolicyEvaluator. Validates decision fields, confidence and supporting arrays.",
+  "type": "object",
+  "required": [
+    "case_id"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "confidence_raw": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "pending",
+        "review",
+        "block"
+      ]
+    },
+    "decision_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "signal_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "triggers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "cross_check": {
+      "type": "object",
+      "properties": {
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

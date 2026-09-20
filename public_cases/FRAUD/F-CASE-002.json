@@ -2,7 +2,6 @@
   "case_id": "F-CASE-002",
   "domain": "fraud",
   "category": "social_engineering_&_unauthorized_access",
-  "confidence_raw": 0,
   "signal_ids": [
     "camouflage:domestic",
     "evasion:control",
@@ -89,7 +88,7 @@
       }
     ]
   },
-  "confidence": 1,
+  "confidence": 0.88,
   "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
@@ -119,6 +118,7 @@
       }
     ]
   },
+  "confidence_raw": 7.15,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ]

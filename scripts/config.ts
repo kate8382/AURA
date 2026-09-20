@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 export interface TriggerConfig {
+  normAlpha: any;
   triggerWeights: { [k: string]: number };
   defaultTriggerWeight: number;
   crossCheckWeight: number;
@@ -14,7 +15,8 @@ const FALLBACK_CONFIG: TriggerConfig = {
   defaultTriggerWeight: 0.01,
   crossCheckWeight: 0.005,
   signalIdWeight: 0.01,
-  maxBoost: 0.10
+  maxBoost: 0.10,
+  normAlpha: undefined
 };
 
 export function loadTriggerConfig(): TriggerConfig {
@@ -30,6 +32,7 @@ export function loadTriggerConfig(): TriggerConfig {
         if (typeof parsed.crossCheckWeight === 'number') cfg.crossCheckWeight = parsed.crossCheckWeight;
         if (typeof parsed.signalIdWeight === 'number') cfg.signalIdWeight = parsed.signalIdWeight;
         if (typeof parsed.maxBoost === 'number') cfg.maxBoost = parsed.maxBoost;
+        if (typeof parsed.normAlpha === 'number') cfg.normAlpha = parsed.normAlpha;
       }
     }
   } catch (err) {

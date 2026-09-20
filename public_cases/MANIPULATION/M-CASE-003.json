@@ -2,7 +2,6 @@
   "case_id": "M-CASE-003",
   "domain": "manipulation",
   "category": "_(social_engineering_&_platform_integrity_evasion)",
-  "confidence_raw": 0,
   "signal_ids": [
     "alibi:academic",
     "deception:fact",
@@ -83,7 +82,7 @@
       }
     ]
   },
-  "confidence": 0.9,
+  "confidence": 0.82,
   "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
@@ -113,6 +112,7 @@
       }
     ]
   },
+  "confidence_raw": 5.75,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ]

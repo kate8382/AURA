@@ -13,7 +13,6 @@ export function reorderCaseKeys(obj: AnyObj): AnyObj {
   add('case_id', obj.case_id);
   add('domain', obj.domain);
   add('category', obj.category);
-  add('confidence_raw', obj.confidence_raw);
   add('signal_ids', obj.signal_ids);
   add('scenarios', obj.scenarios);
   add('suggested_action', obj.suggested_action);
@@ -23,6 +22,7 @@ export function reorderCaseKeys(obj: AnyObj): AnyObj {
   add('confidence', obj.confidence);
   add('decision', obj.decision);
   add('deception_threshold', obj.deception_threshold);
+  add('confidence_raw', obj.confidence_raw);
   for (const k of Object.keys(obj)) if (!Object.prototype.hasOwnProperty.call(ordered, k)) ordered[k] = obj[k];
   return ordered;
 }

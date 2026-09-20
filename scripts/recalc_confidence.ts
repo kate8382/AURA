@@ -29,14 +29,22 @@ export class RecalcConfidence {
   }
 
   static getBaseForCategory(category: string): number {
+    // Preserve method for backward-compatibility but base risk is always 0.0
+    // per 'presumption of innocence' design: categories do NOT give base score.
+    return RecalcConfidence.PROMPT_BASE;
+  }
+
+  static getCategoryMultiplier(category: string): number {
     const cat = (category || '').toLowerCase();
-    let base = RecalcConfidence.MAP_DEFAULT_BASE;
-    if (cat.includes('extort') || cat.includes('harass')) base = 0.9;
-    else if (cat.includes('fraud') || cat.includes('financial')) base = 0.9;
-    else if (cat.includes('access') || cat.includes('unauthorized') || cat.includes('infrastructure')) base = 0.95;
-    else if (cat.includes('manipulation') || cat.includes('platform')) base = 0.8;
-    else if (cat.includes('espionage') || cat.includes('insider')) base = 0.95;
-    return base;
+    // Categories influence how strongly triggers count (weight multiplier),
+    // but do not provide an initial base score.
+    if (!cat || !cat.trim()) return 1.0;
+    if (cat.includes('access') || cat.includes('unauthorized') || cat.includes('infrastructure')) return 1.5;
+    if (cat.includes('espionage') || cat.includes('insider')) return 1.5;
+    if (cat.includes('extort') || cat.includes('harass')) return 1.3;
+    if (cat.includes('fraud') || cat.includes('financial')) return 1.3;
+    if (cat.includes('manipulation') || cat.includes('platform')) return 1.2;
+    return 1.0;
   }
 
   // Note: canonical ordering handled by shared utility `reorderCaseKeys`
@@ -110,35 +118,53 @@ export class RecalcConfidence {
 
       const rawVal = (typeof e.confidence_raw === 'number') ? e.confidence_raw : (typeof old === 'number') ? old : RecalcConfidence.PROMPT_BASE;
 
-      // Get base by category
+      // Category no longer gives base; it only modifies trigger multipliers
       const base = RecalcConfidence.getBaseForCategory(e.category || '');
 
       // Weighted mapping for triggers (loaded from config/trigger-weights.json or ENV)
-      const TRIGGER_WEIGHTS = cfg.triggerWeights;
+      const TRIGGER_WEIGHTS = cfg.triggerWeights || {};
 
-      const DEFAULT_TRIGGER_WEIGHT = cfg.defaultTriggerWeight;
-      const CROSS_CHECK_WEIGHT = cfg.crossCheckWeight; // per question
-      const SIGNAL_ID_WEIGHT = cfg.signalIdWeight; // per signal_id if present
+      const DEFAULT_TRIGGER_WEIGHT = (typeof cfg.defaultTriggerWeight === 'number') ? cfg.defaultTriggerWeight : 0.01;
+      const CROSS_CHECK_WEIGHT = (typeof cfg.crossCheckWeight === 'number') ? cfg.crossCheckWeight : 0.005; // per question
+      const SIGNAL_ID_WEIGHT = (typeof cfg.signalIdWeight === 'number') ? cfg.signalIdWeight : 0.01; // per signal_id if present
+
+      // Normalize trigger weight keys to lowercase for robust matching and coerce values to numbers
+      const normalizedWeights: Record<string, number> = {};
+      for (const k of Object.keys(TRIGGER_WEIGHTS)) {
+        const rawVal = TRIGGER_WEIGHTS[k];
+        const num = Number(rawVal);
+        if (!Number.isNaN(num)) normalizedWeights[String(k).trim().toLowerCase()] = num;
+      }
 
       let totalWeight = 0;
       for (const trig of Array.from(uniqueTriggers)) {
-        let found = false;
-        for (const key of Object.keys(TRIGGER_WEIGHTS)) {
-          if (trig === key) { totalWeight += TRIGGER_WEIGHTS[key]; found = true; break; }
-        }
-        if (!found) totalWeight += DEFAULT_TRIGGER_WEIGHT;
+        const w = normalizedWeights[trig];
+        if (typeof w === 'number') totalWeight += w;
+        else totalWeight += DEFAULT_TRIGGER_WEIGHT;
       }
       // add contributions from cross_check and unmapped signal_ids (fallback)
       totalWeight += crossCheckQuestions * CROSS_CHECK_WEIGHT;
       if (unmappedSignalCount > 0) totalWeight += unmappedSignalCount * SIGNAL_ID_WEIGHT;
+      // Apply category multiplier only to trigger-derived weight
+      const catMultiplier = RecalcConfidence.getCategoryMultiplier(e.category || '');
+      totalWeight = totalWeight * catMultiplier;
 
-      const MAX_BOOST = cfg.maxBoost;
-      const boost = Math.min(MAX_BOOST, totalWeight);
+      // Determine final raw confidence as the honest sum of real signals (no category base)
+      // Remove artificial global cap so raw reflects true summed evidence
+      const computedRaw = totalWeight;
 
-      let newVal = Math.min(1.0, Math.round((base + boost) * 100) / 100);
-      newVal = Math.round(Math.max(minFloor, newVal) * 100) / 100;
+      // Round raw confidence to 2 decimals (honest aggregation)
+      const computedRawRounded = Math.round(computedRaw * 100) / 100;
+
+      // Normalize raw to [0,1] using diminishing-returns function:
+      // normalized = 1 - exp(-alpha * raw)  (alpha default 1.0)
+      const alpha = (typeof cfg.normAlpha === 'number') ? cfg.normAlpha : 1.0;
+      const normalized = 1 - Math.exp(-alpha * computedRaw);
+      let newVal = Math.round(normalized * 100) / 100;
+      if (newVal < minFloor) newVal = minFloor;
       const oldDecision = (e as any).decision;
-      if (typeof e.confidence_raw === 'undefined') e.confidence_raw = rawVal;
+      // Store computed raw evidence as the auditable `confidence_raw` (honest sum)
+      e.confidence_raw = computedRawRounded;
       e.confidence = newVal;
       // evaluate decision based on policy and cross-check history
       let newDecision = oldDecision;
@@ -229,7 +255,7 @@ export class RecalcConfidence {
           const idx = process.argv.indexOf('--min');
           return idx >= 0 ? process.argv[idx + 1] : undefined;
         })())
-      : (typeof envMin === 'number' && !Number.isNaN(envMin) ? envMin : 0.5);
+      : (typeof envMin === 'number' && !Number.isNaN(envMin) ? envMin : 0.0);
     if (!path.isAbsolute(filePath)) {
       const repoRoot = path.resolve(__dirname, '..');
       filePath = path.resolve(repoRoot, filePath);

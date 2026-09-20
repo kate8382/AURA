@@ -1,0 +1,38 @@
+flowchart LR
+  %% Compact A4-friendly AURA pipeline (current)
+
+  Start[[Start]] --> Load["Load configs & mappings\n(config/trigger-weights.json, config/signal-mapping.json)"]
+  Load --> CollectCases["Input: public_cases/ (or single file)"]
+  CollectCases --> Extract["Extract: category, scenarios, signal_ids, cross_check"]
+
+  subgraph G[Trigger expansion]
+    Extract --> GenSignals["generate-signal-ids / expand mapped signal_ids"]
+    GenSignals --> NormalizeTriggers["Normalize trigger text (lowercase, dedupe)"]
+    NormalizeTriggers --> LookupWeights["Lookup per-trigger weight (trigger-weights.json)\nuse defaultTriggerWeight fallback"]
+n
+    LookupWeights --> SumWeights["Sum unique trigger weights"]
+  end
+
+  subgraph R[Raw evidence computation]
+    SumWeights --> AddCross["+ cross_check_questions * CROSS_CHECK_WEIGHT"]
+    AddCross --> AddUnmapped["+ unmappedSignalCount * SIGNAL_ID_WEIGHT"]
+    AddUnmapped --> ApplyCategory["* categoryMultiplier (no category base)"]
+    ApplyCategory --> ComputeRaw["computedRaw = summed evidence"]
+    ComputeRaw --> RoundRaw["confidence_raw = round(computedRaw,2) (audit)\n(remove legacy confidence_evidence if present)"]
+  end
+
+  subgraph N[Normalization & decision]
+    RoundRaw --> Normalize["confidence = 1 - exp(-normAlpha * confidence_raw)"]
+    Normalize --> PolicyEval["PolicyEvaluator.evaluate(case) -> decision + decision_reasons"]
+    PolicyEval --> Reorder["reorderCaseKeys(case) → place confidence_raw near end"]
+  end
+
+  Reorder --> Write["Write updated JSON file(s)"]
+  Write --> Validate["Run validate-percases (AJV schema)"]
+  Validate --> Tests["npm test (unit tests)" ]
+  Tests --> Commit["Commit & push changes (branch/PR)"]
+
+  %% Legend / notes (compact)
+  classDef legend fill:#f8f9fa,stroke:#ddd
+  Legend["Legend:\n- `confidence_raw`: auditable raw evidence sum (may be >1)\n- `confidence`: normalized in [0..1] via 1 - exp(-alpha*raw)\n- `normAlpha` (config) controls saturation speed\n- legacy `confidence_evidence` removed"]:::legend
+  Commit --> Legend

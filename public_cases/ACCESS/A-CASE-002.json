@@ -2,7 +2,6 @@
   "case_id": "A-CASE-002",
   "domain": "access",
   "category": "unauthorized_osint_tracking_&_cyber-stalking",
-  "confidence_raw": 0,
   "signal_ids": [
     "camouflage:role",
     "camouflage:domestic",
@@ -84,7 +83,7 @@
       }
     ]
   },
-  "confidence": 1,
+  "confidence": 0.9,
   "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
@@ -113,6 +112,7 @@
       }
     ]
   },
+  "confidence_raw": 7.54,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ]

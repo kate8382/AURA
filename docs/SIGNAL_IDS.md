@@ -11,6 +11,13 @@ How the new mapping is used
 - The canonical mapping lives in `config/signal-mapping.json`.
 - At runtime `scripts/recalc_confidence.ts` and `scripts/generate-trigger-weights.ts` load this mapping and expand mapped signal keys into normalized triggers when computing weights and boosts. If a case contains explicit `signal_ids`, those are respected; unmapped triggers get a deterministic fallback ID.
 
+Note about `confidence_raw` and `confidence`
+- The recalculation pipeline now writes two separate fields for traceability:
+  - `confidence_raw`: an auditable raw sum of evidence (the sum of trigger weights, cross-check contributions, and unmapped `signal_id` fallbacks). This value is intended for debugging and review and may exceed 1.0.
+  - `confidence`: a normalized probability-like score in the [0..1] range derived from `confidence_raw` via a diminishing-returns formula (see `docs/SCRIPTS.md`).
+
+When editing `config/signal-mapping.json` or performing bulk migrations, prefer the runtime expansion approach (letting the generator/recalculator apply mappings) rather than manually editing `confidence_raw` values in case files.
+
 Generating trigger lists and editing the mapping
 1. Collect unique normalized triggers from `public_cases/` (writes into `tmp/`):
 

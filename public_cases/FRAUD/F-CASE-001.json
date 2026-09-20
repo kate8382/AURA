@@ -2,7 +2,6 @@
   "case_id": "F-CASE-001",
   "domain": "fraud",
   "category": "brand_impersonation",
-  "confidence_raw": 0,
   "signal_ids": [
     "evasion:control",
     "deception:fact",
@@ -83,7 +82,7 @@
       }
     ]
   },
-  "confidence": 0.85,
+  "confidence": 0.76,
   "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
@@ -112,6 +111,7 @@
       }
     ]
   },
+  "confidence_raw": 4.73,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ]
