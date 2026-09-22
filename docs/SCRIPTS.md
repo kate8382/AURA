@@ -39,13 +39,28 @@ Notes:
   - The normalized `confidence` is derived from `confidence_raw` using a diminishing-returns
     transform to make the score probability-like:
 
+  The normalization transform converts the auditable raw evidence sum (`confidence_raw`) into
+  a probability-like score in the [0..1] interval using a diminishing-returns function:
+
   $$
   	ext{confidence} = 1 - e^{-\alpha \cdot \text{confidence\_raw}}
   $$
 
-  where `\alpha` (named `normAlpha` in `config/trigger-weights.json` when present) controls
-  how quickly raw evidence saturates toward 1.0. If `normAlpha` is not provided, a sensible
-  default of `1.0` is used.
+  - `\alpha` (configuration key: `normAlpha` in `config/trigger-weights.json`) controls how
+    quickly raw evidence saturates toward 1.0. Smaller values of `\alpha` produce slower
+    saturation (more conservative normalization); larger values saturate faster.
+  - Recommended default: `normAlpha = 0.3` (matches `config/trigger-weights.json` and provides moderate sensitivity). Historically we
+    used `1.0` as a fallback; current recommended tuning for AURA is `0.2-0.35` depending on
+    desired sensitivity.
+  - Example: if `confidence_raw = 3.0` and `normAlpha = 0.3`, then
+
+  $$
+  	ext{confidence} = 1 - e^{-0.3 \times 3.0} \approx 1 - e^{-0.75} \approx 0.59
+  $$
+
+  - Implementation note: `scripts/recalc_confidence.ts` reads `normAlpha` from
+    `config/trigger-weights.json` and falls back to `1.0` when not present. It's recommended
+    to set `normAlpha` explicitly in `config/trigger-weights.json` for reproducible results.
   - The recalculator also evaluates an operational `decision` for each case and writes
     `decision` and `decision_reasons` based on a configurable policy (`config/policy.json`).
     If a case already contains `confidence_raw` the recalculator preserves it unless the

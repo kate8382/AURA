@@ -22,7 +22,10 @@ export class PolicyEvaluator {
       const raw = fs.readFileSync(p, 'utf8');
       this.cfg = JSON.parse(raw);
     } catch (err) {
-      // fallback defaults
+      // If a specific cfgPath was provided, surface the error (no silent fallback).
+      if (cfgPath) throw err;
+
+      // fallback defaults when no explicit path provided
       this.cfg = {
         review_threshold: 0.6,
         block_threshold: 0.85,
@@ -62,45 +65,45 @@ export class PolicyEvaluator {
       if (h.status === 'failed') failedReqs += 1;
     }
 
-    // pending check: if there are questions and not all answered (history less than questions)
-    if (questions.length > 0 && history.length < questions.length) {
-      reasons.push('Awaiting cross-check answers');
-      return { decision: 'pending', reasons, confidence, failed_requirements: failedReqs };
-    }
-
-    // veto triggers
-    for (const v of (this.cfg.veto_triggers || [])) {
+    // veto triggers — check first so veto cannot be neutralized by pending checks
+    for (const v of (this.cfg.veto_triggers ?? [])) {
       if (triggers.has(String(v).toLowerCase())) {
         reasons.push(`Veto trigger matched: ${v}`);
         return { decision: 'block', reasons, confidence, failed_requirements: failedReqs };
       }
     }
 
+    // evasion attempts escalate — check before review thresholds so evasion cannot be bypassed by a high confidence
+    if (evasion >= (this.cfg.max_retries_before_block ?? 3)) {
+      reasons.push(`Evasion attempts >= max_retries_before_block (${this.cfg.max_retries_before_block})`);
+      return { decision: 'block', reasons, confidence, failed_requirements: failedReqs };
+    }
+
+    // pending check: if there are questions and not all answered (history less than questions)
+    if (questions.length > 0 && history.length < questions.length) {
+      reasons.push('Awaiting cross-check answers');
+      return { decision: 'pending', reasons, confidence, failed_requirements: failedReqs };
+    }
+
     // escalation by failed requirements
-    if (failedReqs >= (this.cfg.failed_checks_to_block || 3)) {
+    if (failedReqs >= (this.cfg.failed_checks_to_block ?? 3)) {
       reasons.push(`Failed requirements >= ${this.cfg.failed_checks_to_block}`);
       return { decision: 'block', reasons, confidence, failed_requirements: failedReqs };
     }
 
-    if (confidence >= (this.cfg.block_threshold || 0.85)) {
+    if (confidence >= (this.cfg.block_threshold ?? 0.85)) {
       reasons.push(`Confidence >= block_threshold (${this.cfg.block_threshold})`);
       return { decision: 'block', reasons, confidence, failed_requirements: failedReqs };
     }
 
-    if (failedReqs >= (this.cfg.failed_checks_to_review || 1)) {
+    if (failedReqs >= (this.cfg.failed_checks_to_review ?? 1)) {
       reasons.push(`Failed requirements >= review threshold (${this.cfg.failed_checks_to_review})`);
       return { decision: 'review', reasons, confidence, failed_requirements: failedReqs };
     }
 
-    if (confidence >= (this.cfg.review_threshold || 0.6)) {
+    if (confidence >= (this.cfg.review_threshold ?? 0.6)) {
       reasons.push(`Confidence >= review_threshold (${this.cfg.review_threshold})`);
       return { decision: 'review', reasons, confidence, failed_requirements: failedReqs };
-    }
-
-    // evasion attempts escalate
-    if (evasion >= (this.cfg.max_retries_before_block || 3)) {
-      reasons.push(`Evasion attempts >= max_retries_before_block (${this.cfg.max_retries_before_block})`);
-      return { decision: 'block', reasons, confidence, failed_requirements: failedReqs };
     }
 
     reasons.push('No escalation conditions met — allow');

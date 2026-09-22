@@ -120,12 +120,9 @@ See the full schema at `schemas/per-case-schema.json`. Important note about `con
 
 - `confidence_raw` is an auditable raw evidence sum (may be absent or greater than 1.0) and is
   typically persisted at the end of the case object for reviewability.
-- `confidence` is the normalized score in the [0..1] range used by policy and decision logic. It
-  is computed from `confidence_raw` using a diminishing-returns transform:
-
-**$$
-\text{confidence} = 1 - e^{-\alpha \cdot \text{confidenceRaw}}
-$$**
+- `confidence` is the normalized score in the [0..1] range used by policy and decision logic.
+  It is computed from `confidence_raw` using a diminishing-returns transform — see the
+  developer documentation for the exact formula and tuning guidance: [docs/SCRIPTS.md](docs/SCRIPTS.md).
 
 Example minimal valid case (note `confidence_raw` placed at the end for auditability):
 

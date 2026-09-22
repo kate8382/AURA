@@ -2,7 +2,7 @@ name: Save Traffic History (views/clones)
 
 on:
   schedule:
-    - cron: '0 9 * * *' # каждый день, ~12:00 Moldova local (moved later to allow GitHub metrics to settle)
+    - cron: '0 12 * * *' # каждый день, ~15:00 Moldova local (moved later to allow GitHub metrics to settle)
   workflow_dispatch:
 
 permissions:
