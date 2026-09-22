@@ -207,5 +207,16 @@
       "count": 77,
       "uniques": 34
     }
+  },
+  {
+    "date": "2026-09-21",
+    "views": {
+      "count": 120,
+      "uniques": 56
+    },
+    "clones": {
+      "count": 32,
+      "uniques": 13
+    }
   }
 ]
