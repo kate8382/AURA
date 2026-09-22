@@ -1,0 +1,10 @@
+{
+  "review_threshold": 0.6,
+  "block_threshold": 0.85,
+  "failed_checks_to_review": 1,
+  "failed_checks_to_block": 3,
+  "override_on_failed_requirements": "review",
+  "max_retries_before_block": 3,
+  "veto_triggers": [],
+  "default_behavior": "review"
+}
