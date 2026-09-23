@@ -1,0 +1,14 @@
+// ... existing imports and code from the previous file ...
+
+// Import adapters
+import hackeroneAdapter from './adapters/hackerone';
+import pgpAdapter from './adapters/pgpVerify';
+import pdfSignatureAdapter from './adapters/pdfSignature';
+
+// Register adapters
+registerAdapter(hackeroneAdapter);
+registerAdapter(pgpAdapter);
+registerAdapter(pdfSignatureAdapter);
+
+// Export the registry for external use
+export { hackeroneAdapter, pgpAdapter, pdfSignatureAdapter };
