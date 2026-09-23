@@ -124,25 +124,83 @@
         "questions": {
           "type": "array",
           "items": {
-            "type": "object",
-            "required": [
-              "id",
-              "title",
-              "type"
-            ],
-            "properties": {
-              "id": { "type": "string" },
-              "title": { "type": "string" },
-              "description": { "type": "string" },
-              "type": { "type": "string", "enum": ["boolean","enum","number","string","datetime"] },
-              "required": { "type": "boolean" },
-              "severity": { "type": "string", "enum": ["hard","soft","info"] },
-              "options": { "type": "array", "items": { "type": "string" } },
-              "threshold": { "type": "object" },
-              "evidence_weight": { "type": "number" },
-              "enforcement": { "type": "object" }
-            },
-            "additionalProperties": true
+            "anyOf": [
+              {
+                "type": "object",
+                "required": [
+                  "id",
+                  "title",
+                  "type"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "boolean",
+                      "enum",
+                      "number",
+                      "string",
+                      "datetime"
+                    ]
+                  },
+                  "required": {
+                    "type": "boolean"
+                  },
+                  "severity": {
+                    "type": "string",
+                    "enum": [
+                      "hard",
+                      "soft",
+                      "info"
+                    ]
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "threshold": {
+                    "type": "object"
+                  },
+                  "evidence_weight": {
+                    "type": "number"
+                  },
+                  "enforcement": {
+                    "type": "object"
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "name",
+                  "full_text"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "full_text": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            ]
           }
         }
       },
