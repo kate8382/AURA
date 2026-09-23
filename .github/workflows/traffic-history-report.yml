@@ -33,7 +33,9 @@ jobs:
         run: |
           node .github/scripts/backfill-traffic-history.js
 
-      - name: Generate CSV and SVG (local)
+      - name: Generate CSV (images disabled)
+        env:
+          DISABLE_IMAGE_GEN: 'true'
         run: |
           node .github/scripts/generate-traffic-report.js
 
