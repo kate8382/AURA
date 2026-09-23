@@ -50,6 +50,20 @@ export class CrossCheckAdapter {
   constructor() {
     // register noop adapter by default
     this.registerAdapter('noop', async (_req: CrossCheckRequirement, _caseObj: any) => ({ result: null, ok: false, notes: 'noop' }));
+    // register a mock IP geolocation adapter
+    this.registerAdapter('ip-geolocate', async (req: CrossCheckRequirement, caseObj: any) => {
+      // mock behavior: if caseObj has `meta` with `ip_country` that matches expected value in req.options[0], pass
+      const ipCountry = caseObj && caseObj.meta && caseObj.meta.ip_country ? String(caseObj.meta.ip_country) : null;
+      const expected = req && Array.isArray(req.options) && req.options.length ? String(req.options[0]) : null;
+      if (expected && ipCountry && expected.toLowerCase() === ipCountry.toLowerCase()) return { result: ipCountry, ok: true, notes: 'ip matched' };
+      return { result: ipCountry, ok: false, notes: 'ip mismatch or missing' };
+    });
+
+    // register a mock email-verified adapter
+    this.registerAdapter('email-verified', async (_req: CrossCheckRequirement, caseObj: any) => {
+      const verified = caseObj && caseObj.meta && !!caseObj.meta.email_verified;
+      return { result: !!verified, ok: !!verified, notes: verified ? 'email verified' : 'email unverified' };
+    });
   }
 
   // Register a new adapter function by name. The function should accept a requirement and a case object, and return a Promise resolving to {result, ok, notes}.

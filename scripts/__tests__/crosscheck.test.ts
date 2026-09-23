@@ -12,12 +12,12 @@ describe('CrossCheckAdapter basic', () => {
 
   test('register adapter and apply weight', async () => {
     const adapter = CrossCheckAdapter;
-    adapter.registerAdapter('yes', async (r: any, _c: any) => ({ result: true, ok: true, notes: 'ok' }));
-    const req = { id: 'cc-2', title: 't2', type: 'boolean', evidence_weight: 0.3 } as any;
-    const res = await adapter.evaluateCrossChecks({}, [req], { cc2: 'yes' });
-    // note: adaptersConfig used by evaluateCrossChecks maps by id; our call passed { cc2: 'yes' }
-    // fallback behaviour: if mapping absent, adapter name resolves to 'noop'
-    // so assert auditEntries present; total_weight may be 0 if mapping not applied
+    // use built-in email-verified mock adapter via adaptersConfig map
+    const req = { id: 'cc-email-verified', title: 'Email', type: 'boolean', evidence_weight: 0.2 } as any;
+    const caseObj = { meta: { email_verified: true } };
+    const res = await adapter.evaluateCrossChecks(caseObj, [req], { 'cc-email-verified': 'email-verified' });
     expect(res.auditEntries.length).toBe(1);
+    expect(res.total_weight).toBeCloseTo(0.2);
+    expect(res.auditEntries[0].ok).toBe(true);
   });
 });
