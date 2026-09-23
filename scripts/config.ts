@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 export interface TriggerConfig {
+  crossCheckAdapters: any;
   normAlpha: any;
   triggerWeights: { [k: string]: number };
   defaultTriggerWeight: number;
@@ -16,7 +17,8 @@ const FALLBACK_CONFIG: TriggerConfig = {
   crossCheckWeight: 0.005,
   signalIdWeight: 0.01,
   maxBoost: 0.10,
-  normAlpha: undefined
+  normAlpha: undefined,
+  crossCheckAdapters: undefined
 };
 
 export function loadTriggerConfig(): TriggerConfig {

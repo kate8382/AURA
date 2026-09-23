@@ -126,19 +126,21 @@
           "items": {
             "type": "object",
             "required": [
-              "name",
-              "full_text"
+              "id",
+              "title",
+              "type"
             ],
             "properties": {
-              "name": {
-                "type": "string"
-              },
-              "full_text": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "type": { "type": "string", "enum": ["boolean","enum","number","string","datetime"] },
+              "required": { "type": "boolean" },
+              "severity": { "type": "string", "enum": ["hard","soft","info"] },
+              "options": { "type": "array", "items": { "type": "string" } },
+              "threshold": { "type": "object" },
+              "evidence_weight": { "type": "number" },
+              "enforcement": { "type": "object" }
             },
             "additionalProperties": true
           }
