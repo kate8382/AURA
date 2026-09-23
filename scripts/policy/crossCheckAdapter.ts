@@ -50,19 +50,23 @@ export class CrossCheckAdapter {
   constructor() {
     // register noop adapter by default
     this.registerAdapter('noop', async (_req: CrossCheckRequirement, _caseObj: any) => ({ result: null, ok: false, notes: 'noop' }));
-    // register a mock IP geolocation adapter
+    // register simple mock adapters useful for testing and initial integration
     this.registerAdapter('ip-geolocate', async (req: CrossCheckRequirement, caseObj: any) => {
-      // mock behavior: if caseObj has `meta` with `ip_country` that matches expected value in req.options[0], pass
+      // Support both quick mocks (caseObj.mock_ip_geo) and structured meta.ip_country matching
+      const quickOk = !!(caseObj && (caseObj as any).mock_ip_geo === true);
+      if (quickOk) return { result: true, ok: true, notes: 'ip geolocation matched (mock quick)' };
       const ipCountry = caseObj && caseObj.meta && caseObj.meta.ip_country ? String(caseObj.meta.ip_country) : null;
       const expected = req && Array.isArray(req.options) && req.options.length ? String(req.options[0]) : null;
-      if (expected && ipCountry && expected.toLowerCase() === ipCountry.toLowerCase()) return { result: ipCountry, ok: true, notes: 'ip matched' };
+      if (expected && ipCountry && expected.toLowerCase() === ipCountry.toLowerCase()) return { result: ipCountry, ok: true, notes: 'ip matched (meta)' };
       return { result: ipCountry, ok: false, notes: 'ip mismatch or missing' };
     });
 
-    // register a mock email-verified adapter
-    this.registerAdapter('email-verified', async (_req: CrossCheckRequirement, caseObj: any) => {
+    // register an email verification adapter supporting quick mock and meta field
+    this.registerAdapter('email-verify', async (_req: CrossCheckRequirement, caseObj: any) => {
+      const quickOk = !!(caseObj && (caseObj as any).mock_email_verified === true);
+      if (quickOk) return { result: true, ok: true, notes: 'email verified (mock quick)' };
       const verified = caseObj && caseObj.meta && !!caseObj.meta.email_verified;
-      return { result: !!verified, ok: !!verified, notes: verified ? 'email verified' : 'email unverified' };
+      return { result: !!verified, ok: !!verified, notes: verified ? 'email verified (meta)' : 'email unverified' };
     });
   }
 
