@@ -67,6 +67,13 @@ Notes:
     `--force` behavior is requested — this keeps `confidence_raw` usable as an auditable
     provenance field.
 
+    - Cross-check integration: the recalculator calls the `crossCheckAdapter` when a case
+      contains `cross_check.questions`. The adapter evaluates machine-checkable requirements
+      (via registered adapters) and returns an audited `cross_check_audit` array plus a
+      numeric `total_weight` which is added to `confidence_raw`. See `scripts/policy/crossCheckAdapter.ts` for API and `scripts/__tests__/crosscheck.test.ts` for examples.
+
+
+
 Usage examples:
 
 ```bash

@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import PolicyEvaluator from './policy/evaluateDecision';
+import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from './policy/crossCheckAdapter';
 import { reorderCaseKeys } from './utils';
 import { generateSignalIds } from './generate-trigger-weights';
 
@@ -10,11 +11,18 @@ type Entry = { [k: string]: any };
  * RecalcConfidence
  * Класс для пересчёта поля `confidence` в JSON кейсах.
  * Методы:
- * - mapConfidence(): эвристика соответствия категории + сигналов
- * - recalc(): пересчитать один файл и записать изменения
- * - run(): обработать директорию/файл
- * При записи гарантируем порядок ключей: `confidence_raw` перед `scenarios`, `confidence` после `cross_check`.
+ * - mapConfidence(category, signalCount): эвристика для совместимости (base + сигнал-буст).
+ * - getBaseForCategory(category): возвращает базовую составляющую (в текущей модели всегда 0).
+ * - getCategoryMultiplier(category): множитель для суммарного веса триггеров в зависимости от категории.
+ * - recalc(filePath, preserveExisting = false, minFloor = 0.0): пересчитывает один файл и записывает изменения;
+ *     формирует `confidence_raw` (аудируемая сумма), `confidence` (нормализованная), `cross_check_audit`, `decision` и `decision_reasons`.
+ * - parseArgs(argv): парсит CLI-аргументы (`--file|--dir`, `--dry-run`, `--preserve-existing`, `--min`).
+ * - run(): обрабатывает файл или директорию, поддерживает `--dry-run` для проверки без записи.
+ * Особенности: интеграция с `crossCheckAdapter` — если в деле есть `cross_check.questions`, их
+ * результаты учитываются как `evidence_weight` и записываются в `cross_check_audit`.
+ * Экспортируемые сущности: `mapConfidence`, `PROMPT_BASE`, `DEFAULT_CONFIDENCE` для обратной совместимости.
  */
+
 export class RecalcConfidence {
   static PROMPT_BASE = 0.0;
   static MAP_DEFAULT_BASE = 0.75;
@@ -28,12 +36,14 @@ export class RecalcConfidence {
     return Math.round(value * 100) / 100;
   }
 
+  // Get the base confidence for a given category. This is used as the starting point before applying signal-based boosts.
   static getBaseForCategory(category: string): number {
     // Preserve method for backward-compatibility but base risk is always 0.0
     // per 'presumption of innocence' design: categories do NOT give base score.
     return RecalcConfidence.PROMPT_BASE;
   }
 
+  // Get the multiplier for a given category. This affects how strongly triggers influence the final confidence score.
   static getCategoryMultiplier(category: string): number {
     const cat = (category || '').toLowerCase();
     // Categories influence how strongly triggers count (weight multiplier),
@@ -80,8 +90,9 @@ export class RecalcConfidence {
     };
 
     const evaluator = new PolicyEvaluator();
+    const crossAdapter = CrossCheckAdapter; // default instance
 
-    const updateCase = (e: Entry) => {
+    const updateCase = async (e: Entry) => {
       const old = e.confidence;
       if (preserveExisting && (typeof old === 'number')) return null;
       const signals: string[] = Array.isArray(e.signal_ids) ? (e.signal_ids as string[]).slice() : generateSignalIds(e.scenarios || []);
@@ -144,6 +155,23 @@ export class RecalcConfidence {
       }
       // add contributions from cross_check and unmapped signal_ids (fallback)
       totalWeight += crossCheckQuestions * CROSS_CHECK_WEIGHT;
+      // run cross-check adapter to compute evidence_weight contributions (adapters configured via config file)
+      try {
+        const requirements = (e.cross_check && Array.isArray(e.cross_check.questions)) ? e.cross_check.questions : [];
+        const adaptersCfg = (cfg && (cfg.crossCheckAdapters)) ? cfg.crossCheckAdapters : undefined;
+        if (requirements && requirements.length) {
+          // Use default adapter class instance
+          // Note: we only apply weights returned by adapter; adapters may be noop by default
+          // to keep behavior backward-compatible when no adapters are registered.
+          // eslint-disable-next-line no-await-in-loop
+          const summary = await (crossAdapter as CrossCheckAdapterClass).evaluateCrossChecks(e, requirements, adaptersCfg);
+          if (summary && typeof summary.total_weight === 'number') totalWeight += summary.total_weight;
+          // attach audit entries for traceability
+          (e as any).cross_check_audit = summary.auditEntries || [];
+        }
+      } catch (err) {
+        // ignore cross-check errors to avoid blocking recalc; do not apply additional weight
+      }
       if (unmappedSignalCount > 0) totalWeight += unmappedSignalCount * SIGNAL_ID_WEIGHT;
       // Apply category multiplier only to trigger-derived weight
       const catMultiplier = RecalcConfidence.getCategoryMultiplier(e.category || '');
