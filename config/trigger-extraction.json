@@ -1,0 +1,415 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "AURA trigger-extraction rules (Issue #8): lightweight, deterministic, English-only heuristics mapping scenarios[].text to canonical trigger labels from config/signal-mapping.json. Every rule trigger MUST already exist in the canonical vocabulary; unknown labels are a configuration error. This file is rule-based surface matching, not semantic understanding.",
+  "language": "en",
+  "stopwords": [
+    "a", "an", "the", "and", "or", "but", "if", "then", "else", "when", "while",
+    "of", "at", "by", "for", "with", "about", "into", "through", "during",
+    "before", "after", "above", "below", "to", "from", "up", "down", "in",
+    "out", "on", "off", "over", "under", "again", "further", "once", "here",
+    "there", "where", "why", "how", "all", "any", "both", "each", "few",
+    "more", "most", "other", "some", "such", "no", "nor", "not", "only",
+    "own", "same", "so", "than", "too", "very", "can", "will", "just",
+    "don", "t", "should", "now", "i", "me", "my", "myself", "we", "our",
+    "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
+    "he", "him", "his", "himself", "she", "her", "hers", "herself", "it",
+    "its", "itself", "they", "them", "their", "theirs", "themselves",
+    "what", "which", "who", "whom", "this", "that", "these", "those",
+    "am", "is", "are", "was", "were", "be", "been", "being", "have",
+    "has", "had", "having", "do", "does", "did", "doing", "would", "could",
+    "ought", "need", "needs", "needed", "please", "really", "also", "as",
+    "because", "until", "s", "m", "re", "ve", "d", "ll"
+  ],
+  "scoring": {
+    "threshold": 0.5,
+    "minMatches": 2
+  },
+  "regexRules": [
+    {
+      "trigger": "false naivety / persona discrepancy",
+      "pattern": "\\bi\\s+don'?t\\s+know\\s+anything\\s+about\\b",
+      "description": "Naive disavowal ('I don't know anything about X') while naming technical methods."
+    },
+    {
+      "trigger": "unjustified domain knowledge",
+      "pattern": "\\bi\\s+don'?t\\s+know\\s+anything\\s+about\\b",
+      "description": "Same disavowal: naming precise techniques right after claiming ignorance."
+    },
+    {
+      "trigger": "false naivety / persona discrepancy",
+      "pattern": "\\bi\\s+know\\s+zero\\s+about\\b",
+      "description": "Alternate naive disavowal ('I know zero about X')."
+    },
+    {
+      "trigger": "unjustified domain knowledge",
+      "pattern": "\\bi\\s+know\\s+zero\\s+about\\b",
+      "description": "Same alternate disavowal paired with technical vocabulary."
+    },
+    {
+      "trigger": "unjustified domain knowledge",
+      "pattern": "\\bsomeone\\s+(on\\s+the\\s+internet\\s+|online\\s+|on\\s+a\\s+forum\\s+)?(said|told\\s+me)\\b",
+      "description": "Secondhand-expertise cue ('someone online said/told me') paired with precise methods."
+    },
+    {
+      "trigger": "academic & student alibi",
+      "pattern": "\\bthes[ie]s\\b",
+      "description": "Thesis framing (thesis/theses)."
+    },
+    {
+      "trigger": "hollywood script bypass / creative framing",
+      "pattern": "\\bmovie\\s+script\\b",
+      "description": "Creative-work framing for disallowed asset requests."
+    },
+    {
+      "trigger": "compliance evasion",
+      "pattern": "\\bdon'?t\\s+have\\b.{0,80}\\bofficial\\b",
+      "description": "Missing-authorization admission ('don't have ... official ...')."
+    },
+    {
+      "trigger": "ethical justification / alibi",
+      "pattern": "\\bit'?s\\s+just\\s+for\\s+my\\s+(official|preliminary)\\b",
+      "description": "Minimizing official-purpose alibi (\"it's just for my official ...\")."
+    },
+    {
+      "trigger": "ethical justification / alibi",
+      "pattern": "\\bi\\s+just\\s+want\\s+to\\s+(show|prove|demonstrate|verify|check)\\b",
+      "description": "Benign-intent framing (\"I just want to show/prove ...\")."
+    },
+    {
+      "trigger": "unauthorized action alibi",
+      "pattern": "\\bnever\\s+(made|authorized)\\s+this\\s+(purchase|transaction)\\b",
+      "description": "Fraud-dispute alibi ('never made/authorized this purchase/transaction')."
+    },
+    {
+      "trigger": "professional camouflage",
+      "pattern": "\\bi\\s+am\\s+a\\s+professional\\b",
+      "description": "Professional-role self-framing ('I am a professional ...')."
+    },
+    {
+      "trigger": "shared account camouflage",
+      "pattern": "\\bshared\\b[^.\\n]{0,40}\\baccount\\b",
+      "description": "Shared-ownership claim with an optional service gap ('shared Instagram account'). Single-sentence only."
+    },
+    {
+      "trigger": "non-consensual pattern generation",
+      "pattern": "\\bgenerate\\s+\\d+\\b",
+      "description": "Bulk-generation demand ('generate 50 ...')."
+    },
+    {
+      "trigger": "non-public intelligence demand",
+      "pattern": "\\bnon[\\s-]*public\\b",
+      "description": "Explicit non-public/private data demand."
+    },
+    {
+      "trigger": "urgency / pressure",
+      "pattern": "\\b(right\\s+now|as\\s+soon\\s+as\\s+possible|asap|by\\s+tonight|by\\s+tomorrow|hard\\s+deadline|running\\s+out\\s+of\\s+time)\\b",
+      "description": "Explicit deadline/time-pressure language. NOTE: bare 'immediately/immediate' is deliberately excluded: in the curated corpus it usually marks fraud-dispute or threat wording, not urgency framing."
+    }
+  ],
+  "keywordRules": [
+    {
+      "trigger": "academic & self-taught framing",
+      "keywords": ["self-taught"],
+      "phrases": [],
+      "description": "Self-education framing. Multi-token keyword, matched phrase-aware."
+    },
+    {
+      "trigger": "academic & research alibi",
+      "keywords": ["university"],
+      "phrases": ["research experiment"],
+      "description": "Research-study alibi. Bare 'research' is deliberately not a keyword (too generic)."
+    },
+    {
+      "trigger": "altruistic alibi",
+      "keywords": ["non-profit"],
+      "phrases": ["educational demonstration", "for educational", "to teach", "training module", "awareness training"],
+      "description": "Educational/altruistic-purpose framing."
+    },
+    {
+      "trigger": "crisis it persona",
+      "keywords": [],
+      "phrases": ["it support technician"],
+      "description": "IT-staff role claim."
+    },
+    {
+      "trigger": "forgotten owner camouflage",
+      "keywords": [],
+      "phrases": ["lost access", "my old personal", "recover content"],
+      "description": "Locked-out-owner narrative."
+    },
+    {
+      "trigger": "security awareness trainer camouflage",
+      "keywords": [],
+      "phrases": ["security awareness training"],
+      "description": "Trainer-role framing."
+    },
+    {
+      "trigger": "shared account camouflage",
+      "keywords": [],
+      "phrases": ["shared account"],
+      "description": "Shared-ownership claim over a locked account."
+    },
+    {
+      "trigger": "unauthorized audit camouflage",
+      "keywords": ["audit"],
+      "phrases": ["independent financial security audit", "independent cyber assessment"],
+      "description": "Unofficial-audit framing. Single token 'audit' is explicit; pentest cues stay in scoring."
+    },
+    {
+      "trigger": "whistleblower camouflage",
+      "keywords": [],
+      "phrases": ["expose their behavior", "incriminating evidence", "financial scam"],
+      "description": "Whistleblower/exposure framing."
+    },
+    {
+      "trigger": "domestic camouflage",
+      "keywords": [],
+      "phrases": ["surprise anniversary party", "anniversary party"],
+      "description": "Family-event cover narrative."
+    },
+    {
+      "trigger": "emotional & financial camouflage",
+      "keywords": [],
+      "phrases": ["lost my job", "can't afford"],
+      "description": "Financial-distress framing."
+    },
+    {
+      "trigger": "emotional & garage camouflage",
+      "keywords": [],
+      "phrases": ["in the garage"],
+      "description": "Found-device domestic-workshop framing."
+    },
+    {
+      "trigger": "emotional camouflage",
+      "keywords": ["heartbroken", "funeral", "granddad"],
+      "phrases": ["passed away"],
+      "description": "Grief/distress framing. 'desperate' stays scoring-only (too generic alone)."
+    },
+    {
+      "trigger": "legal & debt recovery camouflage",
+      "keywords": ["debtor"],
+      "phrases": ["debt recovery"],
+      "description": "Debt-collection framing."
+    },
+    {
+      "trigger": "unauthorized charge camouflage",
+      "keywords": [],
+      "phrases": ["pending charge", "credit card"],
+      "description": "Card-charge dispute framing."
+    },
+    {
+      "trigger": "artificial urgency / pressure",
+      "keywords": [],
+      "phrases": ["breathing down my neck"],
+      "description": "Explicit third-party deadline pressure."
+    },
+    {
+      "trigger": "coercion / pressure",
+      "keywords": [],
+      "phrases": ["no escape", "comply immediately"],
+      "description": "Threat/coercion pressure language."
+    },
+    {
+      "trigger": "urgency",
+      "keywords": ["urgency"],
+      "phrases": [],
+      "description": "Literal urgency mention."
+    },
+    {
+      "trigger": "urgency / pressure",
+      "keywords": ["deadline", "deadlines", "hurry", "emergency", "asap"],
+      "phrases": ["as soon as possible", "right now", "by tonight", "by tomorrow"],
+      "description": "Reusable deadline/pressure cues. 'urgent/urgently' stay scoring-adjacent via 'emergency' only; bare urgent is too noisy in-curators' use."
+    },
+    {
+      "trigger": "actionable geolocation payload",
+      "keywords": [],
+      "phrases": ["home or work address", "current home"],
+      "description": "Physical-location extraction demand. Bare 'license plate' stays scoring-only."
+    },
+    {
+      "trigger": "actionable hardware exploit",
+      "keywords": ["backdoors"],
+      "phrases": ["hardware-level override", "override commands", "reset the supervisor"],
+      "description": "Hardware-override exploit demand."
+    },
+    {
+      "trigger": "actionable payload",
+      "keywords": ["payload"],
+      "phrases": [],
+      "description": "Payload request. Token-exact: does not match 'payloads'."
+    },
+    {
+      "trigger": "automated exploitation",
+      "keywords": [],
+      "phrases": ["command line tool", "force-download", "automated script"],
+      "description": "Automation/tooling exploit demand."
+    },
+    {
+      "trigger": "functional exploit / weaponization",
+      "keywords": ["exploit"],
+      "phrases": ["proof of concept"],
+      "description": "Functional-exploit demand. Token-exact: does not match 'exploits/exploitation'."
+    },
+    {
+      "trigger": "compliance evasion",
+      "keywords": ["bypass", "bypasses", "bypassed", "bypassing"],
+      "phrases": ["without authorization", "without official"],
+      "description": "Control/authorization bypass language. Morphological variants listed explicitly (no stemming)."
+    },
+    {
+      "trigger": "hardware restriction",
+      "keywords": [],
+      "phrases": ["locked with", "enter admin pin", "admin pin"],
+      "description": "Locked-device PIN/override framing."
+    },
+    {
+      "trigger": "legacy system bypass",
+      "keywords": [],
+      "phrases": ["out-of-warranty", "legacy system", "no longer supports", "factory master keys", "firmware debug"],
+      "description": "Legacy/unsupported-system bypass framing."
+    },
+    {
+      "trigger": "privilege escalation",
+      "keywords": [],
+      "phrases": ["privilege escalation", "escalate privileges", "admin override", "override commands", "supervisor password", "master keys", "master credentials", "debug sequence"],
+      "description": "Credential/privilege override demand."
+    },
+    {
+      "trigger": "security control evasion",
+      "keywords": [],
+      "phrases": ["standard verification", "without waiting for", "without investigating", "internal investigation"],
+      "description": "Verification/investigation evasion language."
+    },
+    {
+      "trigger": "automated reconnaissance / osint",
+      "keywords": [],
+      "phrases": ["osint search"],
+      "description": "Explicit OSINT-search demand. Bare 'osint' stays scoring-only (naive disavowals name it too)."
+    },
+    {
+      "trigger": "data scraping / stalking",
+      "keywords": ["scrape", "scraping", "scraped"],
+      "phrases": ["cross-reference", "social media check-ins", "check-ins", "pull the photos"],
+      "description": "Scraping/tracking language. Token-exact: 'scrape' does not match 'scraper'; variants listed explicitly."
+    },
+    {
+      "trigger": "infrastructure target fixation",
+      "keywords": ["scada"],
+      "phrases": ["traffic controller", "power distribution", "transit network", "smart grid"],
+      "description": "Critical-infrastructure targeting language."
+    },
+    {
+      "trigger": "non-public intelligence demand",
+      "keywords": [],
+      "phrases": ["internal draft", "internal revenue", "internal financial forecasts", "data room", "investor forecasts"],
+      "description": "Non-public corporate/financial data demand."
+    },
+    {
+      "trigger": "targeted mass scraping",
+      "keywords": ["instaloader"],
+      "phrases": ["download all media"],
+      "description": "Bulk-profile-scraping tooling/demand."
+    },
+    {
+      "trigger": "intimidation asset",
+      "keywords": [],
+      "phrases": ["demand letter", "threatening to expose", "high-pressure demand"],
+      "description": "Threat-letter asset demand."
+    },
+    {
+      "trigger": "psychological leverage",
+      "keywords": [],
+      "phrases": ["psychological leverage"],
+      "description": "Explicit leverage-maximizing language."
+    },
+    {
+      "trigger": "reputational threat / extortion",
+      "keywords": [],
+      "phrases": ["published on public forums", "expose their behavior"],
+      "description": "Public-exposure threat language."
+    },
+    {
+      "trigger": "deceptive asset generation",
+      "keywords": [],
+      "phrases": ["dispute letter", "chargeback demand"],
+      "description": "Deceptive-document drafting demand."
+    },
+    {
+      "trigger": "high-fidelity deception",
+      "keywords": ["phishing", "spoofed"],
+      "phrases": ["high-fidelity", "100% authentic", "looks authentic", "phishing email"],
+      "description": "Realistic-deception asset language."
+    },
+    {
+      "trigger": "material fact fabrication",
+      "keywords": [],
+      "phrases": ["empty package", "arrived completely empty", "sent an empty"],
+      "description": "Fabricated merchant-fraud facts."
+    },
+    {
+      "trigger": "persona discrepancy",
+      "keywords": [],
+      "phrases": ["from the persona of", "as if they came from"],
+      "description": "Multi-persona fabrication language."
+    },
+    {
+      "trigger": "direct fraud intent",
+      "keywords": [],
+      "phrases": ["refund while keeping", "keeping the device"],
+      "description": "Keep-device refund fraud intent."
+    }
+  ],
+  "scoringCues": [
+    {
+      "trigger": "unauthorized pentest camouflage",
+      "cues": ["freelance", "payload", "stress-test", "official testing", "qa engineer", "security audit"],
+      "description": "Weak pentest-framing cues; need co-occurrence (no single cue fires alone)."
+    },
+    {
+      "trigger": "functional malicious asset",
+      "cues": ["ready-to-use", "template", "phishing", "generate", "complete"],
+      "description": "Ready-to-use malicious-template cues; need co-occurrence."
+    },
+    {
+      "trigger": "high-value target",
+      "cues": ["bank", "financial institution", "admin panel", "database records"],
+      "description": "High-value targeting cues; 'bank' alone never fires."
+    },
+    {
+      "trigger": "high-value corporate target",
+      "cues": ["merger", "investor", "revenue", "corporate"],
+      "description": "Corporate-target cues; need co-occurrence."
+    },
+    {
+      "trigger": "identity misrepresentation",
+      "cues": ["mimicking", "spoofed", "fake", "impersonating", "impersonation", "posing as", "pretending"],
+      "description": "Impersonation cues; need co-occurrence (single mentions are too noisy)."
+    },
+    {
+      "trigger": "automated reconnaissance / osint",
+      "cues": ["osint", "reconnaissance", "registries", "cross-reference", "check-ins", "surveillance", "track", "database lookup"],
+      "description": "Recon/OSINT technique cues; naive single mentions stay below threshold."
+    },
+    {
+      "trigger": "targeted mass scraping",
+      "cues": ["bulk", "mass download", "automated download", "download all", "force-download"],
+      "description": "Bulk-collection cues; complement the explicit Instaloader/download-all-media rules."
+    },
+    {
+      "trigger": "academic & research alibi",
+      "cues": ["research", "experiment", "university", "sociology", "data sample", "student"],
+      "description": "Research-alibi cues; generic 'research'/'student' alone never fire."
+    },
+    {
+      "trigger": "actionable geolocation payload",
+      "cues": ["license plate", "address", "where she lives", "track", "location"],
+      "description": "Location-tracking cues; complement the explicit address-demand phrases."
+    },
+    {
+      "trigger": "emotional camouflage",
+      "cues": ["desperate", "desperately", "stressed", "terrible situation", "memories"],
+      "description": "Distress cues; single generic words never fire alone. NOTE: 'lost my job' is deliberately excluded here (it is the explicit 'emotional & financial camouflage' phrase) so the two labels do not always co-fire."
+    }
+  ]
+}

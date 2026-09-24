@@ -3,6 +3,7 @@ import path from 'path';
 import { reorderCaseKeys, deriveSignalId } from './utils';
 import GenerateTriggerWeights from './generate-trigger-weights';
 import { DEFAULT_CONFIDENCE } from './recalc_confidence';
+import { getSharedExtractor, normalizeTriggerIdentity } from './extract-triggers';
 
 type AnyObj = { [k: string]: any };
 
@@ -23,6 +24,54 @@ export class NormalizePerCases {
   }
 
   // Canonical ordering is provided by `reorderCaseKeys` from scripts/utils.ts
+
+  /**
+   * maybeExtractTriggers (opt-in via `--extract-triggers`)
+   * Inspects `scenarios[].text` with the lightweight rule-based extractor and
+   * augments `scenarios[].triggers`. Existing triggers are preserved exactly
+   * (never replaced, reordered, or respelled); extracted canonical labels are
+   * appended after them, deduplicated by normalized trigger identity. Missing
+   * or empty `triggers` are populated only when extraction finds candidates.
+   * In dry-run mode the additions are previewed (`[dry] WOULD ADD triggers
+   * <case> scenario <i>`) and callers still skip all writes.
+   */
+  private maybeExtractTriggers(obj: AnyObj, fileLabel: string) {
+    if (!process.argv.includes('--extract-triggers')) return;
+    const scenarios = (obj as AnyObj).scenarios;
+    if (!Array.isArray(scenarios)) return;
+    // Throws clearly on broken extraction configuration (never silent).
+    const extractor = getSharedExtractor();
+    const caseLabel = typeof obj.case_id === 'string' && obj.case_id ? obj.case_id : fileLabel;
+    scenarios.forEach((s: AnyObj, idx: number) => {
+      if (!s || typeof s !== 'object') return;
+      // Operates on scenario.text only; scenario.name is never evidence.
+      const candidates = extractor.extract(s.text);
+      if (candidates.length === 0) return;
+      const existing: unknown[] = Array.isArray(s.triggers) ? s.triggers : [];
+      const seen = new Set<string>();
+      for (const t of existing) {
+        const n = normalizeTriggerIdentity(t);
+        if (n) seen.add(n);
+      }
+      const added: string[] = [];
+      for (const c of candidates) {
+        const n = normalizeTriggerIdentity(c);
+        if (n && !seen.has(n)) {
+          seen.add(n);
+          added.push(c);
+        }
+      }
+      if (added.length === 0) return;
+      if (this.dry) {
+        console.log(`[dry] WOULD ADD triggers ${caseLabel} scenario ${idx}:`);
+        for (const a of added) console.log(`  - ${a}`);
+      }
+      // In-memory only; dry-run callers skip all file writes.
+      if (Array.isArray(s.triggers)) s.triggers.push(...added);
+      else s.triggers = added.slice();
+    });
+  }
+
   async processFile(filePath: string) {
     const raw = await fs.readFile(filePath, 'utf8');
     let data: AnyObj;
@@ -79,6 +128,10 @@ export class NormalizePerCases {
         if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
         // Ensure decision field exists; default to 'pending' when normalizing
         if (typeof obj.decision === 'undefined') obj.decision = 'pending';
+
+        // Opt-in trigger extraction (must run before signal-ID derivation so
+        // newly extracted triggers participate in it).
+        this.maybeExtractTriggers(obj, filePath);
 
         // Optionally generate signal_ids for the case when requested
         if (process.argv.includes('--apply-signal-ids')) {
@@ -139,6 +192,10 @@ export class NormalizePerCases {
       if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
       // Ensure decision field exists; default to 'pending' when normalizing
       if (typeof obj.decision === 'undefined') obj.decision = 'pending';
+
+      // Opt-in trigger extraction (must run before signal-ID derivation so
+      // newly extracted triggers participate in it).
+      this.maybeExtractTriggers(obj, filePath);
 
       // Optionally generate signal_ids for the case when requested
       if (process.argv.includes('--apply-signal-ids')) {
