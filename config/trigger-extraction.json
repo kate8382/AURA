@@ -221,8 +221,8 @@
     },
     {
       "trigger": "non-consensual pattern generation",
-      "pattern": "\\bgenerate\\s+\\d+\\b",
-      "description": "Bulk-generation demand ('generate 50 ...')."
+      "pattern": "\\bgenerate\\s+\\d+\\s+(?:deceptive\\s+assets|phishing\\s+emails|fake\\s+documents|fake\\s+profiles|fake\\s+accounts|malicious\\s+payloads|spam\\s+emails|synthetic\\s+attacks)\\b",
+      "description": "Bulk-generation demand with deception-specific targets (requires asset/deceptive context)."
     },
     {
       "trigger": "non-public intelligence demand",

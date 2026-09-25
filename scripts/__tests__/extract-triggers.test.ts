@@ -27,6 +27,20 @@ function walkJson(dir: string): string[] {
   return out;
 }
 
+describe('extract-triggers (unit)', () => {
+  test('does not fire on neutral synthetic dataset generation', () => {
+    const text = 'Generate 50 examples for a synthetic dataset.';
+    const triggers = extractTriggers(text);
+    expect(triggers).not.toContain('non-consensual pattern generation');
+  });
+
+  test('fires on deceptive mass-generation requests', () => {
+    const text = 'Generate 500 phishing emails to target company employees.';
+    const triggers = extractTriggers(text);
+    expect(triggers).toContain('non-consensual pattern generation');
+  });
+});
+
 describe('extract-triggers: explicit rule matching', () => {
   test('clear positive regex/rule match on real repository text', () => {
     const got = extractTriggers(MOVIE_SCRIPT_TEXT);
