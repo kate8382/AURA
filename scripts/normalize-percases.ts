@@ -3,7 +3,7 @@ import path from 'path';
 import { reorderCaseKeys, deriveSignalId } from './utils';
 import GenerateTriggerWeights from './generate-trigger-weights';
 import { DEFAULT_CONFIDENCE } from './recalc_confidence';
-import { getSharedExtractor, normalizeTriggerIdentity } from './extract-triggers';
+import { getSharedExtractor, normalizeTriggerIdentity, defaultRepoRoot } from './extract-triggers';
 
 type AnyObj = { [k: string]: any };
 
@@ -139,7 +139,10 @@ export class NormalizePerCases {
         // to avoid drift between triggers and signal_ids.
         if (process.argv.includes('--apply-signal-ids')) {
           try {
-            const gw = new GenerateTriggerWeights(process.cwd());
+            // Use the same repoRoot resolution as the extractor so both
+            // tools load config from the same directory regardless of CWD.
+            const repoRoot = defaultRepoRoot();
+            const gw = new GenerateTriggerWeights(repoRoot || process.cwd());
             gw.loadSignalMapping();
             const sset = new Set<string>();
             if (Array.isArray(obj.scenarios)) {
@@ -215,8 +218,10 @@ export class NormalizePerCases {
 
       // Optionally (re)generate signal_ids for the case when requested.
       if (process.argv.includes('--apply-signal-ids')) {
-        try {
-          const gw = new GenerateTriggerWeights(process.cwd());
+          try {
+            // Generate signal IDs for the triggers in the scenarios.
+          const repoRoot = defaultRepoRoot();
+          const gw = new GenerateTriggerWeights(repoRoot || process.cwd());
           gw.loadSignalMapping();
           const sset = new Set<string>();
           if (Array.isArray(obj.scenarios)) {
