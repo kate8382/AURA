@@ -79,6 +79,15 @@ describe('extract-triggers: explicit rule matching', () => {
       'unjustified domain knowledge',
     ]);
   });
+
+  test('naive disavowal with non-technical topics should not emit unjustified domain knowledge', () => {
+    expect(extractTriggers("I don't know anything about gardening.")).toEqual([
+      'false naivety / persona discrepancy',
+    ]);
+    expect(extractTriggers('I know zero about cooking.')).toEqual([
+      'false naivety / persona discrepancy',
+    ]);
+  });
 });
 
 describe('extract-triggers: tokenization and substring protection', () => {
