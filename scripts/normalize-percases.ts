@@ -133,29 +133,45 @@ export class NormalizePerCases {
         // newly extracted triggers participate in it).
         this.maybeExtractTriggers(obj, filePath);
 
-        // Optionally generate signal_ids for the case when requested
+        // Optionally (re)generate signal_ids for the case when requested.
+        // IMPORTANT: when --apply-signal-ids is present we recompute based on
+        // current `scenarios[].triggers` — this overwrites existing `signal_ids`
+        // to avoid drift between triggers and signal_ids.
         if (process.argv.includes('--apply-signal-ids')) {
-          if (!Array.isArray(obj.signal_ids) || obj.signal_ids.length === 0) {
-            try {
-              const gw = new GenerateTriggerWeights(process.cwd());
-              gw.loadSignalMapping();
-              const sset = new Set<string>();
-              if (Array.isArray(obj.scenarios)) {
-                for (const s of obj.scenarios) {
-                  if (!s || !Array.isArray(s.triggers)) continue;
-                  for (const t of s.triggers) {
-                    const n = gw.normalizeTrigger(t);
-                    if (!n) continue;
-                    const sid = (gw as any).signalMap[n];
-                    if (sid) sset.add(sid);
-                    else sset.add(deriveSignalId(n));
-                  }
+          try {
+            const gw = new GenerateTriggerWeights(process.cwd());
+            gw.loadSignalMapping();
+            const sset = new Set<string>();
+            if (Array.isArray(obj.scenarios)) {
+              for (const s of obj.scenarios) {
+                if (!s || !Array.isArray(s.triggers)) continue;
+                for (const t of s.triggers) {
+                  const n = gw.normalizeTrigger(t);
+                  if (!n) continue;
+                  const sid = (gw as any).signalMap[n];
+                  if (sid) sset.add(sid);
+                  else sset.add(deriveSignalId(n));
                 }
               }
-              const arr = Array.from(sset);
-              if (arr.length) obj.signal_ids = arr;
-            } catch (e) {
-              // ignore generate errors
+            }
+            const arr = Array.from(sset);
+            if (arr.length) obj.signal_ids = arr;
+            else {
+              // empty result: clear existing signal_ids to avoid stale mappings
+              if (Array.isArray(obj.signal_ids) && obj.signal_ids.length > 0) {
+                if (this.dry) console.log(`[dry] WOULD CLEAR signal_ids for ${obj.case_id || filePath}`);
+                else {
+                  obj.signal_ids = [];
+                }
+              }
+            }
+          } catch (err) {
+            const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
+            console.error('Error generating signal_ids for', obj.case_id || filePath, msg);
+            if (this.dry) {
+              console.warn('Dry-run: continuing despite generate error');
+            } else {
+              throw err;
             }
           }
         }
@@ -197,29 +213,39 @@ export class NormalizePerCases {
       // newly extracted triggers participate in it).
       this.maybeExtractTriggers(obj, filePath);
 
-      // Optionally generate signal_ids for the case when requested
+      // Optionally (re)generate signal_ids for the case when requested.
       if (process.argv.includes('--apply-signal-ids')) {
-        if (!Array.isArray(obj.signal_ids) || obj.signal_ids.length === 0) {
-          try {
-            const gw = new GenerateTriggerWeights(process.cwd());
-            gw.loadSignalMapping();
-            const sset = new Set<string>();
-            if (Array.isArray(obj.scenarios)) {
-              for (const s of obj.scenarios) {
-                if (!s || !Array.isArray(s.triggers)) continue;
-                for (const t of s.triggers) {
-                  const n = gw.normalizeTrigger(t);
-                  if (!n) continue;
-                  const sid = (gw as any).signalMap[n];
-                  if (sid) sset.add(sid);
-                  else sset.add(deriveSignalId(n));
-                }
+        try {
+          const gw = new GenerateTriggerWeights(process.cwd());
+          gw.loadSignalMapping();
+          const sset = new Set<string>();
+          if (Array.isArray(obj.scenarios)) {
+            for (const s of obj.scenarios) {
+              if (!s || !Array.isArray(s.triggers)) continue;
+              for (const t of s.triggers) {
+                const n = gw.normalizeTrigger(t);
+                if (!n) continue;
+                const sid = (gw as any).signalMap[n];
+                if (sid) sset.add(sid);
+                else sset.add(deriveSignalId(n));
               }
             }
-            const arr = Array.from(sset);
-            if (arr.length) obj.signal_ids = arr;
-          } catch (e) {
-            // ignore
+          }
+          const arr = Array.from(sset);
+          if (arr.length) obj.signal_ids = arr;
+          else {
+            if (Array.isArray(obj.signal_ids) && obj.signal_ids.length > 0) {
+              if (this.dry) console.log(`[dry] WOULD CLEAR signal_ids for ${obj.case_id || filePath}`);
+              else obj.signal_ids = [];
+            }
+          }
+        } catch (err) {
+          const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
+          console.error('Error generating signal_ids for', obj.case_id || filePath, msg);
+          if (this.dry) {
+            console.warn('Dry-run: continuing despite generate error');
+          } else {
+            throw err;
           }
         }
       }
