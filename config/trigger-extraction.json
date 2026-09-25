@@ -753,9 +753,9 @@
       "cues": [
         "exploit",
         "weaponize",
-        "working",
         "proof of concept",
-        "execute"
+        "execute",
+        "working"
       ],
       "description": "Exploit must co-occur with weaponization/working/PoC context."
     },
@@ -767,7 +767,8 @@
         "spoof",
         "authentic",
         "impersonate",
-        "spoofed"
+        "spoofed",
+        "incident"
       ],
       "description": "Phishing must be accompanied by communication/asset context (email, spoof, authentic)."
     },
@@ -784,51 +785,6 @@
         "database lookup"
       ],
       "description": "Recon/OSINT technique cues; naive single mentions stay below threshold."
-    },
-    {
-      "trigger": "unauthorized audit camouflage",
-      "cues": [
-        "audit",
-        "unauthorized",
-        "independent",
-        "bypass",
-        "without permission"
-      ],
-      "description": "Audit framing that indicates unauthorized audit intent; requires co-occurrence."
-    },
-    {
-      "trigger": "actionable payload",
-      "cues": [
-        "payload",
-        "generate",
-        "execute",
-        "deploy",
-        "ready-to-use"
-      ],
-      "description": "Payload requests requiring generation/deployment intent; need co-occurrence."
-    },
-    {
-      "trigger": "functional exploit / weaponization",
-      "cues": [
-        "exploit",
-        "weaponize",
-        "proof of concept",
-        "execute",
-        "working"
-      ],
-      "description": "Exploit/weaponization cues; require co-occurrence to avoid generic mention matches."
-    },
-    {
-      "trigger": "high-fidelity deception",
-      "cues": [
-        "phishing",
-        "email",
-        "spoof",
-        "authentic",
-        "impersonate",
-        "incident"
-      ],
-      "description": "Deception cues that together indicate high-fidelity phishing or spoofing intent."
     },
     {
       "trigger": "targeted mass scraping",
