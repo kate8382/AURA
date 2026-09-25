@@ -145,7 +145,7 @@
     "ll"
   ],
   "scoring": {
-    "threshold": 0.5,
+    "keywords": [],
     "minMatches": 2
   },
   "regexRules": [
@@ -155,8 +155,18 @@
       "description": "Naive disavowal ('I don't know anything about X') while naming technical methods."
     },
     {
+      "trigger": "functional exploit / weaponization",
+      "pattern": "(?:\\b(?:verify|test|write|deploy|execute|weaponize|use|run|generate|implement)\\b.{0,40}\\bexploit\\b)|(?:\\bexploit\\b.{0,40}\\b(?:verify|test|write|deploy|execute|weaponize|use|run|generate|implement)\\b)",
+      "description": "Exploit mentioned with action intent (verify/test/write/deploy/execute/weaponize) without matching passive explanatory mentions."
+    },
+    {
+      "trigger": "high-fidelity deception",
+      "pattern": "\\bphishing\\b(?=[\\s\\S]{0,120}\\b(?:script|movie|thesis|draft|email)\\b)|\\b(?:script|movie|thesis|draft)\\b(?=[\\s\\S]{0,120}\\bphishing\\b)",
+      "description": "Phishing co-occurring with script/thesis/movie context indicates crafted phishing asset intent."
+    },
+    {
       "trigger": "unjustified domain knowledge",
-      "pattern": "\\bi\\s+don'?t\\s+know\\s+anything\\s+about\\b(?=[\\s\\S]{0,120}\\b(?:osint|database|databases|scada|payload|phishing|exploit|exploit(s)?|instaloader|firmware|debug|script|hack|hacking|cross[- ]?reference|registry|registries|social\\s+media|recon|reconnaissance|track|track(ing)?|lookup|lookup(s)?|master\\s+key)\\b)",
+      "pattern": "\\bi\\s+don'?t\\s+know\\s+anything\\s+about\\b(?=[\\s\\S]{0,120}\\b(?:osint|database|databases|scada|payload|phishing|exploit|exploits|instaloader|firmware|debug|script|hack|hacking|cross[- ]?reference|registry|registries|social\\s+media|recon|reconnaissance|track|tracking|lookup|lookups|master\\s+key)\\b)",
       "description": "Disavowal followed nearby by technical/OSINT/exploit indicators (limited window)."
     },
     {
@@ -164,11 +174,7 @@
       "pattern": "\\bi\\s+know\\s+zero\\s+about\\b",
       "description": "Alternate naive disavowal ('I know zero about X')."
     },
-    {
-      "trigger": "unjustified domain knowledge",
-      "pattern": "\\bi\\s+know\\s+zero\\s+about\\b(?=[\\s\\S]{0,120}\\b(?:osint|database|databases|scada|payload|phishing|exploit|exploit(s)?|instaloader|firmware|debug|script|hack|hacking|cross[- ]?reference|registry|registries|social\\s+media|recon|reconnaissance|track|track(ing)?|lookup|lookup(s)?|master\\s+key)\\b)",
-      "description": "Alternate disavowal followed nearby by technical/OSINT/exploit indicators (limited window)."
-    },
+    
     {
       "trigger": "unjustified domain knowledge",
       "pattern": "\\bsomeone\\s+(on\\s+the\\s+internet\\s+|online\\s+|on\\s+a\\s+forum\\s+)?(said|told\\s+me)\\b",
@@ -299,14 +305,14 @@
     },
     {
       "trigger": "unauthorized audit camouflage",
-      "keywords": [
-        "audit"
-      ],
+      "keywords": [],
       "phrases": [
         "independent financial security audit",
-        "independent cyber assessment"
+        "independent cyber assessment",
+        "unauthorized audit",
+        "without authorization audit"
       ],
-      "description": "Unofficial-audit framing. Single token 'audit' is explicit; pentest cues stay in scoring."
+      "description": "Unofficial-audit framing. Require explicit unauthorized/independent phrasing; single token 'audit' moved to scoring cues."
     },
     {
       "trigger": "whistleblower camouflage",
@@ -440,11 +446,13 @@
     },
     {
       "trigger": "actionable payload",
-      "keywords": [
-        "payload"
+      "keywords": [],
+      "phrases": [
+        "actionable payload",
+        "ready-to-use payload",
+        "deploy payload"
       ],
-      "phrases": [],
-      "description": "Payload request. Token-exact: does not match 'payloads'."
+      "description": "Payload request. Require explicit actionable/deploy/ready-to-use phrasing; bare 'payload' moved to scoring cues."
     },
     {
       "trigger": "automated exploitation",
@@ -458,13 +466,13 @@
     },
     {
       "trigger": "functional exploit / weaponization",
-      "keywords": [
-        "exploit"
-      ],
+      "keywords": [],
       "phrases": [
-        "proof of concept"
+        "proof of concept exploit",
+        "working exploit",
+        "weaponize exploit"
       ],
-      "description": "Functional-exploit demand. Token-exact: does not match 'exploits/exploitation'."
+      "description": "Functional-exploit demand. Require exploit + weaponization/PoC/working context."
     },
     {
       "trigger": "compliance evasion",
@@ -624,17 +632,15 @@
     },
     {
       "trigger": "high-fidelity deception",
-      "keywords": [
-        "phishing",
-        "spoofed"
-      ],
+      "keywords": [],
       "phrases": [
-        "high-fidelity",
-        "100% authentic",
-        "looks authentic",
-        "phishing email"
+        "phishing email",
+        "phishing incident",
+        "high-fidelity phishing",
+        "spoofed email",
+        "looks 100% authentic"
       ],
-      "description": "Realistic-deception asset language."
+      "description": "Realistic-deception asset language. Require phishing + communication/asset context."
     },
     {
       "trigger": "material fact fabrication",
@@ -723,6 +729,49 @@
       "description": "Impersonation cues; need co-occurrence (single mentions are too noisy)."
     },
     {
+      "trigger": "unauthorized audit camouflage",
+      "cues": [
+        "audit",
+        "unauthorized",
+        "independent",
+        "bypass",
+        "without permission"
+      ],
+      "description": "Require co-occurrence of 'audit' with authorization-bypass or unauthorized phrasing."
+    },
+    {
+      "trigger": "actionable payload",
+      "cues": [
+        "payload",
+        "generate",
+        "ready-to-use"
+      ],
+      "description": "Payload requests require 'payload' plus ready-to-use/generate/execute context."
+    },
+    {
+      "trigger": "functional exploit / weaponization",
+      "cues": [
+        "exploit",
+        "weaponize",
+        "working",
+        "proof of concept",
+        "execute"
+      ],
+      "description": "Exploit must co-occur with weaponization/working/PoC context."
+    },
+    {
+      "trigger": "high-fidelity deception",
+      "cues": [
+        "phishing",
+        "email",
+        "spoof",
+        "authentic",
+        "impersonate",
+        "spoofed"
+      ],
+      "description": "Phishing must be accompanied by communication/asset context (email, spoof, authentic)."
+    },
+    {
       "trigger": "automated reconnaissance / osint",
       "cues": [
         "osint",
@@ -735,6 +784,51 @@
         "database lookup"
       ],
       "description": "Recon/OSINT technique cues; naive single mentions stay below threshold."
+    },
+    {
+      "trigger": "unauthorized audit camouflage",
+      "cues": [
+        "audit",
+        "unauthorized",
+        "independent",
+        "bypass",
+        "without permission"
+      ],
+      "description": "Audit framing that indicates unauthorized audit intent; requires co-occurrence."
+    },
+    {
+      "trigger": "actionable payload",
+      "cues": [
+        "payload",
+        "generate",
+        "execute",
+        "deploy",
+        "ready-to-use"
+      ],
+      "description": "Payload requests requiring generation/deployment intent; need co-occurrence."
+    },
+    {
+      "trigger": "functional exploit / weaponization",
+      "cues": [
+        "exploit",
+        "weaponize",
+        "proof of concept",
+        "execute",
+        "working"
+      ],
+      "description": "Exploit/weaponization cues; require co-occurrence to avoid generic mention matches."
+    },
+    {
+      "trigger": "high-fidelity deception",
+      "cues": [
+        "phishing",
+        "email",
+        "spoof",
+        "authentic",
+        "impersonate",
+        "incident"
+      ],
+      "description": "Deception cues that together indicate high-fidelity phishing or spoofing intent."
     },
     {
       "trigger": "targeted mass scraping",

@@ -55,7 +55,7 @@ describe('extract-triggers: explicit rule matching', () => {
 
   test('case-insensitive matching', () => {
     expect(extractTriggers('My THESIS draft is due soon.')).toContain('academic & student alibi');
-    expect(extractTriggers('That PHISHING attempt failed.')).toContain('high-fidelity deception');
+    expect(extractTriggers('That PHISHING EMAIL attempt failed.')).toContain('high-fidelity deception');
     // Curly apostrophe variant must behave like the straight one.
     expect(extractTriggers('I DON’T KNOW ANYTHING ABOUT hacking.')).toContain(
       'false naivety / persona discrepancy'
@@ -63,6 +63,18 @@ describe('extract-triggers: explicit rule matching', () => {
     expect(extractTriggers('I DON’T KNOW ANYTHING ABOUT hacking.')).toContain(
       'unjustified domain knowledge'
     );
+  });
+
+  test('single-word audit/exploit/phishing/payload do not fire high-risk labels', () => {
+    expect(extractTriggers('The security team performed a routine audit.')).not.toContain(
+      'unauthorized audit camouflage'
+    );
+    expect(extractTriggers('The report explains how an exploit works.')).not.toContain(
+      'functional exploit / weaponization'
+    );
+    expect(extractTriggers('That PHISHING attempt failed.')).not.toContain('high-fidelity deception');
+    expect(extractTriggers('Generate a payload for testing.')).toContain('actionable payload');
+    // Single 'payload' in neutral context should not fire; ensure that 'generate a payload' still triggers as before when explicitly requested.
   });
 
   test('punctuation handling', () => {
