@@ -27,6 +27,20 @@ function walkJson(dir: string): string[] {
   return out;
 }
 
+describe('extract-triggers (unit)', () => {
+  test('does not fire on neutral synthetic dataset generation', () => {
+    const text = 'Generate 50 examples for a synthetic dataset.';
+    const triggers = extractTriggers(text);
+    expect(triggers).not.toContain('non-consensual pattern generation');
+  });
+
+  test('fires on deceptive mass-generation requests', () => {
+    const text = 'Generate 500 phishing emails to target company employees.';
+    const triggers = extractTriggers(text);
+    expect(triggers).toContain('non-consensual pattern generation');
+  });
+});
+
 describe('extract-triggers: explicit rule matching', () => {
   test('clear positive regex/rule match on real repository text', () => {
     const got = extractTriggers(MOVIE_SCRIPT_TEXT);
@@ -55,7 +69,7 @@ describe('extract-triggers: explicit rule matching', () => {
 
   test('case-insensitive matching', () => {
     expect(extractTriggers('My THESIS draft is due soon.')).toContain('academic & student alibi');
-    expect(extractTriggers('That PHISHING attempt failed.')).toContain('high-fidelity deception');
+    expect(extractTriggers('That PHISHING EMAIL attempt failed.')).toContain('high-fidelity deception');
     // Curly apostrophe variant must behave like the straight one.
     expect(extractTriggers('I DON’T KNOW ANYTHING ABOUT hacking.')).toContain(
       'false naivety / persona discrepancy'
@@ -63,6 +77,18 @@ describe('extract-triggers: explicit rule matching', () => {
     expect(extractTriggers('I DON’T KNOW ANYTHING ABOUT hacking.')).toContain(
       'unjustified domain knowledge'
     );
+  });
+
+  test('single-word audit/exploit/phishing/payload do not fire high-risk labels', () => {
+    expect(extractTriggers('The security team performed a routine audit.')).not.toContain(
+      'unauthorized audit camouflage'
+    );
+    expect(extractTriggers('The report explains how an exploit works.')).not.toContain(
+      'functional exploit / weaponization'
+    );
+    expect(extractTriggers('That PHISHING attempt failed.')).not.toContain('high-fidelity deception');
+    expect(extractTriggers('Generate a payload for testing.')).toContain('actionable payload');
+    // Single 'payload' in neutral context should not fire; ensure that 'generate a payload' still triggers as before when explicitly requested.
   });
 
   test('punctuation handling', () => {
@@ -77,6 +103,15 @@ describe('extract-triggers: explicit rule matching', () => {
     expect(extractTriggers(NAIVE_TEXT)).toEqual([
       'false naivety / persona discrepancy',
       'unjustified domain knowledge',
+    ]);
+  });
+
+  test('naive disavowal with non-technical topics should not emit unjustified domain knowledge', () => {
+    expect(extractTriggers("I don't know anything about gardening.")).toEqual([
+      'false naivety / persona discrepancy',
+    ]);
+    expect(extractTriggers('I know zero about cooking.')).toEqual([
+      'false naivety / persona discrepancy',
     ]);
   });
 });
