@@ -443,6 +443,10 @@ export function validateExtractionConfig(
     throw new Error('extract-triggers: "scoringCues" must be an array');
   }
   const scoringCues: ValidatedExtractionConfig['scoringCues'] = [];
+  // Merge scoringCues definitions for the same trigger (best-effort): if the
+  // config contains multiple scoringCues objects for one trigger (copy/paste
+  // artifact), merge their cues and produce a single runtime definition.
+  const scoringMap = new Map<string, { cues: Set<string>; cueTokens: string[][]; count: number }>();
   (config.scoringCues || []).forEach((set, i) => {
     if (!set || typeof set !== 'object' || Array.isArray(set)) {
       throw new Error(`extract-triggers: scoringCues[${i}] must be an object`);
@@ -451,27 +455,37 @@ export function validateExtractionConfig(
     if (!Array.isArray(set.cues) || set.cues.length === 0) {
       throw new Error(`extract-triggers: scoringCues[${i}] must define a non-empty "cues" array`);
     }
-    const cues: string[] = [];
-    const cueTokens: string[][] = [];
+    let entry = scoringMap.get(trigger);
+    if (!entry) {
+      entry = { cues: new Set<string>(), cueTokens: [], count: 0 };
+      scoringMap.set(trigger, entry);
+    }
+    entry.count++;
     set.cues.forEach((cue, j) => {
       if (typeof cue !== 'string' || !cue.trim()) {
         throw new Error(`extract-triggers: scoringCues[${i}] cues[${j}] must be a non-empty string`);
       }
-      // Scoring cues match on content tokens (stopwords removed), so a cue
-      // consisting only of stopwords can never match and is a config error.
       const toks = tokenize(cue, stopwords);
       if (toks.length === 0) {
         throw new Error(
-          `extract-triggers: scoringCues[${i}] cues[${j}] ${JSON.stringify(
-            cue
-          )} has no content tokens after stopword removal`
+          `extract-triggers: scoringCues[${i}] cues[${j}] ${JSON.stringify(cue)} has no content tokens after stopword removal`
         );
       }
-      cues.push(cue);
-      cueTokens.push(toks);
+      if (!entry!.cues.has(cue)) {
+        entry!.cues.add(cue);
+        entry!.cueTokens.push(toks);
+      }
     });
-    scoringCues.push({ trigger, cues, cueTokens });
   });
+
+  for (const [trigger, data] of scoringMap.entries()) {
+    if (data.count > 1) {
+      console.warn(
+        `extract-triggers: merged ${data.count} scoringCues definitions for the same trigger: ${trigger}`
+      );
+    }
+    scoringCues.push({ trigger, cues: Array.from(data.cues), cueTokens: data.cueTokens });
+  }
 
   // -- duplicate detection (warnings, not hard errors) --
   try {
@@ -556,8 +570,6 @@ export function createExtractor(options?: ExtractorOptions): TriggerExtractor {
     for (const t of rawTokens) {
       if (!validated.stopwords.has(t)) contentTokenSet.add(t);
     }
-    // Prepare content tokens by filtering out stopwords from the raw tokens.
-    const contentTokens = rawTokens.filter((t) => !validated.stopwords.has(t));
 
     // 1. Regex rules (case-insensitive; text pre-normalized for apostrophes).
     validated.regexRules.forEach((rule, i) => {
@@ -593,6 +605,9 @@ export function createExtractor(options?: ExtractorOptions): TriggerExtractor {
     //    score = matchedCues / totalCues; fires only when
     //    matchedCues >= minMatches AND score >= threshold, so a single
     //    generic cue can never create a trigger by itself.
+    // prepare ordered content tokens (stopwords removed) for windowed matching
+    const contentTokens = rawTokens.filter((t) => !validated.stopwords.has(t));
+
     for (const set of validated.scoringCues) {
       if (found.has(set.trigger)) continue;
       const matchedCues: string[] = [];

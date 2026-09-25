@@ -174,7 +174,6 @@
       "pattern": "\\bi\\s+know\\s+zero\\s+about\\b",
       "description": "Alternate naive disavowal ('I know zero about X')."
     },
-    
     {
       "trigger": "unjustified domain knowledge",
       "pattern": "\\bsomeone\\s+(on\\s+the\\s+internet\\s+|online\\s+|on\\s+a\\s+forum\\s+)?(said|told\\s+me)\\b",
