@@ -169,7 +169,7 @@ export class NormalizePerCases {
             const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
             console.error('Error generating signal_ids for', obj.case_id || filePath, msg);
             if (this.dry) {
-              console.warn('Dry-run: continuing despite generate error');
+              console.warn(`Dry-run: signal_ids were NOT calculated for ${obj.case_id || filePath}: ${msg}`);
             } else {
               throw err;
             }
@@ -243,7 +243,7 @@ export class NormalizePerCases {
           const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
           console.error('Error generating signal_ids for', obj.case_id || filePath, msg);
           if (this.dry) {
-            console.warn('Dry-run: continuing despite generate error');
+            console.warn(`Dry-run: signal_ids were NOT calculated for ${obj.case_id || filePath}: ${msg}`);
           } else {
             throw err;
           }
