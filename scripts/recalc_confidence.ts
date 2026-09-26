@@ -222,7 +222,7 @@ export class RecalcConfidence {
       const logs = (data as any).legal_intent_logs || {};
       for (const table of Object.keys(logs)) {
         const entries: Entry[] = logs[table] || [];
-        for (const e of entries) updateCase(e);
+        for (const e of entries) await updateCase(e);
       }
       (data as any).legal_intent_logs = logs;
       await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
@@ -234,12 +234,12 @@ export class RecalcConfidence {
     if (categoryKeys.length > 0) {
       for (const ck of categoryKeys) {
         const arr: Entry[] = (data as any)[ck] || [];
-        for (const e of arr) updateCase(e);
+        for (const e of arr) await updateCase(e);
         // reorder entries in-place to canonical ordering
         (data as any)[ck] = arr.map((it: Entry) => reorderCaseKeys(it));
       }
     } else if (data.case_id) {
-      updateCase(data as Entry);
+      await updateCase(data as Entry);
       const ordered = reorderCaseKeys(data as Entry);
       Object.assign(data, ordered);
     } else {
@@ -247,10 +247,10 @@ export class RecalcConfidence {
         const v = (data as any)[k];
         if (Array.isArray(v)) {
           for (const item of v) {
-            if (item && typeof item === 'object' && item.case_id) updateCase(item);
+            if (item && typeof item === 'object' && item.case_id) await updateCase(item);
           }
         } else if (v && typeof v === 'object' && v.case_id) {
-          updateCase(v);
+          await updateCase(v);
         }
       }
     }
