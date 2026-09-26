@@ -1,0 +1,66 @@
+%% Mermaid diagram: AURA pipeline v3
+%% Place this file in docs/diagrams and generate PNG with mermaid-cli (mmdc)
+
+flowchart LR
+  %% Repository data sources
+  PC["public_cases\n(JSON files)"]
+  CFG["config/\n(trigger-extraction.json, signal-mapping.json, trigger-weights.json)"]
+
+  subgraph Normalization
+    direction TB
+    N["NormalizePerCases\n(scripts/normalize-percases.ts)"]
+    E["Extractor\n(scripts/extract-triggers.ts)"]
+  end
+
+  subgraph Weighting_and_Mapping
+    direction TB
+    GW["GenerateTriggerWeights\n(scripts/generate-trigger-weights.ts)"]
+    MAP["Signal Mapping\n(config/signal-mapping.json)"]
+    TW["Trigger Weights\n(config/trigger-weights.json)"]
+  end
+
+  subgraph Recalc_and_Policy
+    direction TB
+    RC["RecalcConfidence\n(scripts/recalc_confidence.ts)"]
+    CC["CrossCheckAdapter\n(scripts/policy/crossCheckAdapter.ts)"]
+    PE["PolicyEvaluator\n(scripts/policy/evaluateDecision.ts)"]
+  end
+
+  subgraph CI_and_Tests
+    direction TB
+    T["Jest tests\n(scripts/__tests__)"]
+    WF[".github/workflows\n(CI jobs)"]
+  end
+
+  %% Flow arrows
+  PC --> N
+  N -->|"--extract-triggers (opt-in)"| E
+  E --> GW
+  CFG --> E
+  CFG --> GW
+  GW --> MAP
+  GW --> TW
+  MAP --> RC
+  TW --> RC
+  N -->|"--apply-signal-ids (opt-in)"| GW
+  RC --> CC
+  RC --> PE
+  CC --> RC
+  PE --> RC
+
+  %% Outputs
+  RC --> OUT["Normalized & recalculated\ncases (JSON)\n(reports, audit fields)"]
+  GW -->|"writes"| TW
+  MAP -->|"canonical vocab used by extractor"| E
+
+  %% Tests / CI connections
+  T --> E
+  T --> GW
+  T --> RC
+  WF --> T
+  WF --> GW
+  WF --> RC
+
+  %% Notes
+  classDef cfg fill:#f9f,stroke:#333,stroke-width:1px;
+  class CFG,MAP,TW cfg;
