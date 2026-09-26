@@ -8,7 +8,27 @@
   },
   "license": "Apache-2.0",
   "dataLicense": "CC-BY-NC-4.0",
-  "keywords": [],
+  "keywords": [
+    "AURA",
+    "aura",
+    "llm-security",
+    "ai-guardrails",
+    "ai-safety",
+    "threat-detection",
+    "risk-assessment",
+    "security-heuristics",
+    "signals",
+    "triggers",
+    "policy-engine"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kate8382/AURA.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kate8382/AURA/issues"
+  },
+  "homepage": "https://github.com/kate8382/AURA#readme",
   "scripts": {
     "validate": "node -r ts-node/register scripts/validate-percases.ts public_cases",
     "test": "jest",
