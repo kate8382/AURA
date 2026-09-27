@@ -53,4 +53,3 @@ jobs:
             Run `npm run gen:triggers` locally to reproduce.
           branch: "auto/regenerate-trigger-weights-${{ github.run_id }}"
           base: main
-          path: config/trigger-weights.json
