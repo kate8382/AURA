@@ -1,4 +1,5 @@
 import { mapConfidence, RecalcConfidence } from '../recalc_confidence';
+import CrossCheckAdapter from '../policy/crossCheckAdapter';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -46,6 +47,83 @@ describe('recalc', () => {
     expect(e.confidence).toBe(0.9);
     expect(typeof e.confidence_raw).toBe('undefined');
     expect(typeof e.decision).toBe('undefined');
+  });
+
+  test('recalc persists updates after async cross-checks complete', async () => {
+    const tmpDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'aura-recalc-crosscheck-')
+    );
+    const filePath = path.join(tmpDir, 'crosscheck.json');
+
+    const payload = {
+      case_id: 'T-CROSSCHECK',
+      category: 'access',
+      scenarios: [{ triggers: ['urgency'] }],
+      confidence: 0.01,
+      cross_check: {
+        questions: [
+          {
+            id: 'cc-delay',
+            title: 'Delayed check',
+            type: 'boolean',
+            evidence_weight: 0.1
+          }
+        ]
+      }
+    };
+
+    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
+
+    const adapter = CrossCheckAdapter;
+    const originalEvaluate = adapter.evaluateCrossChecks;
+
+    adapter.evaluateCrossChecks = async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      return {
+        auditEntries: [
+          {
+            id: 'cc-delay',
+            verifier: 'adapter:test-delay',
+            result: true,
+            ok: true,
+            weight_applied: 0.1,
+            ts: new Date().toISOString()
+          }
+        ],
+        total_weight: 0.1,
+        failed_requirements: [],
+        decisionHints: {
+          veto: false,
+          require_manual_review: false,
+          pending: false
+        }
+      };
+    };
+
+    try {
+      const result = await new RecalcConfidence().recalc(
+        filePath,
+        false,
+        0.0
+      );
+
+      expect(result.count).toBe(1);
+
+      const out = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+      expect(out.confidence).not.toBe(0.01);
+      expect(out.confidence_raw).toBeGreaterThan(0);
+      expect(out.cross_check_audit).toHaveLength(1);
+      expect(out.cross_check_audit[0].id).toBe('cc-delay');
+      expect(out.cross_check_audit[0].ok).toBe(true);
+    } finally {
+      adapter.evaluateCrossChecks = originalEvaluate;
+
+      try {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      } catch (e) {}
+    }
   });
 });
 
