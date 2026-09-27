@@ -1,6 +1,7 @@
 name: Regenerate trigger-weights
 
 on:
+  workflow_dispatch: {}
   schedule:
     # weekly on Sunday at 03:00 UTC
     - cron: '0 3 * * 0'
