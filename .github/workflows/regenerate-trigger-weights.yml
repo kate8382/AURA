@@ -1,11 +1,20 @@
 name: Regenerate trigger-weights
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      create_pr:
+        description: 'Create a Pull Request when changes are detected (manual runs only)'
+        required: false
+        default: 'false'
   schedule:
     # weekly on Sunday at 03:00 UTC
     - cron: '0 3 * * 0'
 
+# Minimal read permissions — workflow will not push or create PRs.
+permissions:
+  contents: read
+  pull-requests: read
 jobs:
   regenerate:
     runs-on: ubuntu-latest
@@ -18,7 +27,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm ci
@@ -38,18 +47,10 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create Pull Request with changes
-        if: steps.check_changes.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: regenerate trigger-weights.json"
-          committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
-          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
-          title: "Regenerate trigger-weights.json"
-          body: |
-            Automated regeneration of `config/trigger-weights.json` from `public_cases/`.
+      - name: Exit early when no changes
+        if: steps.check_changes.outputs.changed == 'false'
+        run: |
+          echo "No changes detected; nothing to push or create. Exiting."
+          exit 0
 
-            Run `npm run gen:triggers` locally to reproduce.
-          branch: "auto/regenerate-trigger-weights-${{ github.run_id }}"
-          base: main
+      # Pull request creation removed by request — scheduled runs will not push or create PRs.
