@@ -149,7 +149,17 @@ export class GenerateTriggerWeights {
    * Возвращает объект с ключами-триггерами и значениями-весами, отсортированный по весу.
    */
   computeWeights(counts: CountMap, totalDocs?: number) {
-    const entries = Object.keys(counts).map(k => ({ k, c: counts[k] }));
+    // filter out visual section headers or invalid keys (e.g. lines starting with '===')
+    const entries = Object.keys(counts)
+      .filter(k => {
+        if (!k || typeof k !== 'string') return false;
+        const s = k.trim();
+        if (s.startsWith('===')) return false;
+        // require at least one letter/number in the key
+        if (!/[a-z0-9]/i.test(s)) return false;
+        return true;
+      })
+      .map(k => ({ k, c: counts[k] }));
     if (entries.length === 0) return { triggerWeights: {}, entries: [] };
     // support different weighting methods
     const N = typeof totalDocs === 'number' && totalDocs > 0 ? totalDocs : 0;
@@ -166,9 +176,15 @@ export class GenerateTriggerWeights {
       return { trig: e.k, count: e.c, raw: e.c };
     });
     const maxRaw = Math.max(...raws.map(r => r.raw));
+    // Scaling strategy for TF-IDF: preserve relative ordering but scale absolute magnitude
+    // so that the top trigger maps to desiredTopWeight (e.g. 0.6). For linear method we
+    // keep original topWeight behavior to preserve backward compatibility.
+    const desiredTop = (this.weightMethod === 'tfidf') ? 0.6 : this.topWeight;
     const computed = raws.map(r => {
-      const norm = maxRaw > 0 ? r.raw / maxRaw : 0;
-      const w = Math.max(this.minWeight, Math.round(norm * this.topWeight * 100) / 100);
+      const baseNorm = maxRaw > 0 ? r.raw / maxRaw : 0;
+      // Optional non-linear compression could be applied here; for now keep linear mapping
+      const scaled = baseNorm * desiredTop;
+      const w = Math.max(this.minWeight, Math.round(scaled * 100) / 100);
       return { trig: r.trig, count: r.count, weight: w };
     });
     computed.sort((a, b) => {
@@ -231,32 +247,177 @@ export class GenerateTriggerWeights {
     }
 
     // Preserve existing triggers from current config so we don't drop keys that are expected by other parts of the code/tests.
+    // Load existing config to preserve any human-maintained keys (including visual
+    // section headers of the form "=== ... ===") and to reuse global parameters
+    // if present. We will NOT treat section headers as triggers when computing weights.
+    let existingConfig: any = null;
+    const preservedSections: Record<string, any> = {};
     const cfgPath = path.join(this.repoRoot, 'config', 'trigger-weights.json');
     if (fs.existsSync(cfgPath)) {
       try {
         const raw = fs.readFileSync(cfgPath, 'utf8');
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.triggerWeights && typeof parsed.triggerWeights === 'object') {
-          for (const k of Object.keys(parsed.triggerWeights)) {
-            // Skip legacy or SID-like keys (e.g. keys that start with 'sig-') when preserving
-            // so we don't keep signal_id tokens in the trigger-weights output. Only preserve
-            // human-readable trigger keys.
-            if (/^sig[-_]/i.test(k)) continue;
+        existingConfig = JSON.parse(raw);
+        if (existingConfig && existingConfig.triggerWeights && typeof existingConfig.triggerWeights === 'object') {
+          for (const k of Object.keys(existingConfig.triggerWeights)) {
+            const s = String(k || '').trim();
+            // preserve visual/section header entries verbatim for output, but DO NOT
+            // include them in counts used for weight computation
+            if (s.startsWith('===')) {
+              preservedSections[k] = existingConfig.triggerWeights[k];
+              continue;
+            }
+            // keep human-maintained trigger keys present in existing config so they are
+            // not dropped; but add them to counts only as zero if they don't appear in corpus
+            if (/^sig[-_]/i.test(k)) continue; // skip SID-like keys
             if (!(k in counts)) counts[k] = 0;
           }
         }
       } catch (err) {
         // ignore parse errors and continue
+        existingConfig = null;
       }
     }
 
-    const { triggerWeights, entries } = this.computeWeights(counts, totalCases);
+    // Compute both linear and tfidf maps for calibration and selection
+    const originalMethod = this.weightMethod;
+    this.weightMethod = 'linear';
+    const linearResult = this.computeWeights(counts, totalCases);
+    const linearMap = linearResult.triggerWeights;
+    this.weightMethod = 'tfidf';
+    const tfidfResult = this.computeWeights(counts, totalCases);
+    const tfidfMap = tfidfResult.triggerWeights;
+    // restore original
+    this.weightMethod = originalMethod;
+
+    // Choose which weights to output
+    const baseMap = (originalMethod === 'tfidf') ? tfidfMap : linearMap;
+
+     // Choose which weights to output. If TF-IDF is selected, apply percentile-based
+    // tiering to map raw tfidf scores into curator-friendly ranges (critical, high, camo).
+    /**
+     const baseMap = (originalMethod === 'tfidf') ? (() => {
+      const raw = Object.assign({}, tfidfMap);
+      // build scored list excluding preserved section headers and non-positive values
+      const scored = Object.keys(raw)
+        .filter(k => !preservedSections[k])
+        .map(k => ({ k, v: Number(raw[k] || 0) }))
+        .filter(x => Number.isFinite(x.v) && x.v > 0);
+
+      if (scored.length === 0) return raw;
+
+      const values = scored.map(s => s.v).sort((a, b) => a - b);
+      const n = values.length;
+      // tiers (configurable if needed)
+      const pctCritical = 0.10; // top 10%
+      const pctHigh = 0.30; // next 30%
+      // thresholds (value at which groups split)
+      const idxCrit = Math.max(0, Math.floor((1 - pctCritical) * n));
+      const idxHigh = Math.max(0, Math.floor((1 - pctCritical - pctHigh) * n));
+      const threshCrit = values[Math.min(n - 1, idxCrit)];
+      const threshHigh = values[Math.min(n - 1, idxHigh)];
+
+      // output ranges per tier
+      const CRIT_MIN = 0.40, CRIT_MAX = 0.60;
+      const HIGH_MIN = 0.25, HIGH_MAX = 0.40;
+      const CAMO_MIN = 0.01, CAMO_MAX = 0.05;
+
+      const groupMap: Record<string, number> = {};
+
+      const groupValues: { crit: number[]; high: number[]; camo: number[] } = { crit: [], high: [], camo: [] };
+      for (const s of scored) {
+        if (s.v >= threshCrit) groupValues.crit.push(s.v);
+        else if (s.v >= threshHigh) groupValues.high.push(s.v);
+        else groupValues.camo.push(s.v);
+      }
+
+      const minMax = (arr: number[]) => ({ min: arr.length ? Math.min(...arr) : 0, max: arr.length ? Math.max(...arr) : 0 });
+      const critMM = minMax(groupValues.crit);
+      const highMM = minMax(groupValues.high);
+      const camoMM = minMax(groupValues.camo);
+
+      const scale = (v: number, inMin: number, inMax: number, outMin: number, outMax: number) => {
+        if (inMax <= inMin) return Number(((outMin + outMax) / 2).toFixed(2));
+        const t = (v - inMin) / (inMax - inMin);
+        return Number((outMin + t * (outMax - outMin)).toFixed(2));
+      };
+
+      for (const s of scored) {
+        let scaled = 0;
+        if (s.v >= threshCrit) {
+          scaled = scale(s.v, critMM.min || threshCrit, critMM.max || s.v, CRIT_MIN, CRIT_MAX);
+        } else if (s.v >= threshHigh) {
+          scaled = scale(s.v, highMM.min || threshHigh, highMM.max || s.v, HIGH_MIN, HIGH_MAX);
+        } else {
+          scaled = scale(s.v, camoMM.min || 0, camoMM.max || s.v, CAMO_MIN, CAMO_MAX);
+        }
+        groupMap[s.k] = scaled;
+      }
+
+      // apply scaled values back into raw map (leave preserved sections untouched)
+      for (const k of Object.keys(groupMap)) raw[k] = groupMap[k];
+      return raw;
+    })() : linearMap;
+    **/
+
+    // Calibrate normAlpha: prefer a stable heuristic and clamp to avoid tiny values
+    let chosenAlpha = (existingConfig && typeof existingConfig.normAlpha === 'number') ? existingConfig.normAlpha : (originalMethod === 'tfidf' ? 0.35 : 0.3);
+    try {
+      const files2 = this.walkDir(casesDir);
+      const linearRaws: number[] = [];
+      const tfidfRaws: number[] = [];
+      for (const f of files2) {
+        const cases = this.extractCasesFromFile(f);
+        for (const c of cases) {
+          const uniq = new Set<string>();
+          if (Array.isArray((c as any).scenarios)) {
+            for (const s of (c as any).scenarios) {
+              if (s && Array.isArray(s.triggers)) for (const t of s.triggers) {
+                const n = this.normalizeTrigger(t);
+                if (n) uniq.add(n);
+              }
+            }
+          }
+          let lsum = 0;
+          let tsum = 0;
+          for (const trig of uniq) {
+            lsum += linearMap[trig] || 0;
+            tsum += tfidfMap[trig] || 0;
+          }
+          linearRaws.push(lsum);
+          tfidfRaws.push(tsum);
+        }
+      }
+      if (linearRaws.length > 0 && tfidfRaws.length === linearRaws.length) {
+        const alphaLinear = 0.3;
+        const meanLinear = linearRaws.reduce((s, v) => s + v, 0) / linearRaws.length;
+        const meanTfidf = tfidfRaws.reduce((s, v) => s + v, 0) / tfidfRaws.length;
+        if (meanTfidf > 0) {
+          let a = alphaLinear * (meanLinear / meanTfidf);
+          if (!Number.isFinite(a) || Number.isNaN(a)) a = chosenAlpha;
+          if (a < 0.1) a = 0.1;
+          if (a > 1.0) a = 1.0;
+          if (originalMethod === 'tfidf') chosenAlpha = Number(a.toFixed(2));
+        }
+      }
+    } catch (err) {
+      // ignore calibration errors and fall back to defaults
+    }
+
+    // Merge preserved section headers back into the output map so comments remain in the file
+    const triggerWeights: Record<string, any> = Object.assign({}, baseMap);
+    for (const hk of Object.keys(preservedSections)) triggerWeights[hk] = preservedSections[hk];
+
+    const entries = Object.keys(triggerWeights).map(k => ({ trig: k, count: counts[k] || 0, weight: triggerWeights[k] }));
+
+    // Respect existing global params if present in previous config; otherwise fall back to class defaults
     const out = {
       triggerWeights,
-      defaultTriggerWeight: this.minWeight,
-      crossCheckWeight: this.crossCheckWeight,
-      signalIdWeight: this.signalIdWeight,
-      maxBoost: this.maxBoost
+      defaultTriggerWeight: (existingConfig && typeof existingConfig.defaultTriggerWeight === 'number') ? existingConfig.defaultTriggerWeight : this.minWeight,
+      crossCheckWeight: (existingConfig && typeof existingConfig.crossCheckWeight === 'number') ? existingConfig.crossCheckWeight : this.crossCheckWeight,
+      signalIdWeight: (existingConfig && typeof existingConfig.signalIdWeight === 'number') ? existingConfig.signalIdWeight : this.signalIdWeight,
+      maxBoost: (existingConfig && typeof existingConfig.maxBoost === 'number') ? existingConfig.maxBoost : this.maxBoost,
+      normAlpha: chosenAlpha,
+      weightMethod: this.weightMethod
     };
     const outPath = this.writeConfig(out);
 
