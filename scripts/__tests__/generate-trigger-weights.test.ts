@@ -48,6 +48,47 @@ describe('generate-trigger-weights script', () => {
     // remove tmp
     await fsp.rm(tmp, { recursive: true, force: true });
   });
+
+  test('generates config with tfidf method (env)', async () => {
+    const tmp = await fsp.mkdtemp(path.join(os.tmpdir(), 'aura-gen-'));
+    const casesDir = path.join(tmp, 'public_cases');
+    await fsp.mkdir(path.join(casesDir, 'ACCESS'), { recursive: true });
+    await fsp.mkdir(path.join(casesDir, 'FRAUD'), { recursive: true });
+
+    // create sample cases (same as previous test)
+    const a = {
+      case_id: 'A-1',
+      scenarios: [ { name: 's', triggers: ['Urgency / pressure', 'Targeted mass scraping'] } ],
+      signal_ids: ['sig-1']
+    };
+    const b = {
+      case_id: 'F-1',
+      scenarios: [ { name: 's', triggers: ['targeted mass scraping'] } ],
+      signal_ids: []
+    };
+    await fsp.writeFile(path.join(casesDir, 'ACCESS', 'A-1.json'), JSON.stringify(a, null, 2));
+    await fsp.writeFile(path.join(casesDir, 'FRAUD', 'F-1.json'), JSON.stringify(b, null, 2));
+
+    // run generator with TF-IDF method via env
+    execSync('node -r ts-node/register scripts/generate-trigger-weights.ts', { env: { ...process.env, CASES_DIR: casesDir, TRIGGER_WEIGHT_METHOD: 'tfidf' } });
+
+    const cfgPath = path.resolve('config', 'trigger-weights.json');
+    const raw = await fsp.readFile(cfgPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    expect(parsed).toHaveProperty('triggerWeights');
+    const tw = parsed.triggerWeights;
+    expect(tw).toHaveProperty('urgency / pressure');
+    expect(tw).toHaveProperty('targeted mass scraping');
+    // ensure ordering: targeted mass scraping appears in two cases -> should have >= weight of urgency
+    expect(tw['targeted mass scraping']).toBeGreaterThanOrEqual(tw['urgency / pressure']);
+
+    // cleanup: restore original config if backup exists
+    const bak = cfgPath + '.bak';
+    if (await fsp.stat(bak).catch(() => null)) {
+      await fsp.rename(bak, cfgPath);
+    }
+    await fsp.rm(tmp, { recursive: true, force: true });
+  });
 });
 
 describe('GenerateTriggerWeights', () => {

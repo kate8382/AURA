@@ -18,6 +18,17 @@ CASES_DIR=public_cases npm run gen:triggers
 npm run gen:triggers:apply   # run generator and apply `signal_ids` into case files (.bak created)
 ```
 
+New options:
+
+```bash
+# run generator using linear (default)
+npm run gen:triggers:linear
+# run generator using TF-IDF weighting
+npm run gen:triggers:tfidf
+# compare linear vs tfidf weights (prints top diffs)
+npm run gen:triggers:compare
+```
+
 Notes:
 - The generator preserves curated keys in `config/trigger-weights.json` to avoid accidental deletion.
 - Use `gen:triggers:apply` only when you want `signal_ids` persisted into the case files for auditing

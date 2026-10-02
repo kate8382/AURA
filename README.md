@@ -92,12 +92,13 @@ Short developer reference — full details in [docs/SCRIPTS.md](docs/SCRIPTS.md)
 
 - `npm run gen:triggers` — generate `config/trigger-weights.json` from `public_cases/`.
 - `npm run gen:triggers:apply` — generate and apply `signal_ids` into case files (creates `.bak`).
-- `npm run recalc:confidence` — recompute `confidence` fields (see docs for dry-run flags and options).
-- `npm run collect:triggers` — collect normalized triggers into `tmp/collected-triggers.json`.
-- `npm run audit:categories` — run category-vs-directory audit into `tmp/audit-output.json`.
-- `npm run recalc:confidence` — recompute `confidence` fields (see docs for dry-run flags and options).
-- `npm run crosscheck:run` — run cross-check adapter module (default noop adapter).
-- `npm run crosscheck:run` — run cross-check adapter module (default noop adapter).
+ - `npm run gen:triggers:linear` — generate weights using the legacy linear method.
+ - `npm run gen:triggers:tfidf` — generate weights using TF‑IDF/log‑scaled method (experimental).
+ - `npm run gen:triggers:compare` — print a diff between linear and TF‑IDF weights for inspection.
+ - `npm run recalc:confidence` — recompute `confidence` fields (see docs for dry-run flags and options).
+ - `npm run collect:triggers` — collect normalized triggers into `tmp/collected-triggers.json`.
+ - `npm run audit:categories` — run category-vs-directory audit into `tmp/audit-output.json`.
+ - `npm run crosscheck:run` — run cross-check adapter module (default noop adapter).
 
 Note: see [docs/SCRIPTS.md](./docs/SCRIPTS.md) for details on cross-check behavior and the `cross_check_audit` field.
 

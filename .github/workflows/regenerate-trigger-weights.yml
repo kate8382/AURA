@@ -7,6 +7,10 @@ on:
         description: 'Create a Pull Request when changes are detected (manual runs only)'
         required: false
         default: 'false'
+      method:
+        description: 'Weighting method to use: linear or tfidf'
+        required: false
+        default: 'tfidf'
   schedule:
     # weekly on Sunday at 03:00 UTC
     - cron: '0 3 * * 0'
@@ -33,6 +37,8 @@ jobs:
         run: npm ci
 
       - name: Generate trigger weights
+        env:
+          TRIGGER_WEIGHT_METHOD: ${{ inputs.method || 'tfidf' }}
         run: npm run gen:triggers
 
       - name: Check for changes
