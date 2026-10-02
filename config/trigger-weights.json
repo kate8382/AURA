@@ -71,5 +71,6 @@
   "defaultTriggerWeight": 0.01,
   "crossCheckWeight": 0.005,
   "signalIdWeight": 0.01,
+  "normAlpha": 0.3,
   "maxBoost": 0.1
 }
