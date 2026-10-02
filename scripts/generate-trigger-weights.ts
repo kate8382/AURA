@@ -18,6 +18,10 @@ type CountMap = { [k: string]: number };
  */
 export class GenerateTriggerWeights {
   repoRoot: string;
+  /** Метод расчёта весов: 'linear' или 'tfidf' */
+  weightMethod: 'linear' | 'tfidf' = 'linear';
+  /** Сглаживание для IDF (по умолчанию 1) */
+  idfSmoothing = 1;
   /** Верхняя граница веса для самого часто встречающегося триггера */
   topWeight = 0.05;
   /** Минимальный вес по умолчанию для редко встречающихся триггеров */
@@ -144,13 +148,28 @@ export class GenerateTriggerWeights {
    * Формула: weight = max(minWeight, round((count/maxCount) * topWeight, 2)).
    * Возвращает объект с ключами-триггерами и значениями-весами, отсортированный по весу.
    */
-  computeWeights(counts: CountMap) {
+  computeWeights(counts: CountMap, totalDocs?: number) {
     const entries = Object.keys(counts).map(k => ({ k, c: counts[k] }));
     if (entries.length === 0) return { triggerWeights: {}, entries: [] };
-    const max = Math.max(...entries.map(e => e.c));
-    const computed = entries.map(e => {
-      const w = Math.max(this.minWeight, Math.round((e.c / max) * this.topWeight * 100) / 100);
-      return { trig: e.k, count: e.c, weight: w };
+    // support different weighting methods
+    const N = typeof totalDocs === 'number' && totalDocs > 0 ? totalDocs : 0;
+    // compute a raw score per entry depending on method
+    const raws: { trig: string; count: number; raw: number }[] = entries.map(e => {
+      if (this.weightMethod === 'tfidf' && N > 0) {
+        // df = document frequency = e.c
+        const df = e.c;
+        // raw = df * log(1 + N/df) with optional smoothing
+        const raw = df * Math.log(1 + (N / Math.max(df, 1 + this.idfSmoothing)));
+        return { trig: e.k, count: e.c, raw };
+      }
+      // default linear: use count as raw score (will be normalized by max)
+      return { trig: e.k, count: e.c, raw: e.c };
+    });
+    const maxRaw = Math.max(...raws.map(r => r.raw));
+    const computed = raws.map(r => {
+      const norm = maxRaw > 0 ? r.raw / maxRaw : 0;
+      const w = Math.max(this.minWeight, Math.round(norm * this.topWeight * 100) / 100);
+      return { trig: r.trig, count: r.count, weight: w };
     });
     computed.sort((a, b) => {
       if (b.weight !== a.weight) return b.weight - a.weight;
@@ -182,9 +201,16 @@ export class GenerateTriggerWeights {
     const casesDir = process.env.CASES_DIR || path.join(this.repoRoot, 'public_cases');
     const files = this.walkDir(casesDir);
     const counts: CountMap = Object.create(null);
+    let totalCases = 0;
+    // determine weighting method from ENV or CLI
+    const envMethod = (process.env.TRIGGER_WEIGHT_METHOD || '').toLowerCase();
+    const methodArg = process.argv.find(a => a.startsWith('--method='));
+    const method = methodArg ? methodArg.split('=')[1] : (envMethod || 'linear');
+    if (method === 'tfidf') this.weightMethod = 'tfidf';
     for (const f of files) {
       const cases = this.extractCasesFromFile(f);
       for (const c of cases) {
+        totalCases++;
         const uniq = new Set<string>();
         if (Array.isArray((c as any).scenarios)) {
           for (const s of (c as any).scenarios) {
@@ -224,7 +250,7 @@ export class GenerateTriggerWeights {
       }
     }
 
-    const { triggerWeights, entries } = this.computeWeights(counts);
+    const { triggerWeights, entries } = this.computeWeights(counts, totalCases);
     const out = {
       triggerWeights,
       defaultTriggerWeight: this.minWeight,
