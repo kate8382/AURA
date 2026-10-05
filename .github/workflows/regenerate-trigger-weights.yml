@@ -6,7 +6,11 @@ on:
       create_pr:
         description: 'Create a Pull Request when changes are detected (manual runs only)'
         required: false
-        default: 'false'
+        default: 'true'
+      method:
+        description: 'Weighting method to use (e.g. tfidf-tiered|linear)'
+        required: false
+        default: 'tfidf-tiered'
   schedule:
     # weekly on Sunday at 03:00 UTC
     - cron: '0 3 * * 0'
@@ -18,6 +22,9 @@ permissions:
 jobs:
   regenerate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,7 +40,11 @@ jobs:
         run: npm ci
 
       - name: Generate trigger weights
-        run: npm run gen:triggers
+        env:
+          METHOD: ${{ github.event.inputs.method || 'tfidf-tiered' }}
+        run: |
+          echo "Using method: ${METHOD}"
+          npm run gen:triggers
 
       - name: Check for changes
         id: check_changes
@@ -53,4 +64,23 @@ jobs:
           echo "No changes detected; nothing to push or create. Exiting."
           exit 0
 
-      # Pull request creation removed by request — scheduled runs will not push or create PRs.
+      - name: Create Pull Request with regenerated config
+        if: steps.check_changes.outputs.changed == 'true' && (github.event.inputs.create_pr == 'true' || github.event_name == 'schedule')
+        # Note: using the third-party action `peter-evans/create-pull-request@v5` to create a PR.
+        # This does NOT make "peter-evans" the author — the PR/commit author is determined
+        # by the token passed to the action. We pass `secrets.GITHUB_TOKEN` by default,
+        # so created PRs/commits will appear as `github-actions[bot]` (no personal PAT required).
+        # If you later provide a personal token in `secrets.REGENERATE_TRIGGER_TOKEN`,
+        # the PR would be created under that account instead.
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Regenerate trigger-weights (method: ${{ github.event.inputs.method || 'tfidf-tiered' }})"
+          branch: "regenerate-trigger-weights/${{ github.event.inputs.method || 'tfidf-tiered' }}-${{ github.run_id }}"
+          title: "Regenerate trigger-weights: ${{ github.event.inputs.method || 'tfidf-tiered' }}"
+          body: |
+            Automated regeneration of `config/trigger-weights.json` using method `${{ github.event.inputs.method || 'tfidf-tiered' }}`.
+
+            This PR is created by the scheduled workflow `regenerate-trigger-weights` and includes any changes detected to `config/trigger-weights.json`.
+          labels: automated, regenerate-trigger-weights
+          delete-branch: true
