@@ -82,7 +82,7 @@
       }
     ]
   },
-  "confidence": 0.76,
+  "confidence": 0.63,
   "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
@@ -111,8 +111,37 @@
       }
     ]
   },
-  "confidence_raw": 4.73,
+  "confidence_raw": 3.28,
   "decision_reasons": [
     "Awaiting cross-check answers"
+  ],
+  "cross_check_audit": [
+    {
+      "id": "<no-id>",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-10-05T15:50:10.643Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "<no-id>",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-10-05T15:50:10.643Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "<no-id>",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-10-05T15:50:10.643Z",
+      "notes": "requirement missing id/title/type"
+    }
   ]
 }
