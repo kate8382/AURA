@@ -198,10 +198,15 @@ For commercial licenses, private datasets, or collaborative research, reach out 
 - **Email:** [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com)
 - **LinkedIn:** [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/)
 
-## License & Tooling
+## License
 
-- **Code & tooling:** Apache License 2.0 — see `LICENSE`.
-- **Public dataset (`public_cases/`):** CC BY‑NC 4.0 — see `DATA_LICENSE`.
+This project operates under a dual/hybrid licensing model:
+
+* **Code & Tooling:** [Business Source License 1.1 (BSL 1.1)](LICENSE)
+  * **Free & Open:** Fully permitted for non-commercial use, academic research, education, local testing, and evaluation.
+  * **Commercial Use:** Any production use by commercial entities requires a commercial license. Please contact the author for inquiries.
+  * **Change Date:** Each release automatically transitions to the **Apache License 2.0** 3 years after its release date.
+* **Cases & Data:** [CC BY‑NC 4.0](./DATA_LICENSE)
 
 ## Contribution & Governance
 
