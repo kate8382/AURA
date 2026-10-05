@@ -271,15 +271,7 @@ export class GenerateTriggerWeights {
       camo: { lower: 0.01, upper: 0.03 }
     };
 
-    const detectCategory = (hdr: string) => {
-      const s = String(hdr || '').toLowerCase();
-      if (s.includes('critical')) return 'critical';
-      if (s.includes('high')) return 'high';
-      if (s.includes('medium')) return 'medium';
-      if (s.includes('low')) return 'low';
-      if (s.includes('camouflage') || s.includes('weak')) return 'camo';
-      return 'camo';
-    };
+    // use this.detectCategory helper defined on the class
 
     // Build category mapping from existingConfig sections
     const triggerCategory: Record<string, string> = {};
@@ -288,7 +280,7 @@ export class GenerateTriggerWeights {
       for (const k of Object.keys(existingConfig.triggerWeights)) {
         const s = String(k || '').trim();
         if (s.startsWith('===')) {
-          currentCat = detectCategory(s);
+          currentCat = this.detectCategory(s);
           continue;
         }
         if (/^sig[-_]/i.test(k)) continue;
@@ -360,7 +352,7 @@ export class GenerateTriggerWeights {
     const CATEGORY_ORDER = ['critical', 'high', 'medium', 'low', 'camo'];
     const headerForCategory: Record<string, string | null> = {};
     for (const hk of Object.keys(preservedSections)) {
-      const cat = detectCategory(hk);
+      const cat = this.detectCategory(hk);
       headerForCategory[cat] = hk;
     }
 

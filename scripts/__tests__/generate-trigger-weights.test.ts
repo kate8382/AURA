@@ -89,4 +89,44 @@ describe('GenerateTriggerWeights', () => {
       try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e) {}
     }
   });
+
+  test('tiered TF-IDF assigns critical weights (canonical mapping)', async () => {
+    const tmp = await fsp.mkdtemp(path.join(os.tmpdir(), 'aura-gen-'));
+    try {
+      const cfgDir = path.join(tmp, 'config');
+      await fsp.mkdir(cfgDir, { recursive: true });
+      // create a canonical config with headers so generator uses the categories
+      const canonical = {
+        triggerWeights: {
+          '=== CRITICAL / DIRECT EXPLOITS (0.5 - 0.6) ===': '---',
+          'actionable payload': 0.5,
+          'actionable hardware exploit': 0.5,
+          'functional exploit / weaponization': 0.5,
+          '=== HIGH SEVERITY / THREAT VECTORS (0.3 - 0.4) ===': '---',
+          'automated exploitation': 0.3
+        },
+        normAlpha: 0.3
+      };
+      await fsp.writeFile(path.join(cfgDir, 'trigger-weights.json'), JSON.stringify(canonical, null, 2), 'utf8');
+
+      const casesDir = path.join(tmp, 'public_cases');
+      await fsp.mkdir(path.join(casesDir, 'ACCESS'), { recursive: true });
+      // create a case that contains actionable payload
+      const a = { case_id: 'A-CRIT', scenarios: [{ name: 's', triggers: ['Actionable payload'] }] };
+      await fsp.writeFile(path.join(casesDir, 'ACCESS', 'A-CRIT.json'), JSON.stringify(a, null, 2));
+
+      const g = new GenerateTriggerWeights(tmp);
+      const res = g.run();
+      const out = JSON.parse(await fsp.readFile(res.outPath, 'utf8'));
+      expect(out).toHaveProperty('triggerWeights');
+      const tw = out.triggerWeights;
+      // actionable payload should be in critical range 0.50-0.60
+      expect(tw['actionable payload']).toBeGreaterThanOrEqual(0.5);
+      expect(tw['actionable payload']).toBeLessThanOrEqual(0.6);
+      // weightMethod set
+      expect(out.weightMethod).toBeTruthy();
+    } finally {
+      try { await fsp.rm(tmp, { recursive: true, force: true }); } catch (e) {}
+    }
+  });
 });

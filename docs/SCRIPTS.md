@@ -18,8 +18,16 @@ CASES_DIR=public_cases npm run gen:triggers
 npm run gen:triggers:apply   # run generator and apply `signal_ids` into case files (.bak created)
 ```
 
-Notes:
-- The generator preserves curated keys in `config/trigger-weights.json` to avoid accidental deletion.
+**Notes:**
+- The generator preserves curated keys and section headers in `config/trigger-weights.json` to avoid accidental deletion.
+- Weighting algorithm: Tier-based TF‑IDF. For each trigger we compute a TF-like document frequency and an IDF smoothing factor, then compute a raw TF‑IDF score and normalize it per-category. Final weight mapping uses:
+
+- raw_t = df_t * log(1 + N / max(df_t, 1 + idfSmoothing))
+- Per-category normalization maps normalized TF‑IDF into the category span:
+
+- Weight = Category_Min + norm * (Category_Max - Category_Min)
+
+- Configurable parameters: `idfSmoothing` (default 1), `tfidfScale` (default 1.5), `normAlpha` (default 0.3). The generator uses `canonical` category mappings to enforce critical/high/medium/low membership for important triggers.
 - Use `gen:triggers:apply` only when you want `signal_ids` persisted into the case files for auditing
   or external integration.
 

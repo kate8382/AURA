@@ -3,6 +3,6 @@ dist/
 .env
 .venv/
 tmp/
-config/*.bakTODOs.md
+config/*.bak
 .github/ISSUE/
 .github/PR/

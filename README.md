@@ -108,9 +108,9 @@ Note: see [docs/SCRIPTS.md](./docs/SCRIPTS.md) for details on cross-check behavi
 
 ### How trigger weights are computed
 
-- Triggers are counted per case (unique within a case). The most frequent trigger is mapped to `topWeight` (default 0.05) and other triggers get a linear weight scaled relative to that maximum, with a lower bound `defaultTriggerWeight` (0.01).
-- Final `confidence` for a case is computed as: base (by category) + boost, where `boost = min(maxBoost, totalTriggerWeight + crossCheckWeight*questions + signalIdWeight*unmappedSignalCount)`.
-- The generator preserves any existing trigger keys from the current `config/trigger-weights.json` to avoid accidentally dropping curated keys.
+- Generator uses Tier‑based TF‑IDF: triggers are counted per case (unique within a case), a raw TF‑IDF score is computed per trigger, then normalized inside an expert category (critical/high/medium/low/camo).
+- Final mapping: Weight = Category_Min + normalized_TFIDF * (Category_Max - Category_Min). This guarantees critical triggers remain within the configured critical span (e.g. 0.50–0.60).
+- The output includes `normAlpha`, `idfSmoothing` and `tfidfScale` parameters; `normAlpha` defaults to 0.3. The generator preserves existing curated keys/section headers in `config/trigger-weights.json`.
 
 ### Automation
 
