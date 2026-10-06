@@ -115,34 +115,5 @@
   "confidence_raw": 5.2,
   "decision_reasons": [
     "Awaiting cross-check answers"
-  ],
-  "cross_check_audit": [
-    {
-      "id": "<no-id>",
-      "verifier": "system",
-      "result": null,
-      "ok": false,
-      "weight_applied": 0,
-      "ts": "2026-10-05T15:50:10.629Z",
-      "notes": "requirement missing id/title/type"
-    },
-    {
-      "id": "<no-id>",
-      "verifier": "system",
-      "result": null,
-      "ok": false,
-      "weight_applied": 0,
-      "ts": "2026-10-05T15:50:10.629Z",
-      "notes": "requirement missing id/title/type"
-    },
-    {
-      "id": "<no-id>",
-      "verifier": "system",
-      "result": null,
-      "ok": false,
-      "weight_applied": 0,
-      "ts": "2026-10-05T15:50:10.629Z",
-      "notes": "requirement missing id/title/type"
-    }
   ]
 }

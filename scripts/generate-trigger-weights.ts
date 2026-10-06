@@ -164,28 +164,6 @@ export class GenerateTriggerWeights {
   }
 
   /**
-   * Computes the weight map based on trigger occurrence counts.
-   * Formula: weight = max(minWeight, round((count/maxCount) * topWeight, 2)).
-   * Returns an object with trigger keys and weight values, sorted by weight.
-   */
-  computeWeights(counts: CountMap) {
-    const entries = Object.keys(counts).map(k => ({ k, c: counts[k] }));
-    if (entries.length === 0) return { triggerWeights: {}, entries: [] };
-    const max = Math.max(...entries.map(e => e.c));
-    const computed = entries.map(e => {
-      const w = Math.max(this.minWeight, Math.round((e.c / max) * this.topWeight * 100) / 100);
-      return { trig: e.k, count: e.c, weight: w };
-    });
-    computed.sort((a, b) => {
-      if (b.weight !== a.weight) return b.weight - a.weight;
-      return a.trig.localeCompare(b.trig);
-    });
-    const triggerWeights: { [k: string]: number } = {};
-    for (const it of computed) triggerWeights[it.trig] = it.weight;
-    return { triggerWeights, entries: computed };
-  }
-
-  /**
    * Writes the final JSON config to `config/trigger-weights.json`, creating a backup
    * of the previous version as `trigger-weights.json.bak`.
    */
@@ -206,8 +184,10 @@ export class GenerateTriggerWeights {
     const casesDir = process.env.CASES_DIR || path.join(this.repoRoot, 'public_cases');
     const files = this.walkDir(casesDir);
     const counts: CountMap = Object.create(null);
+    let totalCases = 0;
     for (const f of files) {
       const cases = this.extractCasesFromFile(f);
+      totalCases += cases.length;
       for (const c of cases) {
         const uniq = new Set<string>();
         if (Array.isArray((c as any).scenarios)) {
@@ -218,12 +198,7 @@ export class GenerateTriggerWeights {
             }
           }
         }
-        // Do NOT include `signal_ids` here — signal IDs are a separate concept (identifiers),
-        // not human-readable trigger text. Including them pollutes `trigger-weights.json` with
-        // SID-like keys (e.g. "SIG-...") which breaks downstream expectations.
-        // If you need to account for mapped signals, expand them into trigger text via
-        // `signal-mapping.json` elsewhere (recalc pipeline). For weight generation we only
-        // count `scenarios[].triggers`.
+        // Count unique triggers per case only (not signal_ids).
         for (const trig of uniq) counts[trig] = (counts[trig] || 0) + 1;
       }
     }
@@ -255,12 +230,7 @@ export class GenerateTriggerWeights {
       }
     }
 
-    let totalCases = 0;
-    // recompute totalCases from files (count of case objects)
-    for (const f of files) {
-      const cases = this.extractCasesFromFile(f);
-      totalCases += cases.length;
-    }
+    // totalCases computed above in the main pass
 
     // Tier-based TF-IDF mapping
     const CATEGORY_RANGES: Record<string, { lower: number; upper: number }> = {
@@ -306,8 +276,10 @@ export class GenerateTriggerWeights {
       'unjustified domain knowledge': 'low'
     };
 
-    // apply canonical map first
-    for (const k of Object.keys(canonicalCategoryMap)) triggerCategory[k] = canonicalCategoryMap[k];
+    // apply canonical map only for triggers that don't already have a category
+    for (const k of Object.keys(canonicalCategoryMap)) {
+      if (!triggerCategory[k]) triggerCategory[k] = canonicalCategoryMap[k];
+    }
 
     // default any remaining missing triggers into camo (also map camo/alibi heuristics)
     for (const t of Object.keys(counts)) {
@@ -320,12 +292,18 @@ export class GenerateTriggerWeights {
       }
     }
 
-    // compute TF-IDF raw per trigger
-    const N = totalCases;
+    // compute TF‑IDF-like score per trigger (favor rare but important triggers)
+    // Use inverse document frequency style scoring (do NOT multiply by df).
+    const N = Math.max(1, totalCases);
     const rawPerTrig: Record<string, number> = {};
     for (const t of Object.keys(counts)) {
-      const df = counts[t] || 0;
-      rawPerTrig[t] = this.tfidfScale * df * Math.log(1 + (N / Math.max(df, 1 + this.idfSmoothing)));
+      const df = Math.max(0, counts[t] || 0);
+      if (df <= 0) {
+        // not observed in corpus — give minimal raw score (will be mapped to lower bound)
+        rawPerTrig[t] = 0;
+      } else {
+        rawPerTrig[t] = this.tfidfScale * Math.log(1 + N / (df + this.idfSmoothing));
+      }
     }
 
     // group raws by category
@@ -341,11 +319,6 @@ export class GenerateTriggerWeights {
       const arr = perCat[c];
       perCatMinMax[c] = { min: Math.min(...arr), max: Math.max(...arr) };
     }
-
-    const boostMaxForCat = (cat: string) => {
-      const r = CATEGORY_RANGES[cat] || CATEGORY_RANGES.camo;
-      return Math.min(0.05, Math.max(0, r.upper - r.lower));
-    };
 
     // Build ordered output: for each expert category (in preferred order)
     // insert header then sorted triggers for that category.
@@ -368,7 +341,13 @@ export class GenerateTriggerWeights {
         const mm = perCatMinMax[cat] || { min: 0, max: 0 };
         const raw = rawPerTrig[t] || 0;
         let norm = 0;
-        if (mm.max > mm.min) norm = (raw - mm.min) / (mm.max - mm.min);
+        // If category has a single element or all raws equal, give it full normalized score
+        const arr = perCat[cat] || [];
+        if (arr.length <= 1 || mm.max === mm.min) {
+          norm = 1;
+        } else {
+          norm = (raw - mm.min) / (mm.max - mm.min);
+        }
         const range = CATEGORY_RANGES[cat] || CATEGORY_RANGES.camo;
         const weight = Number((range.lower + norm * (range.upper - range.lower)).toFixed(2));
         // clamp
