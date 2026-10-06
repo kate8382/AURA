@@ -92,6 +92,18 @@ export class RecalcConfidence {
     const evaluator = new PolicyEvaluator();
     const crossAdapter = CrossCheckAdapter; // default instance
 
+    const removeAuditEntries = (node: any) => {
+      if (!node) return;
+      if (Array.isArray(node)) {
+        for (const it of node) removeAuditEntries(it);
+        return;
+      }
+      if (typeof node === 'object') {
+        if (Object.prototype.hasOwnProperty.call(node, 'cross_check_audit')) delete node.cross_check_audit;
+        for (const k of Object.keys(node)) removeAuditEntries(node[k]);
+      }
+    };
+
     const updateCase = async (e: Entry) => {
       const old = e.confidence;
       if (preserveExisting && (typeof old === 'number')) return null;
@@ -166,8 +178,18 @@ export class RecalcConfidence {
           // eslint-disable-next-line no-await-in-loop
           const summary = await (crossAdapter as CrossCheckAdapterClass).evaluateCrossChecks(e, requirements, adaptersCfg);
           if (summary && typeof summary.total_weight === 'number') totalWeight += summary.total_weight;
-          // attach audit entries for traceability
-          (e as any).cross_check_audit = summary.auditEntries || [];
+          // attach audit entries for traceability (keep in-memory for tests and write
+          // to file only when `writeCrossCheckAudit` is enabled in config)
+          try {
+            const writeAudit = (cfg && typeof (cfg as any).writeCrossCheckAudit === 'boolean') ? (cfg as any).writeCrossCheckAudit : true;
+            (e as any).cross_check_audit = summary.auditEntries || [];
+            if (!writeAudit) {
+              // remove before persisting to disk later (write step will still include field unless we strip it)
+              // we will selectively strip audit entries only when cfg.writeCrossCheckAudit === false
+            }
+          } catch (err) {
+            // ignore audit attach errors
+          }
         }
       } catch (err) {
         // ignore cross-check errors to avoid blocking recalc; do not apply additional weight
@@ -225,7 +247,13 @@ export class RecalcConfidence {
         for (const e of entries) await updateCase(e);
       }
       (data as any).legal_intent_logs = logs;
-      await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+      if (!(cfg && (cfg as any).writeCrossCheckAudit === false)) {
+        await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+      } else {
+        // strip audit entries before persisting
+        removeAuditEntries(data);
+        await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+      }
       return { count, changes };
     }
 
@@ -255,7 +283,12 @@ export class RecalcConfidence {
       }
     }
 
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+    if (!(cfg && (cfg as any).writeCrossCheckAudit === false)) {
+      await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+    } else {
+      removeAuditEntries(data);
+      await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+    }
     return { count, changes };
   }
 

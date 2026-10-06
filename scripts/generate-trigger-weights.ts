@@ -3,31 +3,55 @@ import path from 'path';
 import { deriveSignalId } from './utils';
 
 type CountMap = { [k: string]: number };
-
 /**
  * GenerateTriggerWeights
- * Класс, инкапсулирующий логику сканирования кейсов и генерации файла
- * `config/trigger-weights.json` на основе триггеров, встречающихся в `public_cases`.
  *
+ * Это основной класс для генерации `config/trigger-weights.json` на основе
+ * триггеров, найденных в `public_cases`. Он собирает уникальные триггеры по
+ * каждому кейсу, подсчитывает число кейсов, в которых встречается каждый триггер,
+ * вычисляет TF‑IDF внутри экспертных категорий и выдаёт итоговую карту весов.
+ *
+ * Важные свойства:
+ * - Используется канонический маппинг категорий из существующего `config/trigger-weights.json`.
+ * - Триггеры строго привязываются к категориям (critical/high/medium/low/camo).
+ * - Вес триггера = Category_Min + normalized_raw * (Category_Max - Category_Min).
+ *
+ * Формула raw-оценки: использована гибридная TF‑IDF‑подобная функция, чтобы избежать двух опасностей:
+ *  - чисто линейного взвешивания (которое игнорирует распространенность в корпусе),
+ *  - и наивного TF*IDF, который умножает на сырую df и тем самым усиливает часто встречающиеся триггеры.
+ *
+ *  raw = tfidfScale * log(1 + N/(df + idfSmoothing)) * log(1 + df)
+ *
+ * Где первая лог-часть даёт IDF‑стайл штраф для очень частых триггеров, а вторая лог‑часть
+ * даёт мягкое усиление по частоте внутри категории (soft TF), не приводя к экспонентному росту.
  * Поведение:
- * - собирает уникальные триггеры по каждому кейсу (из `scenarios[].triggers` и `signal_ids`),
+ * - собирает уникальные триггеры по каждому кейсу (из `scenarios[].triggers`).
+ *   Mapped `signal_ids` не разворачиваются автоматически при генерации; используйте
+ *   `--apply-signal-ids` / `gen:triggers:apply` чтобы применить `signal_ids` в файлах кейсов.
  * - считает число кейсов, в которых встречается каждый триггер,
  * - нормализует строки (trim + toLowerCase),
- * - сопоставляет частоты в веса в диапазоне [minWeight, topWeight] (линейная нормализация),
+ * - вычисляет гибридную raw-оценку (см. формулу выше) для каждого триггера, затем нормализует
+ *   значения `raw` внутри каждой категории в диапазон [0..1] (см. обработку single-item ниже) и
+ *   линейно отображает нормализованные значения в настроенные диапазоны категории (Category_Min..Category_Max),
  * - записывает результат в `config/trigger-weights.json` и создаёт резервную копию предыдущего.
  */
 export class GenerateTriggerWeights {
+  // Highest weight for the most frequently occurring trigger
   repoRoot: string;
-  /** Верхняя граница веса для самого часто встречающегося триггера */
+  // Lowest weight for the least frequently occurring trigger
   topWeight = 0.05;
-  /** Минимальный вес по умолчанию для редко встречающихся триггеров */
+  // Minimum weight for the least frequently occurring trigger
   minWeight = 0.01;
-  /** Вес за вопрос в cross_check */
+  // Weight for a question in cross_check
   crossCheckWeight = 0.005;
-  /** Вес за наличе signal_id */
+  // Weight for the presence of a signal_id
   signalIdWeight = 0.01;
-  /** Максимальный суммарный буст */
+  // Maximum cumulative boost
   maxBoost = 0.1;
+    // Smoothing for IDF (default 1)
+    idfSmoothing = 1;
+    // Sensitivity multiplier for the hybrid TF-IDF-like raw score (before normalization)
+    tfidfScale = 1.5;
 
   constructor(repoRoot?: string) {
     this.repoRoot = repoRoot || path.resolve(__dirname, '..');
@@ -55,9 +79,22 @@ export class GenerateTriggerWeights {
     }
   }
 
-  /**
-   * Рекурсивно обходит директорию и возвращает список всех JSON-файлов.
-   * Возвращает пустой массив, если директория не существует.
+  /** detectCategory
+   * Returns the canonical category based on the section header string.
+   * Used when reconstructing the section structure from an existing config.
+   */
+  private detectCategory(hdr: string) {
+    const s = String(hdr || '').toLowerCase();
+    if (s.includes('critical')) return 'critical';
+    if (s.includes('high')) return 'high';
+    if (s.includes('medium')) return 'medium';
+    if (s.includes('low')) return 'low';
+    if (s.includes('camouflage') || s.includes('weak')) return 'camo';
+    return 'camo';
+  }
+
+  /** Recursively walks through a directory and returns a list of all JSON files.
+   * Returns an empty array if the directory does not exist.
    */
   walkDir(dir: string, files: string[] = []): string[] {
     if (!fs.existsSync(dir)) return files;
@@ -70,11 +107,11 @@ export class GenerateTriggerWeights {
   }
 
   /**
-   * Извлекает объекты кейсов из файла.
-   * Поддерживает несколько форматов входных файлов:
-   * - файлы, где верхний ключ — `MANIPULATION`/`FRAUD`/`ACCESS` (массив кейсов),
-   * - одиночный кейс (объект с `case_id`),
-   * - файлы с вложенными объектами/массивами, содержащими объекты с `case_id`.
+   * Extracts case objects from a file.
+   * Supports multiple input file formats:
+   * - files where the top-level key is `MANIPULATION`/`FRAUD`/`ACCESS` (array of cases),
+   * - a single case (object with `case_id`),
+   * - files with nested objects/arrays containing objects with `case_id`.
    */
   extractCasesFromFile(file: string): any[] {
     try {
@@ -105,8 +142,8 @@ export class GenerateTriggerWeights {
   }
 
   /**
-   * Приводит триггер к каноническому виду: trim + toLowerCase.
-   * Возвращает `null` для невалидных значений.
+   * Normalizes a trigger to its canonical form: trim + toLowerCase.
+   * Returns `null` for invalid values.
    */
   normalizeTrigger(t: unknown): string | null {
     if (!t || typeof t !== 'string') return null;
@@ -140,30 +177,8 @@ export class GenerateTriggerWeights {
   }
 
   /**
-   * Вычисляет карту весов на основе подсчёта встречаемости триггеров.
-   * Формула: weight = max(minWeight, round((count/maxCount) * topWeight, 2)).
-   * Возвращает объект с ключами-триггерами и значениями-весами, отсортированный по весу.
-   */
-  computeWeights(counts: CountMap) {
-    const entries = Object.keys(counts).map(k => ({ k, c: counts[k] }));
-    if (entries.length === 0) return { triggerWeights: {}, entries: [] };
-    const max = Math.max(...entries.map(e => e.c));
-    const computed = entries.map(e => {
-      const w = Math.max(this.minWeight, Math.round((e.c / max) * this.topWeight * 100) / 100);
-      return { trig: e.k, count: e.c, weight: w };
-    });
-    computed.sort((a, b) => {
-      if (b.weight !== a.weight) return b.weight - a.weight;
-      return a.trig.localeCompare(b.trig);
-    });
-    const triggerWeights: { [k: string]: number } = {};
-    for (const it of computed) triggerWeights[it.trig] = it.weight;
-    return { triggerWeights, entries: computed };
-  }
-
-  /**
-   * Записывает финальный JSON-конфиг в `config/trigger-weights.json`, создавая резервную копию
-   * предыдущей версии как `trigger-weights.json.bak`.
+   * Writes the final JSON config to `config/trigger-weights.json`, creating a backup
+   * of the previous version as `trigger-weights.json.bak`.
    */
   writeConfig(payload: any) {
     const cfgDir = path.join(this.repoRoot, 'config');
@@ -175,15 +190,17 @@ export class GenerateTriggerWeights {
   }
 
   /**
-   * Основной запуск: ищет все JSON-файлы в `public_cases` (или в `process.env.CASES_DIR`),
-   * собирает статистику триггеров, вычисляет веса и записывает конфиг.
+   * Main run: searches for all JSON files in `public_cases` (or in `process.env.CASES_DIR`),
+   * collects trigger statistics, computes weights, and writes the config.
    */
   run() {
     const casesDir = process.env.CASES_DIR || path.join(this.repoRoot, 'public_cases');
     const files = this.walkDir(casesDir);
     const counts: CountMap = Object.create(null);
+    let totalCases = 0;
     for (const f of files) {
       const cases = this.extractCasesFromFile(f);
+      totalCases += cases.length;
       for (const c of cases) {
         const uniq = new Set<string>();
         if (Array.isArray((c as any).scenarios)) {
@@ -194,43 +211,176 @@ export class GenerateTriggerWeights {
             }
           }
         }
-        // Do NOT include `signal_ids` here — signal IDs are a separate concept (identifiers),
-        // not human-readable trigger text. Including them pollutes `trigger-weights.json` with
-        // SID-like keys (e.g. "SIG-...") which breaks downstream expectations.
-        // If you need to account for mapped signals, expand them into trigger text via
-        // `signal-mapping.json` elsewhere (recalc pipeline). For weight generation we only
-        // count `scenarios[].triggers`.
+        // Count unique triggers per case only (not signal_ids).
         for (const trig of uniq) counts[trig] = (counts[trig] || 0) + 1;
       }
     }
 
     // Preserve existing triggers from current config so we don't drop keys that are expected by other parts of the code/tests.
     const cfgPath = path.join(this.repoRoot, 'config', 'trigger-weights.json');
+    let existingConfig: any = null;
+    const preservedSections: Record<string, any> = {};
     if (fs.existsSync(cfgPath)) {
       try {
         const raw = fs.readFileSync(cfgPath, 'utf8');
         const parsed = JSON.parse(raw);
+        existingConfig = parsed;
         if (parsed && parsed.triggerWeights && typeof parsed.triggerWeights === 'object') {
           for (const k of Object.keys(parsed.triggerWeights)) {
-            // Skip legacy or SID-like keys (e.g. keys that start with 'sig-') when preserving
-            // so we don't keep signal_id tokens in the trigger-weights output. Only preserve
-            // human-readable trigger keys.
+            const s = String(k || '').trim();
+            // preserve section headers verbatim but do not count them as triggers
+            if (s.startsWith('===')) {
+              preservedSections[k] = parsed.triggerWeights[k];
+              continue;
+            }
+            // Skip SID-like keys when preserving
             if (/^sig[-_]/i.test(k)) continue;
             if (!(k in counts)) counts[k] = 0;
           }
         }
       } catch (err) {
-        // ignore parse errors and continue
+        existingConfig = null;
       }
     }
 
-    const { triggerWeights, entries } = this.computeWeights(counts);
+    // totalCases computed above in the main pass
+
+    // Tier-based TF-IDF mapping
+    const CATEGORY_RANGES: Record<string, { lower: number; upper: number }> = {
+      critical: { lower: 0.50, upper: 0.60 },
+      high: { lower: 0.30, upper: 0.40 },
+      medium: { lower: 0.15, upper: 0.20 },
+      low: { lower: 0.04, upper: 0.05 },
+      camo: { lower: 0.01, upper: 0.03 }
+    };
+
+    // use this.detectCategory helper defined on the class
+
+    // Build category mapping from existingConfig sections
+    const triggerCategory: Record<string, string> = {};
+    if (existingConfig && existingConfig.triggerWeights && typeof existingConfig.triggerWeights === 'object') {
+      let currentCat = 'camo';
+      for (const k of Object.keys(existingConfig.triggerWeights)) {
+        const s = String(k || '').trim();
+        if (s.startsWith('===')) {
+          currentCat = this.detectCategory(s);
+          continue;
+        }
+        if (/^sig[-_]/i.test(k)) continue;
+        triggerCategory[k] = currentCat;
+      }
+    }
+
+    // canonical mapping: enforce expert-assigned categories for known critical/high/medium/low triggers
+    const canonicalCategoryMap: Record<string, string> = {
+      'actionable payload': 'critical',
+      'actionable hardware exploit': 'critical',
+      'functional exploit / weaponization': 'critical',
+
+      'automated exploitation': 'high',
+      'privilege escalation': 'high',
+      'direct fraud intent': 'high',
+      'security control evasion': 'high',
+
+      'automated reconnaissance / osint': 'medium',
+
+      'compliance evasion': 'low',
+      'false naivety / persona discrepancy': 'low',
+      'unjustified domain knowledge': 'low'
+    };
+
+    // apply canonical map only for triggers that don't already have a category
+    for (const k of Object.keys(canonicalCategoryMap)) {
+      if (!triggerCategory[k]) triggerCategory[k] = canonicalCategoryMap[k];
+    }
+
+    // default any remaining missing triggers into camo (also map camo/alibi heuristics)
+    for (const t of Object.keys(counts)) {
+      if (triggerCategory[t]) continue;
+      // Default all remaining unmapped triggers to `camo` (weak/benign heuristics)
+      triggerCategory[t] = 'camo';
+    }
+
+    // compute TF‑IDF-like score per trigger (favor rare but important triggers)
+    // Use inverse document frequency style scoring (do NOT multiply by df).
+    const N = Math.max(1, totalCases);
+    const rawPerTrig: Record<string, number> = {};
+    for (const t of Object.keys(counts)) {
+      const df = Math.max(0, counts[t] || 0);
+      if (df <= 0) {
+        rawPerTrig[t] = 0;
+      } else {
+        // hybrid score: IDF-style term downweights very common terms, but include
+        // a soft TF component so that within the same category more frequent
+        // triggers tend to score higher. Use log(1+df) as a gentle TF factor.
+        rawPerTrig[t] = this.tfidfScale * Math.log(1 + N / (df + this.idfSmoothing)) * Math.log(1 + df);
+      }
+    }
+
+    // group raws by category
+    const perCat: Record<string, number[]> = {};
+    for (const t of Object.keys(rawPerTrig)) {
+      const c = triggerCategory[t] || 'camo';
+      perCat[c] = perCat[c] || [];
+      perCat[c].push(rawPerTrig[t]);
+    }
+
+    const perCatMinMax: Record<string, { min: number; max: number }> = {};
+    for (const c of Object.keys(perCat)) {
+      const arr = perCat[c];
+      perCatMinMax[c] = { min: Math.min(...arr), max: Math.max(...arr) };
+    }
+
+    // Build ordered output: for each expert category (in preferred order)
+    // insert header then sorted triggers for that category.
+    const CATEGORY_ORDER = ['critical', 'high', 'medium', 'low', 'camo'];
+    const headerForCategory: Record<string, string | null> = {};
+    for (const hk of Object.keys(preservedSections)) {
+      const cat = this.detectCategory(hk);
+      headerForCategory[cat] = hk;
+    }
+
+    const triggerWeights: Record<string, any> = {};
+    for (const cat of CATEGORY_ORDER) {
+      // header
+      const hk = headerForCategory[cat];
+      if (hk) triggerWeights[hk] = preservedSections[hk];
+
+      // collect triggers for this category
+      const tris = Object.keys(counts).filter(t => !preservedSections[t] && (triggerCategory[t] || 'camo') === cat);
+      const scored = tris.map(t => {
+        const mm = perCatMinMax[cat] || { min: 0, max: 0 };
+        const raw = rawPerTrig[t] || 0;
+        let norm = 0;
+        // If category has a single element or all raws equal, give it full normalized score
+        const arr = perCat[cat] || [];
+        if (arr.length <= 1 || mm.max === mm.min) {
+          norm = 1;
+        } else {
+          norm = (raw - mm.min) / (mm.max - mm.min);
+        }
+        const range = CATEGORY_RANGES[cat] || CATEGORY_RANGES.camo;
+        const weight = Number((range.lower + norm * (range.upper - range.lower)).toFixed(2));
+        // clamp
+        const clamped = Math.max(range.lower, Math.min(range.upper, weight));
+        return { trig: t, weight: clamped };
+      });
+      scored.sort((a, b) => b.weight - a.weight || a.trig.localeCompare(b.trig));
+      for (const it of scored) triggerWeights[it.trig] = it.weight;
+    }
+    const entries = Object.keys(triggerWeights)
+      .filter(k => !preservedSections[k])
+      .map(k => ({ trig: k, count: counts[k] || 0, weight: triggerWeights[k] }))
+      .sort((a, b) => (b.weight || 0) - (a.weight || 0));
+
     const out = {
       triggerWeights,
       defaultTriggerWeight: this.minWeight,
       crossCheckWeight: this.crossCheckWeight,
       signalIdWeight: this.signalIdWeight,
-      maxBoost: this.maxBoost
+      maxBoost: this.maxBoost,
+      normAlpha: (existingConfig && typeof existingConfig.normAlpha === 'number') ? existingConfig.normAlpha : 0.3,
+      weightMethod: 'tfidf-tiered'
     };
     const outPath = this.writeConfig(out);
 

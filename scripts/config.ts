@@ -2,8 +2,13 @@ import fs from 'fs';
 import path from 'path';
 
 export interface TriggerConfig {
-  crossCheckAdapters: any;
-  normAlpha: any;
+  // Whether to write cross-check audit entries back into case files on disk
+  writeCrossCheckAudit?: boolean;
+  // Optional adapter configuration for cross-check adapters
+  crossCheckAdapters?: any;
+  // Normalization alpha used by recalc (optional)
+  normAlpha?: number | undefined;
+  // Per-trigger weights
   triggerWeights: { [k: string]: number };
   defaultTriggerWeight: number;
   crossCheckWeight: number;
@@ -18,7 +23,8 @@ const FALLBACK_CONFIG: TriggerConfig = {
   signalIdWeight: 0.01,
   maxBoost: 0.10,
   normAlpha: undefined,
-  crossCheckAdapters: undefined
+  crossCheckAdapters: undefined,
+  writeCrossCheckAudit: true
 };
 
 export function loadTriggerConfig(): TriggerConfig {
@@ -35,6 +41,8 @@ export function loadTriggerConfig(): TriggerConfig {
         if (typeof parsed.signalIdWeight === 'number') cfg.signalIdWeight = parsed.signalIdWeight;
         if (typeof parsed.maxBoost === 'number') cfg.maxBoost = parsed.maxBoost;
         if (typeof parsed.normAlpha === 'number') cfg.normAlpha = parsed.normAlpha;
+        if (typeof parsed.crossCheckAdapters !== 'undefined') cfg.crossCheckAdapters = parsed.crossCheckAdapters;
+        if (typeof parsed.writeCrossCheckAudit === 'boolean') cfg.writeCrossCheckAudit = parsed.writeCrossCheckAudit;
       }
     }
   } catch (err) {

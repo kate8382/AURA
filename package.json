@@ -44,6 +44,7 @@
     "normalize:percases": "node -r ts-node/register scripts/normalize-percases.ts public_cases -- --apply-signal-ids",
     "normalize:percases:extract:dry": "node -r ts-node/register scripts/normalize-percases.ts public_cases --dry-run --extract-triggers",
     "validate:percases": "node -r ts-node/register scripts/validate-percases.ts public_cases",
+    "clean:public_cases": "node -r ts-node/register scripts/tools/clean-public-cases.ts",
     "gen:triggers": "node -r ts-node/register scripts/generate-trigger-weights.ts",
     "gen:triggers:apply": "node -r ts-node/register scripts/generate-trigger-weights.ts -- --apply-signal-ids",
     "collect:triggers": "node scripts/tools/collect-triggers.js",
