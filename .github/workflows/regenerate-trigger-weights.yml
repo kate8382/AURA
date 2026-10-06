@@ -7,10 +7,6 @@ on:
         description: 'Create a Pull Request when changes are detected (manual runs only)'
         required: false
         default: 'true'
-      method:
-        description: 'Weighting method to use (e.g. tfidf-tiered|linear)'
-        required: false
-        default: 'tfidf-tiered'
   schedule:
     # weekly on Sunday at 03:00 UTC
     - cron: '0 3 * * 0'
@@ -40,10 +36,8 @@ jobs:
         run: npm ci
 
       - name: Generate trigger weights
-        env:
-          METHOD: ${{ github.event.inputs.method || 'tfidf-tiered' }}
         run: |
-          echo "Using method: ${METHOD}"
+          echo "Generating trigger weights"
           npm run gen:triggers
 
       - name: Check for changes
@@ -75,11 +69,11 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Regenerate trigger-weights (method: ${{ github.event.inputs.method || 'tfidf-tiered' }})"
-          branch: "regenerate-trigger-weights/${{ github.event.inputs.method || 'tfidf-tiered' }}-${{ github.run_id }}"
-          title: "Regenerate trigger-weights: ${{ github.event.inputs.method || 'tfidf-tiered' }}"
+          commit-message: "Regenerate trigger-weights"
+          branch: "regenerate-trigger-weights/${{ github.run_id }}"
+          title: "Regenerate trigger-weights"
           body: |
-            Automated regeneration of `config/trigger-weights.json` using method `${{ github.event.inputs.method || 'tfidf-tiered' }}`.
+            Automated regeneration of `config/trigger-weights.json`.
 
             This PR is created by the scheduled workflow `regenerate-trigger-weights` and includes any changes detected to `config/trigger-weights.json`.
           labels: automated, regenerate-trigger-weights
