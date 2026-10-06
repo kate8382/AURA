@@ -20,12 +20,7 @@ npm run gen:triggers:apply   # run generator and apply `signal_ids` into case fi
 
 **Notes:**
 - The generator preserves curated keys and section headers in `config/trigger-weights.json` to avoid accidental deletion.
-- Weighting algorithm: Tier-based TF‑IDF. For each trigger we compute a TF-like document frequency and an IDF smoothing factor, then compute a raw TF‑IDF score and normalize it per-category. Final weight mapping uses:
-
-- raw_t = df_t * log(1 + N / max(df_t, 1 + idfSmoothing))
-- Per-category normalization maps normalized TF‑IDF into the category span:
-
-- Weight = Category_Min + norm * (Category_Max - Category_Min)
+ - Weighting algorithm: Tier-based TF‑IDF (method `tfidf-tiered`). For each trigger we compute a hybrid raw score (IDF-style downweighting combined with a soft TF boost), normalize raw values per-category, and map normalized values into the category span (Category_Min..Category_Max).
 
  - Configurable parameters: `idfSmoothing` (default 1), `tfidfScale` (default 1.5), `normAlpha` (default 0.3).
  - Weighting method: the generator now uses a hybrid TF‑IDF–like score (method `tfidf-tiered`) rather than a pure linear or naive TF*IDF multiplication. The hybrid raw score is:

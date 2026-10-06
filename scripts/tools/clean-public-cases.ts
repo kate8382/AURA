@@ -37,7 +37,6 @@ walk(base, (file) => {
   try {
     const raw = fs.readFileSync(file, 'utf8');
     const parsed = JSON.parse(raw);
-    const before = JSON.stringify(parsed);
     const c = cleanObj(parsed);
     if (c) {
       fs.copyFileSync(file, file + '.bak');

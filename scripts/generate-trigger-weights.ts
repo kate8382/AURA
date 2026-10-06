@@ -25,7 +25,9 @@ type CountMap = { [k: string]: number };
  * Где первая лог-часть даёт IDF‑стайл штраф для очень частых триггеров, а вторая лог‑часть
  * даёт мягкое усиление по частоте внутри категории (soft TF), не приводя к экспонентному росту.
  * Поведение:
- * - собирает уникальные триггеры по каждому кейсу (из `scenarios[].triggers` и `signal_ids`),
+ * - собирает уникальные триггеры по каждому кейсу (из `scenarios[].triggers`).
+ *   Mapped `signal_ids` не разворачиваются автоматически при генерации; используйте
+ *   `--apply-signal-ids` / `gen:triggers:apply` чтобы применить `signal_ids` в файлах кейсов.
  * - считает число кейсов, в которых встречается каждый триггер,
  * - нормализует строки (trim + toLowerCase),
  * - вычисляет гибридную raw-оценку (см. формулу выше) для каждого триггера, затем нормализует
@@ -295,12 +297,8 @@ export class GenerateTriggerWeights {
     // default any remaining missing triggers into camo (also map camo/alibi heuristics)
     for (const t of Object.keys(counts)) {
       if (triggerCategory[t]) continue;
-      const lt = String(t).toLowerCase();
-      if (lt.includes('camouflage') || lt.includes('alibi') || lt.includes('naive') || lt.includes('persona')) {
-        triggerCategory[t] = 'camo';
-      } else {
-        triggerCategory[t] = 'camo';
-      }
+      // Default all remaining unmapped triggers to `camo` (weak/benign heuristics)
+      triggerCategory[t] = 'camo';
     }
 
     // compute TF‑IDF-like score per trigger (favor rare but important triggers)
