@@ -299,10 +299,12 @@ export class GenerateTriggerWeights {
     for (const t of Object.keys(counts)) {
       const df = Math.max(0, counts[t] || 0);
       if (df <= 0) {
-        // not observed in corpus — give minimal raw score (will be mapped to lower bound)
         rawPerTrig[t] = 0;
       } else {
-        rawPerTrig[t] = this.tfidfScale * Math.log(1 + N / (df + this.idfSmoothing));
+        // hybrid score: IDF-style term downweights very common terms, but include
+        // a soft TF component so that within the same category more frequent
+        // triggers tend to score higher. Use log(1+df) as a gentle TF factor.
+        rawPerTrig[t] = this.tfidfScale * Math.log(1 + N / (df + this.idfSmoothing)) * Math.log(1 + df);
       }
     }
 
