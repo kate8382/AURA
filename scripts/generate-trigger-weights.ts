@@ -14,12 +14,23 @@ type CountMap = { [k: string]: number };
  * Важные свойства:
  * - Используется канонический маппинг категорий из существующего `config/trigger-weights.json`.
  * - Триггеры строго привязываются к категориям (critical/high/medium/low/camo).
- * - Вес триггера = Category_Min + TFIDF_normalized * (Category_Max - Category_Min).
+ * - Вес триггера = Category_Min + normalized_raw * (Category_Max - Category_Min).
+ *
+ * Формула raw-оценки: использована гибридная TF‑IDF‑подобная функция, чтобы избежать двух опасностей:
+ *  - чисто линейного взвешивания (которое игнорирует распространенность в корпусе),
+ *  - и наивного TF*IDF, который умножает на сырую df и тем самым усиливает часто встречающиеся триггеры.
+ *
+ *  raw = tfidfScale * log(1 + N/(df + idfSmoothing)) * log(1 + df)
+ *
+ * Где первая лог-часть даёт IDF‑стайл штраф для очень частых триггеров, а вторая лог‑часть
+ * даёт мягкое усиление по частоте внутри категории (soft TF), не приводя к экспонентному росту.
  * Поведение:
  * - собирает уникальные триггеры по каждому кейсу (из `scenarios[].triggers` и `signal_ids`),
  * - считает число кейсов, в которых встречается каждый триггер,
  * - нормализует строки (trim + toLowerCase),
- * - сопоставляет частоты в веса в диапазоне [minWeight, topWeight] (линейная нормализация),
+ * - вычисляет гибридную raw-оценку (см. формулу выше) для каждого триггера, затем нормализует
+ *   значения `raw` внутри каждой категории в диапазон [0..1] (см. обработку single-item ниже) и
+ *   линейно отображает нормализованные значения в настроенные диапазоны категории (Category_Min..Category_Max),
  * - записывает результат в `config/trigger-weights.json` и создаёт резервную копию предыдущего.
  */
 export class GenerateTriggerWeights {
@@ -37,7 +48,7 @@ export class GenerateTriggerWeights {
   maxBoost = 0.1;
     // Smoothing for IDF (default 1)
     idfSmoothing = 1;
-    // Sensitivity multiplier for TF-IDF (increases the influence of raw tfidf before normalization)
+    // Sensitivity multiplier for the hybrid TF-IDF-like raw score (before normalization)
     tfidfScale = 1.5;
 
   constructor(repoRoot?: string) {

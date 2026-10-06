@@ -27,7 +27,14 @@ npm run gen:triggers:apply   # run generator and apply `signal_ids` into case fi
 
 - Weight = Category_Min + norm * (Category_Max - Category_Min)
 
-- Configurable parameters: `idfSmoothing` (default 1), `tfidfScale` (default 1.5), `normAlpha` (default 0.3). The generator uses `canonical` category mappings to enforce critical/high/medium/low membership for important triggers.
+ - Configurable parameters: `idfSmoothing` (default 1), `tfidfScale` (default 1.5), `normAlpha` (default 0.3).
+ - Weighting method: the generator now uses a hybrid TF‑IDF–like score (method `tfidf-tiered`) rather than a pure linear or naive TF*IDF multiplication. The hybrid raw score is:
+
+  $$
+  \mathrm{raw}_t = \mathrm{tfidfScale} \times \log\left(1 + \frac{N}{df_t + \mathrm{idfSmoothing}}\right) \times \log(1 + df_t)
+  $$
+
+  This combines an IDF-style downweighting for very common triggers with a soft TF boost so that, within a category, more frequent triggers rank higher without exploding with df. After computing `raw` per trigger, values are normalized per-category and mapped into the configured category spans (CRITICAL/HIGH/MEDIUM/LOW/CAMO).
 - Use `gen:triggers:apply` only when you want `signal_ids` persisted into the case files for auditing
   or external integration.
 
