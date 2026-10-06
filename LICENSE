@@ -1,8 +1,9 @@
+
 BUSINESS SOURCE LICENSE 1.1
 
 This Business Source License 1.1 ("BSL 1.1") governs the use of the
 software and accompanying materials (the "Licensed Work") made available by
-the Licensor under the terms below.
+the Licensor under the terms set forth below.
 
 Licensor:
   Ecaterina Sevciuc (@kate8382)
@@ -16,26 +17,29 @@ Change Date:
 Change License:
   Apache License, Version 2.0
 
+Grant of Rights:
+  Subject to the Conditions below, the Licensor hereby grants you a
+  non‑exclusive, non‑transferable, worldwide, royalty‑free license to
+  use, reproduce, and prepare derivative works of the Licensed Work for
+  purposes permitted by this BSL 1.1.
+
 Additional Use Grant:
-  You may use the Licensed Work for non-commercial, research, educational,
-  and testing purposes free of charge. Commercial use in production
-  environments is strictly prohibited without a separate commercial license
-  from the Licensor.
+  The Licensor permits use of the Licensed Work for non‑commercial
+  purposes including research, education, testing, and evaluation without
+  payment of royalties. Commercial use in production environments, or
+  providing the Licensed Work as part of a commercial hosted service,
+  requires a separate commercial license from the Licensor.
 
 Conditions:
-  1. You must retain this NOTICE file and all copyright and attribution
-     notices in any copy or substantial portion of the Licensed Work.
+  1. You must retain this LICENSE file and all copyright, attribution,
+     and license notices in any copy or substantial portion of the Licensed Work.
   2. You may not provide the Licensed Work as a commercial hosted service
      or otherwise use it in production for commercial purposes without
      acquiring a separate commercial license from the Licensor.
   3. Contributions to the Licensed Work are accepted at the Licensor's
-     discretion and any Contribution is licensed under the terms of this
-     BSL 1.1 unless explicitly stated otherwise by the Licensor.
-
-Warranty and Disclaimer:
-  THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+     discretion; by submitting a Contribution you agree that the Contribution
+     will be licensed under the terms of this BSL 1.1 unless an explicit
+     alternative license or contributor agreement is provided by the Licensor.
 
 Change to Open License:
   On the Change Date specified above (or such earlier date as the Licensor
@@ -44,7 +48,18 @@ Change to Open License:
   the terms of the Change License will apply to the Licensed Work as provided
   by the Licensor.
 
-Copyright (c) 2026 Ecaterina Sevciuc (@kate83882) and AURA contributors.
+Disclaimer of Warranty:
+  THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NONINFRINGEMENT.
+
+Limitation of Liability:
+  IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING
+  FROM, OUT OF, OR IN CONNECTION WITH THE LICENSED WORK OR THE USE OR OTHER
+  DEALINGS IN THE LICENSED WORK.
+
+Copyright (c) 2026 Ecaterina Sevciuc (@kate8382) and AURA contributors.
 
 For commercial licensing inquiries, contact: e.sevciuc82@gmail.com
 
