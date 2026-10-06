@@ -4,5 +4,6 @@ dist/
 .venv/
 tmp/
 config/*.bak
+public_cases/**/*.bak
 .github/ISSUE/
 .github/PR/
