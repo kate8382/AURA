@@ -167,7 +167,10 @@ export class RecalcConfidence {
           const summary = await (crossAdapter as CrossCheckAdapterClass).evaluateCrossChecks(e, requirements, adaptersCfg);
           if (summary && typeof summary.total_weight === 'number') totalWeight += summary.total_weight;
           // attach audit entries for traceability
-          (e as any).cross_check_audit = summary.auditEntries || [];
+          // Temporarily disable writing `cross_check_audit` to case files to avoid
+          // adding transient system audit entries into the public_cases diff.
+          // (e as any).cross_check_audit = summary.auditEntries || [];
+          // TODO: re-enable once auditEntries are sanitized and meaningful.
         }
       } catch (err) {
         // ignore cross-check errors to avoid blocking recalc; do not apply additional weight
