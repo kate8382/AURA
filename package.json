@@ -6,7 +6,9 @@
     "name": "Ecaterina Sevciuc",
     "email": "e.sevciuc82@gmail.com"
   },
-  "license": "Apache-2.0",
+  "license": "BSL-1.1",
+  "licenseChangeDate": "2029-10-05",
+  "licenseChangeTo": "Apache-2.0",
   "dataLicense": "CC-BY-NC-4.0",
   "keywords": [
     "AURA",

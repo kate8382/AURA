@@ -40,7 +40,7 @@ Even though we do not accept direct code or data PRs, community feedback is valu
 
 ## Licensing reminder
 
-- **Software & tooling:** Apache License 2.0 — see [LICENSE](./LICENSE).
+- **Code & Tooling:** Business Source License 1.1 (BSL 1.1) — see [LICENSE](./LICENSE). The project is free for non-commercial research, education, and testing. Commercial production use requires a commercial license; contact the maintainer for details. The codebase will convert to Apache-2.0 on the specified Change Date.
 - **Public cases (`public_cases/`):** CC BY‑NC 4.0 — see [DATA_LICENSE](./DATA_LICENSE).
 
 If a suggestion is implemented by the maintainer, contributed ideas will be credited in release notes upon request.
