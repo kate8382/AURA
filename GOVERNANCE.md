@@ -39,5 +39,5 @@ Roles
 If you discover a security issue in validators, schemas, or tooling, do not open a public issue. Contact the maintainer privately at [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com) or via LinkedIn: [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/).
 
 ## Dependencies & legal
-- Code: Business Source License 1.1 (see [LICENSE](./LICENSE)); releases transition to Apache-2.0 on the Change Date specified in the LICENSE. Commercial production use requires a commercial license; contact the Project Lead.
+- Code: Business Source License 1.1 (see [LICENSE](./LICENSE)); releases transition to Apache-2.0 on the Change Date specified in the LICENSE (2029-10-05). The Licensor permits non‑commercial use (research, education, testing, and evaluation) per the LICENSE; commercial production use or offering the Licensed Work as a commercial hosted service requires a separate commercial license—contact the Project Lead.
 - Public dataset (`public_cases/`): CC BY‑NC 4.0 (see [DATA_LICENSE](./DATA_LICENSE)).

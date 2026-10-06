@@ -108,9 +108,9 @@ Note: see [docs/SCRIPTS.md](./docs/SCRIPTS.md) for details on cross-check behavi
 
 ### How trigger weights are computed
 
-- Generator uses Tier‑based TF‑IDF: triggers are counted per case (unique within a case), a raw TF‑IDF score is computed per trigger, then normalized inside an expert category (critical/high/medium/low/camo).
-- Final mapping: Weight = Category_Min + normalized_TFIDF * (Category_Max - Category_Min). This guarantees critical triggers remain within the configured critical span (e.g. 0.50–0.60).
-- The output includes `normAlpha`, `idfSmoothing` and `tfidfScale` parameters; `normAlpha` defaults to 0.3. The generator preserves existing curated keys/section headers in `config/trigger-weights.json`.
+- Triggers are counted per case (unique within a case). The most frequent trigger is mapped to `topWeight` (default 0.05) and other triggers get a linear weight scaled relative to that maximum, with a lower bound `defaultTriggerWeight` (0.01).
+- Final `confidence` for a case is computed as: base (by category) + boost, where `boost = min(maxBoost, totalTriggerWeight + crossCheckWeight*questions + signalIdWeight*unmappedSignalCount)`.
+- The generator preserves any existing trigger keys from the current `config/trigger-weights.json` to avoid accidentally dropping curated keys.
 
 ### Automation
 
@@ -205,8 +205,9 @@ This project operates under a dual/hybrid licensing model:
 * **Code & Tooling:** [Business Source License 1.1 (BSL 1.1)](LICENSE)
   * **Free & Open:** Fully permitted for non-commercial use, academic research, education, local testing, and evaluation.
   * **Commercial Use:** Any production use by commercial entities requires a commercial license. Please contact the author for inquiries.
-  * **Change Date:** Each release automatically transitions to the **Apache License 2.0** 3 years after its release date.
-* **Cases & Data:** [CC BY‑NC 4.0](./DATA_LICENSE)
+  * **Change Date:** Each release automatically transitions to the **Apache License 2.0** on the Change Date specified in `LICENSE` (2029-10-05 for the initial code base in this PR).
+  * **Note:** Prior releases that were published under Apache‑2.0 remain licensed under Apache‑2.0; the Change Date applies prospectively to this code base as maintained by the Licensor.
+* **Cases & Data:** [Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](./DATA_LICENSE)
 
 ## Contribution & Governance
 
