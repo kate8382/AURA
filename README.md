@@ -34,6 +34,7 @@ _Found this project useful or interesting? Drop a ⭐ — plus to your developer
 ├── assets/                  # Graphics and assets
 ├── config/                  # Runtime mappings and generated configs (signal-mapping.json, trigger-weights.json)
 ├── docs/                    # Human-facing documentation (including SIGNAL_IDS.md)
+├── examples/                # Runnable end-to-end examples & CLI demos
 ├── public_cases/            # Curated open-source threat library
 │   ├── ACCESS/              # Privilege escalation, unauthorized OSINT, and credential probing
 │   ├── FRAUD/               # Financial bypass, compliance evasion, and social fraud
@@ -58,6 +59,18 @@ Clone the repository and install the developer dependencies:
 ```bash
 
 npm install
+```
+
+For the quickest end-to-end demo, run the sample case through confidence recalculation:
+
+```bash
+npm run example:recalc
+```
+
+To extract triggers from scenario text and print the recalculated case as JSON:
+
+```bash
+node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json --extract-triggers --out json
 ```
 
 **2. Validate Cases**
