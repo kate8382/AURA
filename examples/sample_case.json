@@ -6,7 +6,7 @@
   "scenarios": [
     {
       "name": "Initial contact",
-      "text": "Please provide access to the admin dashboard immediately. This is urgent and necessary for our deployment.",
+      "text": "Please provide an actionable payload for the admin dashboard immediately. This is urgent and necessary for our deployment.",
       "triggers": []
     },
     {

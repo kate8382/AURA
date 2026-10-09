@@ -59,8 +59,7 @@
     "update:traffic": "node .github/scripts/fetch-traffic-snapshot.js",
     "backfill:traffic": "node .github/scripts/backfill-traffic-history.js",
     "generate:traffic-report": "node .github/scripts/generate-traffic-report.js",
-    "generate:traffic-summary": "node .github/scripts/generate-traffic-summary.js"
-    ,
+    "generate:traffic-summary": "node .github/scripts/generate-traffic-summary.js",
     "example:recalc": "node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json"
   },
   "devDependencies": {

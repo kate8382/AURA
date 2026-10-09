@@ -48,12 +48,26 @@ async function main() {
 
   try {
     const r = new RecalcConfidence();
-    await r.recalc(tmpPath, false, 0.0);
+    const originalConsoleLog = console.log;
+    const originalConsoleInfo = console.info;
+    const originalConsoleDebug = console.debug;
+    if (outFormat === 'json') {
+      console.log = (...args: any[]) => console.error(...args);
+      console.info = (...args: any[]) => console.error(...args);
+      console.debug = (...args: any[]) => console.error(...args);
+    }
+    try {
+      await r.recalc(tmpPath, false, 0.0);
+    } finally {
+      console.log = originalConsoleLog;
+      console.info = originalConsoleInfo;
+      console.debug = originalConsoleDebug;
+    }
     const outRaw = fs.readFileSync(tmpPath, 'utf8');
     const outObj = JSON.parse(outRaw);
 
     if (outFormat === 'json') {
-      console.log(JSON.stringify(outObj, null, 2));
+      process.stdout.write(`${JSON.stringify(outObj, null, 2)}\n`);
     } else {
       // pretty print summary
       const cid = outObj.case_id || '<no-id>';
