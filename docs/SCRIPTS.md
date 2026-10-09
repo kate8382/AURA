@@ -94,7 +94,24 @@ node -r ts-node/register scripts/recalc_confidence.ts --dry-run --dir public_cas
 npm run recalc:confidence -- --dir public_cases
 ```
 
-3) Trigger extraction: `scripts/extract-triggers.ts` + `normalize-percases --extract-triggers`
+3) End-to-end example: `examples/simple-recalc.ts`
+
+- Runs trigger extraction (optionally) and the existing `RecalcConfidence.recalc()` pipeline
+  for one case file, using a temporary copy so the input file is not modified.
+- Usage:
+
+```bash
+npm run example:recalc
+node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json --extract-triggers --out json
+```
+
+- `--extract-triggers` extracts labels from each scenario's `text` using the rules in
+  `config/trigger-extraction.json` and appends missing labels to `scenarios[].triggers`.
+- `--out pretty|json` selects a human-readable summary (default: `pretty`) or the full
+  recalculated case as JSON. A custom case path can be supplied as the first argument.
+- See `examples/README.md` and `examples/sample_case.json` for the demo input and expected output.
+
+4) Trigger extraction: `scripts/extract-triggers.ts` + `normalize-percases --extract-triggers`
 
 - Purpose: lightweight, deterministic, rule-based extraction of trigger candidates from
   `scenarios[].text` (Issue #8). English-only; no ML, embeddings, TF-IDF, or external NLP
@@ -150,7 +167,7 @@ node -r ts-node/register scripts/normalize-percases.ts public_cases --extract-tr
   (augmentation, dedup, dry-run, idempotency, signal-ID composition). Tests use temp
   dirs/fixtures; `public_cases/` is never rewritten by this feature.
 
-4) Helper scripts (small, idempotent)
+5) Helper scripts (small, idempotent)
 
 - `scripts/tools/collect-triggers.js` — collects normalized triggers from `public_cases/` and writes
   `tmp/collected-triggers.json`.
@@ -163,13 +180,13 @@ npm run collect:triggers
 npm run audit:categories
 ```
 
-5) Signal mapping
+6) Signal mapping
 
 - Canonical mapping file: `config/signal-mapping.json`.
 - New format: mapping uses compact namespaced keys (for example `camouflage:naive`) where each key maps to an object with `id`, `description`, and a `triggers` array. The generator and recalculator expand mapped keys into normalized triggers when computing weights.
 - See [SIGNAL_IDS.md](./SIGNAL_IDS.md) for the recommended workflow to collect triggers and update the mapping.
 
-6) Files and outputs
+7) Files and outputs
 
 - Generated configs and intermediate outputs are written to `config/` and `tmp/`. Add `tmp/` to
   `.gitignore` (already recommended) to avoid checking generated artifacts into Git.
@@ -177,12 +194,12 @@ npm run audit:categories
   - `npm run migrate:categories` — migrate legacy `category` field into `domain` + human `category` label in `public_cases/`.
   - `npm run migrate:signals` — preview and apply signal ID compaction and update `public_cases.signal_ids`.
 
-7) Automation suggestions
+8) Automation suggestions
 
 - Consider a CI workflow that runs the generator on changes to `public_cases/`, writes updated
   `config/trigger-weights.json` to a branch and opens a PR for review.
 
-8) Tests
+9) Tests
 
 Unit tests for the scripts are located in `scripts/__tests__/` and include:
 

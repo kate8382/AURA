@@ -27,11 +27,12 @@ Expected Output (pretty):
 
 Case: EX-EXAMPLE-001
 Category: access/example
-Confidence: 0.42 (raw: 0.87)
-Decision: review
-Decision reasons: cross-check-failed; urgent-request
+Confidence: 0 (raw: 0.01 )
+Decision: pending
+Decision reasons: Awaiting cross-check answers
 Scenarios and triggers:
  - Initial contact
-   triggers: urgency / pressure
+   triggers:
  - Follow-up
-   triggers: actionable payload
+   triggers:
+Cross-check audit: includes a noop adapter result
