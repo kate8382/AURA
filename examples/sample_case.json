@@ -1,0 +1,41 @@
+{
+  "case_id": "EX-EXAMPLE-001",
+  "domain": "access",
+  "category": "access/example",
+  "signal_ids": [],
+  "scenarios": [
+    {
+      "name": "Initial contact",
+      "text": "Please provide access to the admin dashboard immediately. This is urgent and necessary for our deployment.",
+      "triggers": []
+    },
+    {
+      "name": "Follow-up",
+      "text": "We can provide a demo payload to verify the exploit; please generate the artifact for testing.",
+      "triggers": []
+    }
+  ],
+  "suggested_action": "cross_check",
+  "legal_risk": {
+    "short_summary": "Potential unauthorized access request",
+    "full_text": ["User requests access to admin resources without prior authorisation."]
+  },
+  "behavioral_patterns": {
+    "short_summary": "Urgency + potential payload request",
+    "full_text": ["Immediate access requests and mentions of payload generation."]
+  },
+  "cross_check": {
+    "short_summary": "Cross-check required",
+    "questions": [
+      { "id": "cc-delay", "title": "Is access justified?", "type": "boolean", "evidence_weight": 0.1 }
+    ]
+  },
+  "confidence": 0.01,
+  "decision": "pending",
+  "decision_reasons": [],
+  "deception_threshold": {
+    "short_summary": "Deception checks",
+    "full_text": []
+  },
+  "confidence_raw": 0.0
+}
