@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: traffic-data-maintenance
+  cancel-in-progress: false
+
 jobs:
   save-traffic:
     runs-on: ubuntu-latest
@@ -31,17 +35,28 @@ jobs:
         run: |
           node .github/scripts/fetch-traffic-snapshot.js
 
+      - name: Backfill per-day traffic data
+        run: node .github/scripts/backfill-traffic-history.js
+
+      - name: Generate traffic CSV report
+        env:
+          DISABLE_IMAGE_GEN: 'true'
+        run: node .github/scripts/generate-traffic-report.js
+
+      - name: Generate traffic summary JSON
+        run: node .github/scripts/generate-traffic-summary.js
+
       - name: Commit changes
         id: commit_changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add analytics/traffic-history.json || true
+          git add analytics/traffic-history.json analytics/traffic-summary.json analytics/traffic-history.csv || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
             echo "need_push=false" >> $GITHUB_OUTPUT
           else
-            git commit -m "Update traffic-history.json (auto)" --author "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+            git commit -m "Update traffic data (auto)" --author "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
             echo "need_push=true" >> $GITHUB_OUTPUT
           fi
 
@@ -66,9 +81,9 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.TRAFFIC_TOKEN }}
-          commit-message: "Update traffic-history.json (auto)"
-          title: "Update traffic history (auto)"
-          body: "Automated update of analytics traffic-history.json"
+          commit-message: "Update traffic data (auto)"
+          title: "Update traffic data (auto)"
+          body: "Automated update of the traffic history and generated reports."
           branch: "auto/traffic-report-${{ github.run_id }}"
           base: "main"
           labels: automated,traffic-report

@@ -1,17 +1,14 @@
 name: Traffic History Report (CSV + PNG)
 
 on:
-  push:
-    paths:
-      - 'analytics/traffic-history.json'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: traffic-history-report
-  cancel-in-progress: true
+  group: traffic-data-maintenance
+  cancel-in-progress: false
 
 jobs:
   build-report:
