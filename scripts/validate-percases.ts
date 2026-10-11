@@ -46,17 +46,34 @@ export class ValidatePerCases {
     }
   }
 
+  // Parse command-line arguments to determine the target directory for validation.
+  private parseArgs(argv: string[]) {
+    let optionDir: string | undefined;
+    let positionalDir: string | undefined;
+    for (let i = 0; i < argv.length; i++) {
+      const arg = argv[i];
+      if (arg === '--dry-run') continue;
+      if (arg === '--dir' || arg === '-d') {
+        const value = argv[++i];
+        if (!value || value.startsWith('-')) throw new Error(`${arg} requires a directory path`);
+        optionDir = value;
+        continue;
+      }
+      if (arg.startsWith('-')) throw new Error(`Unknown option: ${arg}`);
+      if (positionalDir) throw new Error(`Unexpected argument: ${arg}`);
+      positionalDir = arg;
+    }
+    return optionDir || positionalDir || process.env.CASES_DIR || 'public_cases';
+  }
+
   // Run the validation process on a target directory (or default to public_cases)
   async run(targetDir?: string) {
     const schema = await this.loadSchema();
     const validate = this.ajv.compile(schema);
-    const envDir = process.env.CASES_DIR;
-    const target = envDir || targetDir || process.argv[2] || 'public_cases';
-    const argv = process.argv.slice(2);
-    for (let i = 0; i < argv.length; i++) {
-      const a = argv[i];
-      if (a === '-d' || a === '--dir') { TargetHelper.setTarget(argv[i + 1]); break; } // TargetHelper.setTarget is a placeholder for compatibility with earlier argument parsing style
-    }
+    const target = path.resolve(targetDir || this.parseArgs(process.argv.slice(2)));
+    const targetStats = await fs.stat(target).catch(() => null);
+    if (!targetStats || !targetStats.isDirectory()) throw new Error(`Directory not found: ${target}`);
+    if (process.argv.includes('--dry-run')) console.log('Dry-run mode: validation does not modify files.');
 
     let errors = 0;
     await this.walk(target, async (p) => {
@@ -72,11 +89,6 @@ export class ValidatePerCases {
     if (errors > 0) process.exit(2);
   }
 }
-
-// Helper to satisfy earlier argument parsing style without large change
-const TargetHelper = {
-  setTarget(_: string | undefined) { /* placeholder for compatibility */ }
-};
 
 if (require.main === module) {
   const v = new ValidatePerCases();

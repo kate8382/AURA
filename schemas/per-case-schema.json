@@ -5,19 +5,8 @@
   "additionalProperties": true,
   "required": [
     "case_id",
-    "domain",
     "category",
-    "signal_ids",
-    "scenarios",
-    "suggested_action",
-    "legal_risk",
-    "behavioral_patterns",
-    "cross_check",
-    "confidence",
-    "decision",
-    "decision_reasons",
-    "deception_threshold",
-    "confidence_raw"
+    "scenarios"
   ],
   "properties": {
     "case_id": {
@@ -25,7 +14,7 @@
     },
     "domain": {
       "type": "string",
-      "description": "Optional top-level domain for the case (one of 'access', 'fraud', 'manipulation'). This is intended to be a short, machine-friendly grouping for filtering and routing."
+      "description": "Optional top-level domain for filtering and routing."
     },
     "category": {
       "type": "string"
@@ -35,7 +24,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Optional list of standardized Signal IDs (e.g. \"SIG-...\") for the case; used by `recalc_confidence` to apply signal-based boosts and by external integrators."
+      "description": "Optional list of standardized signal IDs. Signal IDs may be derived or applied in a later normalization step."
     },
     "scenarios": {
       "type": "array",
@@ -113,10 +102,6 @@
     },
     "cross_check": {
       "type": "object",
-      "required": [
-        "short_summary",
-        "questions"
-      ],
       "properties": {
         "short_summary": {
           "type": "string"
@@ -124,7 +109,7 @@
         "questions": {
           "type": "array",
           "items": {
-            "anyOf": [
+            "oneOf": [
               {
                 "type": "object",
                 "required": [
@@ -170,23 +155,34 @@
                     }
                   },
                   "threshold": {
-                    "type": "object"
+                    "type": "object",
+                    "required": ["operator", "value"],
+                    "properties": {
+                      "operator": { "type": "string" },
+                      "value": { "type": "number" }
+                    },
+                    "additionalProperties": true
                   },
                   "evidence_weight": {
-                    "type": "number"
+                    "type": "number",
+                    "minimum": 0
                   },
                   "enforcement": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "actionOnFail": {
+                        "type": "string",
+                        "enum": ["veto", "require_manual_review", "mark_pending"]
+                      }
+                    },
+                    "additionalProperties": true
                   }
                 },
                 "additionalProperties": true
               },
               {
                 "type": "object",
-                "required": [
-                  "name",
-                  "full_text"
-                ],
+                "required": ["name", "full_text"],
                 "properties": {
                   "name": {
                     "type": "string"
