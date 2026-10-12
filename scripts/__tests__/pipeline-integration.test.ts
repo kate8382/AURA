@@ -23,6 +23,15 @@ function snapshotTree(dir: string, base = dir, out: Record<string, string> = {})
   return out;
 }
 
+// generate-trigger-weights.test.ts rewrites these in a parallel worker.
+const isSharedWithOtherSuites = (rel: string) => rel.startsWith('trigger-weights.json');
+
+function snapshotRepoState() {
+  const config = snapshotTree(path.join(repoRoot, 'config'));
+  for (const rel of Object.keys(config)) if (isSharedWithOtherSuites(rel)) delete config[rel];
+  return { public_cases: snapshotTree(path.join(repoRoot, 'public_cases')), config };
+}
+
 function auditSummary(id: string, weight: number) {
   return {
     auditEntries: [{ id, verifier: 'adapter:test-delay', result: true, ok: true, weight_applied: weight, ts: new Date().toISOString() }],
@@ -44,11 +53,14 @@ function typedCase(caseId: string) {
 }
 
 describe('recalc pipeline integration', () => {
-  const publicCasesDir = path.join(repoRoot, 'public_cases');
-  const publicBefore = snapshotTree(publicCasesDir);
+  const repoBefore = snapshotRepoState();
   const originalArgv = process.argv.slice();
   const adapter = CrossCheckAdapter;
   let tmp: string;
+
+  afterAll(() => {
+    expect(snapshotRepoState()).toEqual(repoBefore);
+  });
 
   beforeEach(() => {
     tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-pipeline-'));
@@ -169,8 +181,4 @@ describe('recalc pipeline integration', () => {
     expect(fs.readFileSync(casePath, 'utf8')).toBe(before);
     expect(fs.readdirSync(tmp)).toEqual(['dry-run.json']);
   }, 30000);
-
-  test('public_cases are not modified by the integration run', () => {
-    expect(snapshotTree(publicCasesDir)).toEqual(publicBefore);
-  });
 });
