@@ -35,9 +35,11 @@
     "validate": "node -r ts-node/register scripts/validate-percases.ts public_cases",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:integration": "jest scripts/__tests__/pipeline-integration.test.ts",
     "recalc:confidence": "node -r ts-node/register scripts/recalc_confidence.ts",
     "recalc:confidence:dry": "node -r ts-node/register scripts/recalc_confidence.ts --dry-run",
     "recalc:confidence:min": "node -r ts-node/register scripts/recalc_confidence.ts --min 0.0",
+    "example:recalc": "node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json",
     "new-case:dry": "node -r ts-node/register scripts/new-case-template.ts --dry-run",
     "new-case": "node -r ts-node/register scripts/new-case-template.ts",
     "normalize:percases:dry": "node -r ts-node/register scripts/normalize-percases.ts public_cases --dry-run",
@@ -59,8 +61,7 @@
     "update:traffic": "node .github/scripts/fetch-traffic-snapshot.js",
     "backfill:traffic": "node .github/scripts/backfill-traffic-history.js",
     "generate:traffic-report": "node .github/scripts/generate-traffic-report.js",
-    "generate:traffic-summary": "node .github/scripts/generate-traffic-summary.js",
-    "example:recalc": "node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json"
+    "generate:traffic-summary": "node .github/scripts/generate-traffic-summary.js"
   },
   "devDependencies": {
     "@types/jest": "^29.5.3",

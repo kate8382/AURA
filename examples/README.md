@@ -36,3 +36,11 @@ Scenarios and triggers:
  - Follow-up
    triggers:
 Cross-check audit: includes a noop adapter result
+
+Integration tests
+
+Run the end-to-end pipeline tests (normalize, trigger extraction, weight generation, recalc with a delayed cross-check adapter, `--dry-run` checks). They work on temporary copies, so `public_cases/` and `config/` are not modified:
+
+```bash
+npm run test:integration
+```
