@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { logWarn } from './logger';
 
 export interface TriggerConfig {
   // Whether to write cross-check audit entries back into case files on disk
@@ -29,24 +30,26 @@ const FALLBACK_CONFIG: TriggerConfig = {
 
 export function loadTriggerConfig(): TriggerConfig {
   const cfg: TriggerConfig = { ...FALLBACK_CONFIG };
-  try {
-    const cfgPath = path.resolve(__dirname, '..', 'config', 'trigger-weights.json');
-    if (fs.existsSync(cfgPath)) {
-      const raw = fs.readFileSync(cfgPath, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') {
-        if (parsed.triggerWeights && typeof parsed.triggerWeights === 'object') cfg.triggerWeights = parsed.triggerWeights;
-        if (typeof parsed.defaultTriggerWeight === 'number') cfg.defaultTriggerWeight = parsed.defaultTriggerWeight;
-        if (typeof parsed.crossCheckWeight === 'number') cfg.crossCheckWeight = parsed.crossCheckWeight;
-        if (typeof parsed.signalIdWeight === 'number') cfg.signalIdWeight = parsed.signalIdWeight;
-        if (typeof parsed.maxBoost === 'number') cfg.maxBoost = parsed.maxBoost;
-        if (typeof parsed.normAlpha === 'number') cfg.normAlpha = parsed.normAlpha;
-        if (typeof parsed.crossCheckAdapters !== 'undefined') cfg.crossCheckAdapters = parsed.crossCheckAdapters;
-        if (typeof parsed.writeCrossCheckAudit === 'boolean') cfg.writeCrossCheckAudit = parsed.writeCrossCheckAudit;
-      }
+  const cfgPath = path.resolve(__dirname, '..', 'config', 'trigger-weights.json');
+  if (!fs.existsSync(cfgPath)) {
+    logWarn('trigger weights config not found, using built-in defaults', { file: cfgPath });
+  } else {
+    let parsed: any;
+    try {
+      parsed = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+    } catch (err) {
+      throw new Error(`cannot read trigger weights config ${cfgPath}: ${err instanceof Error ? err.message : err}`);
     }
-  } catch (err) {
-    // ignore read/parse errors and fall back
+    if (parsed && typeof parsed === 'object') {
+      if (parsed.triggerWeights && typeof parsed.triggerWeights === 'object') cfg.triggerWeights = parsed.triggerWeights;
+      if (typeof parsed.defaultTriggerWeight === 'number') cfg.defaultTriggerWeight = parsed.defaultTriggerWeight;
+      if (typeof parsed.crossCheckWeight === 'number') cfg.crossCheckWeight = parsed.crossCheckWeight;
+      if (typeof parsed.signalIdWeight === 'number') cfg.signalIdWeight = parsed.signalIdWeight;
+      if (typeof parsed.maxBoost === 'number') cfg.maxBoost = parsed.maxBoost;
+      if (typeof parsed.normAlpha === 'number') cfg.normAlpha = parsed.normAlpha;
+      if (typeof parsed.crossCheckAdapters !== 'undefined') cfg.crossCheckAdapters = parsed.crossCheckAdapters;
+      if (typeof parsed.writeCrossCheckAudit === 'boolean') cfg.writeCrossCheckAudit = parsed.writeCrossCheckAudit;
+    }
   }
 
   // ENV overrides (explicit)
@@ -55,12 +58,13 @@ export function loadTriggerConfig(): TriggerConfig {
     if (!Number.isNaN(v)) cfg.maxBoost = v;
   }
   if (process.env.TRIGGER_WEIGHTS) {
+    let tw: any;
     try {
-      const tw = JSON.parse(process.env.TRIGGER_WEIGHTS);
-      if (tw && typeof tw === 'object') cfg.triggerWeights = tw;
+      tw = JSON.parse(process.env.TRIGGER_WEIGHTS);
     } catch (err) {
-      // ignore malformed env
+      throw new Error(`TRIGGER_WEIGHTS is not valid JSON: ${err instanceof Error ? err.message : err}`);
     }
+    if (tw && typeof tw === 'object') cfg.triggerWeights = tw;
   }
   return cfg;
 }
@@ -68,14 +72,11 @@ export function loadTriggerConfig(): TriggerConfig {
 export default loadTriggerConfig;
 
 export function loadPolicyConfig() {
+  const p = path.resolve(__dirname, '..', 'config', 'policy.json');
+  if (!fs.existsSync(p)) return null;
   try {
-    const p = path.resolve(__dirname, '..', 'config', 'policy.json');
-    if (fs.existsSync(p)) {
-      const raw = fs.readFileSync(p, 'utf8');
-      return JSON.parse(raw);
-    }
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
   } catch (err) {
-    // ignore
+    throw new Error(`cannot read policy config ${p}: ${err instanceof Error ? err.message : err}`);
   }
-  return null;
 }

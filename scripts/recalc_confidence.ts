@@ -4,6 +4,7 @@ import PolicyEvaluator from './policy/evaluateDecision';
 import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from './policy/crossCheckAdapter';
 import { reorderCaseKeys } from './utils';
 import { generateSignalIds } from './generate-trigger-weights';
+import { logError, logWarn, runCli } from './logger';
 
 type Entry = { [k: string]: any };
 
@@ -70,15 +71,17 @@ export class RecalcConfidence {
 
     // Load signal mapping (signal_id -> [triggers] or { id, description, triggers }) if present
     let signalMapping: Record<string, any> = {};
-    try {
-      const mapPath = path.resolve(__dirname, '..', 'config', 'signal-mapping.json');
-      const rawMap = await fs.readFile(mapPath, 'utf8').catch(() => null);
-      if (rawMap) {
+    const mapPath = path.resolve(__dirname, '..', 'config', 'signal-mapping.json');
+    const rawMap = await fs.readFile(mapPath, 'utf8').catch(() => null);
+    if (rawMap === null) {
+      logWarn('signal mapping not found, signal_ids will count as unmapped', { file: mapPath });
+    } else {
+      try {
         const parsed = JSON.parse(rawMap);
         signalMapping = (parsed && parsed.signals) ? parsed.signals : {};
+      } catch (err) {
+        throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
       }
-    } catch (err) {
-      signalMapping = {};
     }
 
     const normalize = (t: unknown) => {
@@ -168,31 +171,15 @@ export class RecalcConfidence {
       // add contributions from cross_check and unmapped signal_ids (fallback)
       totalWeight += crossCheckQuestions * CROSS_CHECK_WEIGHT;
       // run cross-check adapter to compute evidence_weight contributions (adapters configured via config file)
-      try {
-        const requirements = (e.cross_check && Array.isArray(e.cross_check.questions)) ? e.cross_check.questions : [];
-        const adaptersCfg = (cfg && (cfg.crossCheckAdapters)) ? cfg.crossCheckAdapters : undefined;
-        if (requirements && requirements.length) {
-          // Use default adapter class instance
-          // Note: we only apply weights returned by adapter; adapters may be noop by default
-          // to keep behavior backward-compatible when no adapters are registered.
-          // eslint-disable-next-line no-await-in-loop
-          const summary = await (crossAdapter as CrossCheckAdapterClass).evaluateCrossChecks(e, requirements, adaptersCfg);
-          if (summary && typeof summary.total_weight === 'number') totalWeight += summary.total_weight;
-          // attach audit entries for traceability (keep in-memory for tests and write
-          // to file only when `writeCrossCheckAudit` is enabled in config)
-          try {
-            const writeAudit = (cfg && typeof (cfg as any).writeCrossCheckAudit === 'boolean') ? (cfg as any).writeCrossCheckAudit : true;
-            (e as any).cross_check_audit = summary.auditEntries || [];
-            if (!writeAudit) {
-              // remove before persisting to disk later (write step will still include field unless we strip it)
-              // we will selectively strip audit entries only when cfg.writeCrossCheckAudit === false
-            }
-          } catch (err) {
-            // ignore audit attach errors
-          }
-        }
-      } catch (err) {
-        // ignore cross-check errors to avoid blocking recalc; do not apply additional weight
+      const requirements = (e.cross_check && Array.isArray(e.cross_check.questions)) ? e.cross_check.questions : [];
+      const adaptersCfg = (cfg && (cfg.crossCheckAdapters)) ? cfg.crossCheckAdapters : undefined;
+      if (requirements && requirements.length) {
+        // Adapter failures per question are recorded in the audit by the adapter itself;
+        // an exception here means evaluateCrossChecks is broken and must not be hidden.
+        const summary = await (crossAdapter as CrossCheckAdapterClass).evaluateCrossChecks(e, requirements, adaptersCfg);
+        if (summary && typeof summary.total_weight === 'number') totalWeight += summary.total_weight;
+        // Persisted to disk only when `writeCrossCheckAudit` is not disabled (see strip step below).
+        (e as any).cross_check_audit = summary.auditEntries || [];
       }
       if (unmappedSignalCount > 0) totalWeight += unmappedSignalCount * SIGNAL_ID_WEIGHT;
       // Apply category multiplier only to trigger-derived weight
@@ -219,14 +206,10 @@ export class RecalcConfidence {
       // evaluate decision based on policy and cross-check history
       let newDecision = oldDecision;
       let decisionReasons: string[] = [];
-      try {
-        const decisionRes = evaluator.evaluate(e);
-        if (decisionRes && decisionRes.decision) {
-          newDecision = decisionRes.decision;
-          decisionReasons = decisionRes.reasons || [];
-        }
-      } catch (err) {
-        // swallow policy evaluation errors to avoid blocking recalc
+      const decisionRes = evaluator.evaluate(e);
+      if (decisionRes && decisionRes.decision) {
+        newDecision = decisionRes.decision;
+        decisionReasons = decisionRes.reasons || [];
       }
       (e as any).decision = newDecision;
       (e as any).decision_reasons = decisionReasons;
@@ -327,17 +310,23 @@ export class RecalcConfidence {
 
     let totalCount = 0;
     const totalChanges: Array<[string, any, any]> = [];
+    const failedFiles: string[] = [];
 
     const processSingleFile = async (p: string) => {
-      const content = await fs.readFile(p, 'utf8');
-      if (args.dryRun) {
+      try {
+        if (!args.dryRun) return await this.recalc(p, args.preserve, minFloor);
         const tmpPath = p + '.tmp.recalc.json';
-        await fs.writeFile(tmpPath, content, 'utf8');
-        const res = await this.recalc(tmpPath, args.preserve, minFloor);
-        await fs.unlink(tmpPath).catch(() => {});
-        return res;
-      } else {
-        return await this.recalc(p, args.preserve, minFloor);
+        await fs.writeFile(tmpPath, await fs.readFile(p, 'utf8'), 'utf8');
+        try {
+          return await this.recalc(tmpPath, args.preserve, minFloor);
+        } finally {
+          // Cleanup only; a leftover temp file must not mask the real result.
+          await fs.unlink(tmpPath).catch(() => {});
+        }
+      } catch (err) {
+        logError('recalc failed', { file: p, error: err });
+        failedFiles.push(p);
+        return { count: 0, changes: [] as Array<[string, any, any]> };
       }
     };
 
@@ -368,6 +357,7 @@ export class RecalcConfidence {
       for (const it of totalChanges.slice(0, 20)) console.log(it);
     }
     if (args.dryRun) console.log("Dry-run: files not modified.");
+    if (failedFiles.length > 0) throw new Error(`${failedFiles.length} file(s) failed: ${failedFiles.join(', ')}`);
   }
 }
 
@@ -378,5 +368,5 @@ export const DEFAULT_CONFIDENCE = RecalcConfidence.DEFAULT_CONFIDENCE;
 
 if (require.main === module) {
   const runner = new RecalcConfidence();
-  runner.run().catch(err => { console.error('Error:', err.message || err); process.exit(1); });
+  runCli(() => runner.run());
 }

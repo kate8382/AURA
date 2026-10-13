@@ -4,6 +4,7 @@ import { reorderCaseKeys, deriveSignalId } from './utils';
 import GenerateTriggerWeights from './generate-trigger-weights';
 import { DEFAULT_CONFIDENCE } from './recalc_confidence';
 import { getSharedExtractor, normalizeTriggerIdentity, defaultRepoRoot } from './extract-triggers';
+import { logError, runCli } from './logger';
 
 type AnyObj = { [k: string]: any };
 
@@ -11,6 +12,8 @@ type AnyObj = { [k: string]: any };
 
 export class NormalizePerCases {
   dry: boolean;
+  // Files that failed; run() reports them and fails after processing everything.
+  failures: string[] = [];
   constructor(dry = false) { this.dry = dry; }
 
   // Recursively walk a directory and process each JSON file
@@ -78,7 +81,8 @@ export class NormalizePerCases {
     try {
       data = JSON.parse(raw);
     } catch (e) {
-      console.error("Invalid JSON:", filePath, e);
+      logError('invalid JSON', { file: filePath, error: e });
+      this.failures.push(filePath);
       return;
     }
 
@@ -112,6 +116,7 @@ export class NormalizePerCases {
     if (caseObjs.length > 1) {
       const dir = path.dirname(filePath);
       const base = path.basename(filePath, '.json');
+      let fileFailed = false;
       for (let i = 0; i < caseObjs.length; i++) {
         let obj = caseObjs[i];
         if ('behavioral_pattern' in obj && !('behavioral_patterns' in obj)) {
@@ -169,13 +174,10 @@ export class NormalizePerCases {
               }
             }
           } catch (err) {
-            const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
-            console.error('Error generating signal_ids for', obj.case_id || filePath, msg);
-            if (this.dry) {
-              console.warn(`Dry-run: signal_ids were NOT calculated for ${obj.case_id || filePath}: ${msg}`);
-            } else {
-              throw err;
-            }
+            logError('cannot generate signal_ids', { file: filePath, case_id: obj.case_id, error: err });
+            this.failures.push(filePath);
+            fileFailed = true;
+            continue;
           }
         }
 
@@ -192,6 +194,7 @@ export class NormalizePerCases {
           console.log("WROTE", outPath);
         }
       }
+      if (fileFailed) return; // keep the original so no case is lost
       if (this.dry) console.log('[dry] WOULD REMOVE original', filePath);
       else {
         await fs.unlink(filePath);
@@ -245,13 +248,9 @@ export class NormalizePerCases {
             }
           }
         } catch (err) {
-          const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
-          console.error('Error generating signal_ids for', obj.case_id || filePath, msg);
-          if (this.dry) {
-            console.warn(`Dry-run: signal_ids were NOT calculated for ${obj.case_id || filePath}: ${msg}`);
-          } else {
-            throw err;
-          }
+          logError('cannot generate signal_ids', { file: filePath, case_id: obj.case_id, error: err });
+          this.failures.push(filePath);
+          return;
         }
       }
       const ordered = reorderCaseKeys(obj);
@@ -277,10 +276,13 @@ export class NormalizePerCases {
     if (dry) this.dry = true;
     if (this.dry) console.log("Dry-run mode: no files will be written.");
     await this.walkDir(dir);
+    if (this.failures.length > 0) {
+      throw new Error(`${this.failures.length} file(s) failed: ${this.failures.join(', ')}`);
+    }
   }
 }
 
 if (require.main === module) {
   const N = new NormalizePerCases(process.argv.includes('--dry-run'));
-  N.run().catch(err => { console.error(err); process.exit(1); });
+  runCli(() => N.run());
 }

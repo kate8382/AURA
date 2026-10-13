@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { logError, runCli } = require('../logger');
 
 function walk(dir) {
   const res = [];
@@ -21,6 +22,7 @@ function main() {
   const root = path.resolve(__dirname, '..', '..', 'public_cases');
   const files = walk(root);
   const triggers = new Set();
+  const failures = [];
   for (const f of files) {
     try {
       const raw = fs.readFileSync(f, 'utf8');
@@ -56,17 +58,19 @@ function main() {
         }
       }
     } catch (err) {
-      // ignore
+      logError('cannot read case file', { file: f, error: err });
+      failures.push(f);
     }
   }
   const arr = Array.from(triggers).sort();
   const tmpDir = path.resolve(process.cwd(), 'tmp');
-  try { fs.mkdirSync(tmpDir, { recursive: true }); } catch (e) { }
+  fs.mkdirSync(tmpDir, { recursive: true });
   const outPath = path.resolve(tmpDir, 'collected-triggers.json');
   fs.writeFileSync(outPath, JSON.stringify(arr, null, 2), 'utf8');
-  // also keep legacy filename for compatibility
+  // best-effort: legacy filename kept only for compatibility
   try { fs.writeFileSync(path.resolve(tmpDir, 'all-triggers.json'), JSON.stringify(arr, null, 2), 'utf8'); } catch (e) { }
   console.log('WROTE', outPath, 'COUNT', arr.length);
+  if (failures.length > 0) throw new Error(`${failures.length} file(s) failed: ${failures.join(', ')}`);
 }
 
-if (require.main === module) main();
+if (require.main === module) runCli(main);
