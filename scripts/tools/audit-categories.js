@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { logError, runCli } = require('../logger');
 
 function walk(dir) {
   const res = [];
@@ -16,6 +17,7 @@ function main() {
   const root = path.resolve(__dirname, '..', '..', 'public_cases');
   const files = walk(root);
   const out = [];
+  const failures = [];
   for (const f of files) {
     try {
       const raw = fs.readFileSync(f, 'utf8');
@@ -26,14 +28,16 @@ function main() {
         out.push({ file: f.replace(process.cwd() + path.sep, ''), dir, category: j.category || '' });
       }
     } catch (err) {
-      // ignore parse errors
+      logError('cannot read case file', { file: f, error: err });
+      failures.push(f);
     }
   }
   const tmpDir = path.resolve(process.cwd(), 'tmp');
-  try { fs.mkdirSync(tmpDir, { recursive: true }); } catch (e) { }
+  fs.mkdirSync(tmpDir, { recursive: true });
   const outPath = path.resolve(tmpDir, 'audit-output.json');
   fs.writeFileSync(outPath, JSON.stringify(out, null, 2), 'utf8');
   console.log('WROTE', outPath, 'COUNT', out.length);
+  if (failures.length > 0) throw new Error(`${failures.length} file(s) failed: ${failures.join(', ')}`);
 }
 
-if (require.main === module) main();
+if (require.main === module) runCli(main);

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { logError, runCli } from '../logger';
 
 function walk(dir: string, cb: (file: string) => void) {
   if (!fs.existsSync(dir)) return;
@@ -30,23 +31,27 @@ function cleanObj(o: any): boolean {
   return changed;
 }
 
-const base = path.join(process.cwd(), 'public_cases');
-let total = 0;
-let cleaned = 0;
-walk(base, (file) => {
-  try {
-    const raw = fs.readFileSync(file, 'utf8');
-    const parsed = JSON.parse(raw);
-    const c = cleanObj(parsed);
-    if (c) {
-      fs.copyFileSync(file, file + '.bak');
-      fs.writeFileSync(file, JSON.stringify(parsed, null, 2), 'utf8');
-      cleaned++;
+runCli(() => {
+  const base = path.join(process.cwd(), 'public_cases');
+  let total = 0;
+  let cleaned = 0;
+  const failures: string[] = [];
+  walk(base, (file) => {
+    try {
+      const raw = fs.readFileSync(file, 'utf8');
+      const parsed = JSON.parse(raw);
+      const c = cleanObj(parsed);
+      if (c) {
+        fs.copyFileSync(file, file + '.bak');
+        fs.writeFileSync(file, JSON.stringify(parsed, null, 2), 'utf8');
+        cleaned++;
+      }
+      total++;
+    } catch (e) {
+      logError('cannot clean case file', { file, error: e });
+      failures.push(file);
     }
-    total++;
-  } catch (e) {
-    // ignore
-  }
+  });
+  console.log('Scanned', total, 'files, cleaned', cleaned);
+  if (failures.length > 0) throw new Error(`${failures.length} file(s) failed: ${failures.join(', ')}`);
 });
-console.log('Scanned', total, 'files, cleaned', cleaned);
-process.exit(0);

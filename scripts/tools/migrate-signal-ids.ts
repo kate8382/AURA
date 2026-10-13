@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { logError, runCli } from '../logger';
 
 type OldMap = Record<string, string[]>;
 
@@ -52,8 +53,7 @@ async function main() {
 
   const mapping = await readJson(mappingPath).catch(() => null);
   if (!mapping || !mapping.signals) {
-    console.error('Could not read existing mapping at', mappingPath);
-    process.exit(1);
+    throw new Error(`could not read existing mapping at ${mappingPath}`);
   }
   const oldSignals: OldMap = mapping.signals;
 
@@ -89,6 +89,7 @@ async function main() {
   // Now update public_cases signal_ids
   const files = await walkJsonFiles(casesDir);
   let changed = 0;
+  const failedFiles: string[] = [];
   for (const f of files) {
     try {
       const raw = await fs.readFile(f, 'utf8');
@@ -122,11 +123,13 @@ async function main() {
         }
       }
     } catch (e) {
-      // ignore
+      logError('cannot migrate case file', { file: f, error: e });
+      failedFiles.push(f);
     }
   }
 
   console.log(`Done. Files changed: ${changed}`);
+  if (failedFiles.length > 0) throw new Error(`${failedFiles.length} file(s) failed: ${failedFiles.join(', ')}`);
 }
 
-if (require.main === module) main().catch(err => { console.error(err); process.exit(1); });
+if (require.main === module) runCli(main);

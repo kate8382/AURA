@@ -27,5 +27,8 @@ jobs:
       - name: Validate cases
         run: npm run validate
 
+      - name: Check error handling
+        run: npm run check:errors
+
       - name: Run tests
         run: npm test --silent

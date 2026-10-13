@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { logError, runCli } from '../logger';
 
 /**
  * MigrateCategories - class that migrates legacy `category` into
@@ -8,6 +9,7 @@ import path from 'path';
 export class MigrateCategories {
   root: string;
   casesDir: string;
+  failures: string[] = [];
 
   /**
    * @param root optional repository root; defaults to parent of this script
@@ -147,7 +149,8 @@ export class MigrateCategories {
           console.log('Migrated', f);
         }
       } catch (err) {
-        // ignore parse/write errors per-file and continue
+        logError('cannot migrate case file', { file: f, error: err });
+        this.failures.push(f);
       }
     }
     return changedFiles;
@@ -155,7 +158,10 @@ export class MigrateCategories {
 }
 
 if (require.main === module) {
-  const migrator = new MigrateCategories();
-  const changed = migrator.migrate();
-  console.log('Done. Files changed:', changed);
+  runCli(() => {
+    const migrator = new MigrateCategories();
+    const changed = migrator.migrate();
+    console.log('Done. Files changed:', changed);
+    if (migrator.failures.length > 0) throw new Error(`${migrator.failures.length} file(s) failed: ${migrator.failures.join(', ')}`);
+  });
 }

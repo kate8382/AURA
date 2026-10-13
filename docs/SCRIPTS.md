@@ -199,11 +199,35 @@ npm run audit:categories
 - Consider a CI workflow that runs the generator on changes to `public_cases/`, writes updated
   `config/trigger-weights.json` to a branch and opens a PR for review.
 
-9) Tests
+9) Error handling and exit codes
+
+Scripts fail loudly. The rules, implemented in `scripts/logger.ts` (`runCli`, `logError`):
+
+- An unexpected error (unreadable or invalid JSON, a broken config, an exception in cross-check or policy evaluation) ends the script with a non-zero exit code. This also applies to `--dry-run`: dry-run only means "write nothing", it does not hide errors.
+- Scripts that process many files continue after a bad file, log every problem, and exit with code `1` at the end, so one run shows all broken files. Nothing is written from partial data: `generate-trigger-weights` refuses to write when a case file or the existing config cannot be read, and `normalize-percases` keeps the original file of a failed case.
+- Cross-check adapters that do not answer are normal and are recorded in `cross_check_audit`; a crash of `evaluateCrossChecks` itself is an error.
+- Best-effort steps (for example cleanup of temp files) must say so in a comment containing `best-effort`; the CI check rejects other empty `catch` blocks.
+
+Exit codes: `0` success, `1` runtime failure or unreadable data, `2` invalid cases (`validate-percases`), `3` invalid or missing decisions (`decisions:validate`).
+
+Log format and verbosity:
+
+```text
+[ERROR] cannot read case file file=public_cases/ACCESS/A-CASE-001.json error="Unexpected token"
+```
+
+- `AURA_LOG_FORMAT=json` prints one JSON object per line (`level`, `message`, plus fields such as `file`, `case_id`, `error`).
+- `AURA_LOG_LEVEL=debug|info|warn|error|silent` controls verbosity (default `info`); stack traces are included at `debug`.
+- `npm run check:errors` is part of CI: it rejects silent `catch` blocks and runs normalize, recalc and validate in `--dry-run` on `public_cases/`, failing on a non-zero exit code, an `[ERROR]` log line or an unhandled rejection.
+
+10) Tests
 
 Unit tests for the scripts are located in `scripts/__tests__/` and include:
 
 - `scripts/__tests__/config.test.ts`
+- `scripts/__tests__/error-handling.test.ts`
+- `scripts/__tests__/logger.test.ts`
+- `scripts/__tests__/check-error-handling.test.ts`
 - `scripts/__tests__/extract-triggers.test.ts`
 - `scripts/__tests__/generate-trigger-weights.test.ts`
 - `scripts/__tests__/new-case-template.test.ts`

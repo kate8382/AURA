@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { deriveSignalId } from './utils';
+import { logError, logWarn, runCli } from './logger';
 
 type CountMap = { [k: string]: number };
 /**
@@ -57,25 +58,30 @@ export class GenerateTriggerWeights {
     this.repoRoot = repoRoot || path.resolve(__dirname, '..');
   }
   signalMap: Record<string, string> = {};
+  // Files that could not be processed; run() aborts before writing when this is non-empty.
+  fileErrors: string[] = [];
 
   loadSignalMapping() {
+    const mapPath = path.join(this.repoRoot, 'config', 'signal-mapping.json');
+    if (!fs.existsSync(mapPath)) {
+      logWarn('signal mapping not found, signal ids will not be mapped', { file: mapPath });
+      return;
+    }
+    let parsed: any;
     try {
-      const mapPath = path.join(this.repoRoot, 'config', 'signal-mapping.json');
-      if (!fs.existsSync(mapPath)) return;
-      const raw = fs.readFileSync(mapPath, 'utf8');
-      const parsed = JSON.parse(raw);
-      const signals = (parsed && parsed.signals) ? parsed.signals : {};
-      for (const sid of Object.keys(signals)) {
-        const val = signals[sid];
-        const arr = Array.isArray(val) ? val : (val && Array.isArray(val.triggers) ? val.triggers : []);
-        for (const t of arr) {
-          if (typeof t !== 'string') continue;
-          const n = this.normalizeTrigger(t);
-          if (n) this.signalMap[n] = sid;
-        }
-      }
+      parsed = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
     } catch (err) {
-      // ignore
+      throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
+    }
+    const signals = (parsed && parsed.signals) ? parsed.signals : {};
+    for (const sid of Object.keys(signals)) {
+      const val = signals[sid];
+      const arr = Array.isArray(val) ? val : (val && Array.isArray(val.triggers) ? val.triggers : []);
+      for (const t of arr) {
+        if (typeof t !== 'string') continue;
+        const n = this.normalizeTrigger(t);
+        if (n) this.signalMap[n] = sid;
+      }
     }
   }
 
@@ -137,6 +143,8 @@ export class GenerateTriggerWeights {
       }
       return cases;
     } catch (err) {
+      logError('cannot read case file', { file, error: err });
+      this.fileErrors.push(file);
       return [];
     }
   }
@@ -215,7 +223,9 @@ export class GenerateTriggerWeights {
         for (const trig of uniq) counts[trig] = (counts[trig] || 0) + 1;
       }
     }
-
+    if (this.fileErrors.length > 0) {
+      throw new Error(`${this.fileErrors.length} case file(s) could not be read; trigger weights were not written`);
+    }
     // Preserve existing triggers from current config so we don't drop keys that are expected by other parts of the code/tests.
     const cfgPath = path.join(this.repoRoot, 'config', 'trigger-weights.json');
     let existingConfig: any = null;
@@ -239,7 +249,7 @@ export class GenerateTriggerWeights {
           }
         }
       } catch (err) {
-        existingConfig = null;
+        throw new Error(`cannot read existing config ${cfgPath}; refusing to regenerate without its curated keys: ${err instanceof Error ? err.message : err}`);
       }
     }
 
@@ -426,10 +436,14 @@ export class GenerateTriggerWeights {
             changed++;
           }
         } catch (err) {
-          // ignore
+          logError('cannot apply signal_ids', { file: f, error: err });
+          this.fileErrors.push(f);
         }
       }
       console.log('Applied signal_ids to', changed, 'files');
+      if (this.fileErrors.length > 0) {
+        throw new Error(`${this.fileErrors.length} case file(s) failed while applying signal_ids`);
+      }
     }
     return { outPath, top: entries ? entries.slice(0, 30) : [] };
   }
@@ -443,11 +457,12 @@ export function generateSignalIds(scenarios: any[]): string[] {
 }
 
 if (require.main === module) {
-  const g = new GenerateTriggerWeights();
-  const res = g.run();
-  console.log('WROTE', res.outPath);
-  console.log('Top triggers:');
-  for (const it of res.top) console.log(it.trig, it.count, it.weight);
+  runCli(() => {
+    const res = new GenerateTriggerWeights().run();
+    console.log('WROTE', res.outPath);
+    console.log('Top triggers:');
+    for (const it of res.top) console.log(it.trig, it.count, it.weight);
+  });
 }
 
 export default GenerateTriggerWeights;

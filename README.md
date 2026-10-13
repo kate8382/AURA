@@ -125,6 +125,10 @@ Note: see [docs/SCRIPTS.md](./docs/SCRIPTS.md) for details on cross-check behavi
 - Final `confidence` for a case is computed as: base (by category) + boost, where `boost = min(maxBoost, totalTriggerWeight + crossCheckWeight*questions + signalIdWeight*unmappedSignalCount)`.
 - The generator preserves any existing trigger keys from the current `config/trigger-weights.json` to avoid accidentally dropping curated keys.
 
+### Error handling
+
+Scripts exit with a non-zero code on unexpected errors, including in `--dry-run`, and log them as `[ERROR] ... file=... error=...` (`AURA_LOG_FORMAT=json` for JSON, `AURA_LOG_LEVEL` for verbosity). `npm run check:errors` runs the same checks as CI. Details and exit codes: [docs/SCRIPTS.md](docs/SCRIPTS.md).
+
 ### Automation
 
 Automating `npm run gen:triggers` is optional but recommended if `public_cases/` changes frequently. Typical options:
@@ -190,12 +194,6 @@ Traditional AI alignment often fails in non-English languages due to idiomatic n
 - We plan to expand our threat matrices to support complex syntax variations (starting with Russian) to ensure that conceptual defensive guardrails map globally across different language families.
 
 If you are interested in researching these vectors, please open an Issue to share your thoughts and collaborate!
-
-## Publications & Coverage
-
-- Dev.to — [AURA: AI User Risk Assessment — a behavioral threat‑intelligence framework for AI Safety](https://dev.to/kate8382/aura-ai-user-risk-assessment-a-behavioral-threat-intelligence-framework-for-ai-safety-4h9l)
-- CoderLegion — [AURA: AI User Risk Assessment — a behavioral threat‑intelligence framework for AI Safety](https://coderlegion.com/22768/aura-ai-user-risk-assessment-a-behavioral-threat-intelligence-framework-for-ai-safety)
-- LinkedIn — [Launch post](https://www.linkedin.com/feed/update/urn:li:activity:7483208618545274880/)
 
 ## Integration & Partnerships
 
