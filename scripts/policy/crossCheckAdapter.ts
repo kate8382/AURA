@@ -32,80 +32,96 @@ export type EvaluationSummary = {
 };
 
 // ── bounty-scope helpers ──────────────────────────────────────────────────
-// Cached offline snapshot — loaded once per process from the curated JSON.
+// Cached offline snapshot — resolved relative to this module first, then the
+// working directory, so callers outside the repo root still find it. A failed
+// load is NOT permanently cached: a later call retries the read.
 let _bountySnapshotCache: any[] | null = null;
 function loadBountySnapshot(): any[] {
   if (_bountySnapshotCache !== null) return _bountySnapshotCache as any[];
-  try {
-    const p = path.resolve(process.cwd(), 'config', 'snapshots', 'bounty-programs.json');
-    const raw = fs.readFileSync(p, 'utf8');
-    const d = JSON.parse(raw);
-    _bountySnapshotCache = Array.isArray(d && d.programs) ? d.programs : (Array.isArray(d) ? d : []);
-  } catch {
-    _bountySnapshotCache = [];
+  const candidates = [
+    path.resolve(__dirname, '..', '..', 'config', 'snapshots', 'bounty-programs.json'),
+    path.resolve(process.cwd(), 'config', 'snapshots', 'bounty-programs.json'),
+  ];
+  for (const p of candidates) {
+    try {
+      const raw = fs.readFileSync(p, 'utf8');
+      const d = JSON.parse(raw);
+      const progs = Array.isArray(d && d.programs) ? d.programs : (Array.isArray(d) ? d : []);
+      if (progs.length) { _bountySnapshotCache = progs; return progs; }
+    } catch { /* try the next candidate location */ }
   }
-  return _bountySnapshotCache as any[];
+  return [];  // deliberately not cached — a later call retries
 }
 
-// Pull a field out of a case across the likely shapes — top-level, meta, or
-// nested requirement parameters — so the adapter is forgiving about where the
-// program-id / target lands.
+// Keys that are routing/category metadata, NOT a target or program — so a
+// case's top-level `domain` (a routing field in the schema) is never read as
+// the bounty target.
+const ROUTING_ONLY_KEYS = new Set(['domain', 'category', 'type', 'id']);
+
+// Pull a field out of a case. Searches top-level, meta, then each params
+// object IN TURN for a nonempty requested key — an empty `params` must not
+// shadow a populated `requirement_parameters`.
 function extractField(caseObj: any, keys: string[]): string {
   if (!caseObj || typeof caseObj !== 'object') return '';
-  for (const k of keys) {
-    const v = (caseObj as any)[k];
-    if (v !== undefined && v !== null && v !== '') return String(v);
-  }
-  const meta = (caseObj as any).meta;
-  if (meta && typeof meta === 'object') {
-    for (const k of keys) {
-      const v = meta[k];
-      if (v !== undefined && v !== null && v !== '') return String(v);
-    }
-  }
-  const params = (caseObj as any).params || (caseObj as any).requirement_parameters;
-  if (params && typeof params === 'object') {
-    for (const k of keys) {
-      const v = params[k];
+  const wanted = keys.filter(k => !ROUTING_ONLY_KEYS.has(k));
+  const sources = [
+    caseObj,
+    (caseObj as any).meta,
+    (caseObj as any).params,
+    (caseObj as any).requirement_parameters,
+  ];
+  for (const src of sources) {
+    if (!src || typeof src !== 'object') continue;
+    for (const k of wanted) {
+      const v = (src as any)[k];
       if (v !== undefined && v !== null && v !== '') return String(v);
     }
   }
   return '';
 }
 
-// Whether a target domain/IP falls inside a scope entry — exact, wildcard
-// (*.example.com covers subdomains + the apex), or CIDR for IPs.
+// A strict dotted-quad IPv4 address — rejects trailing junk and out-of-range
+// octets (so '10.1.2.3junk' or '999.1.1.1' never pass a CIDR check).
+const IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+function isIPv4(s: string): boolean {
+  const m = IPV4_RE.exec(String(s).trim());
+  if (!m) return false;
+  for (let i = 1; i <= 4; i++) {
+    const o = parseInt(m[i], 10);
+    if (isNaN(o) || o < 0 || o > 255) return false;
+  }
+  return true;
+}
+
+// Whether a target domain/IP falls inside a scope entry.
+//  - CIDR entry: strict IPv4 containment — malformed input fails closed
+//  - wildcard '*.example.com': the apex + subdomains
+//  - exact 'example.com': the exact hostname ONLY — no implicit subdomains
 function domainInScope(target: string, scope: string): boolean {
   const t = String(target || '').trim().toLowerCase();
   const s = String(scope || '').trim().toLowerCase();
   if (!t || !s) return false;
-  // CIDR
-  if (s.includes('/')) {
-    return cidrMatch(t, s);
-  }
-  // wildcard
+  if (s.includes('/')) return cidrMatch(t, s);
   if (s.startsWith('*.')) {
     const apex = s.slice(2);
     return t === apex || t.endsWith('.' + apex);
   }
-  // exact or suffix-anchored subdomain
-  return t === s || t.endsWith('.' + s);
+  return t === s;
 }
 
-// Minimal IPv4 CIDR containment — '10.0.0.0/8' covers '10.1.2.3'.
+// Minimal IPv4 CIDR containment — '10.0.0.0/8' covers '10.1.2.3'. Both sides
+// must be valid dotted-quad; a malformed IP fails closed rather than matching.
 function cidrMatch(ip: string, cidr: string): boolean {
-  try {
-    const [base, bitsStr] = cidr.split('/');
-    const bits = parseInt(bitsStr, 10);
-    if (isNaN(bits) || bits < 0 || bits > 32) return false;
-    const toInt = (a: string) => a.split('.').reduce((acc, o) => (acc << 8) + parseInt(o, 10), 0) >>> 0;
-    const ipInt = toInt(ip);
-    const baseInt = toInt(base);
-    const mask = bits === 0 ? 0 : (0xffffffff << (32 - bits)) >>> 0;
-    return (ipInt & mask) === (baseInt & mask);
-  } catch {
-    return false;
-  }
+  if (!isIPv4(ip)) return false;
+  const [base, bitsStr] = cidr.split('/');
+  if (!isIPv4(base)) return false;
+  const bits = parseInt(bitsStr, 10);
+  if (isNaN(bits) || bits < 0 || bits > 32) return false;
+  const toInt = (a: string) => a.split('.').reduce((acc, o) => (acc << 8) + parseInt(o, 10), 0) >>> 0;
+  const ipInt = toInt(ip);
+  const baseInt = toInt(base);
+  const mask = bits === 0 ? 0 : (0xffffffff << (32 - bits)) >>> 0;
+  return (ipInt & mask) === (baseInt & mask);
 }
 
 // Minimal class-based adapter manager. Adapters can be registered via
@@ -153,22 +169,25 @@ export class CrossCheckAdapter {
       const quickOk = !!(caseObj && (caseObj as any).mock_bounty_scope === true);
       if (quickOk) return { result: true, ok: true, notes: 'bounty scope matched (mock quick)' };
       const programId = extractField(caseObj, ['bounty_program_id', 'program_id', 'bounty_program', 'program']);
-      const target = extractField(caseObj, ['target_domain', 'target', 'domain', 'target_ip', 'host']);
+      const target = extractField(caseObj, ['target_domain', 'target', 'target_ip', 'host']);
       const snapshot = loadBountySnapshot();
       if (!snapshot.length) return { result: null, ok: false, notes: 'bounty snapshot unavailable or empty' };
+      // Match on the program_id ONLY — never the platform label, so a case
+      // claiming 'hackerone' can't resolve to an arbitrary HackerOne program.
       const program = snapshot.find((p: any) =>
-        String(p.program_id || '').toLowerCase() === String(programId || '').toLowerCase() ||
-        String(p.platform || '').toLowerCase() === String(programId || '').toLowerCase()
+        String(p.program_id || '').toLowerCase() === String(programId || '').toLowerCase()
       );
       if (!program) return { result: { program_id: programId }, ok: false, notes: `program '${programId}' not found in offline bounty snapshot` };
       const status = String(program.status || '').toLowerCase();
       if (status !== 'active') return { result: { program_id: programId, status }, ok: false, notes: `program '${programId}' is not active (status: ${status})` };
-      if (target) {
-        const scopes = Array.isArray(program.in_scope_domains) ? program.in_scope_domains : [];
-        const inScope = scopes.some((s: string) => domainInScope(target, String(s)));
-        if (!inScope) return { result: { program_id: programId, target }, ok: false, notes: `target '${target}' out of scope for program '${programId}'` };
-      }
-      return { result: { program_id: program.program_id, platform: program.platform, target }, ok: true, notes: `program '${program.program_id}' active${target ? ' and target in scope' : ''}` };
+      // A missing target is NOT a pass — the claim asserted program coverage
+      // but there's no target to verify against scope, so it can't be
+      // confirmed. Return not-ok rather than granting unverified evidence weight.
+      if (!target) return { result: { program_id: programId }, ok: false, notes: `program '${programId}' is active but no target supplied — scope coverage unverified` };
+      const scopes = Array.isArray(program.in_scope_domains) ? program.in_scope_domains : [];
+      const inScope = scopes.some((s: string) => domainInScope(target, String(s)));
+      if (!inScope) return { result: { program_id: programId, target }, ok: false, notes: `target '${target}' out of scope for program '${programId}'` };
+      return { result: { program_id: program.program_id, platform: program.platform, target }, ok: true, notes: `program '${program.program_id}' active and target '${target}' in scope` };
     });
   }
 
