@@ -31,6 +31,83 @@ export type EvaluationSummary = {
   decisionHints: { veto: boolean; require_manual_review: boolean; pending: boolean };
 };
 
+// ── bounty-scope helpers ──────────────────────────────────────────────────
+// Cached offline snapshot — loaded once per process from the curated JSON.
+let _bountySnapshotCache: any[] | null = null;
+function loadBountySnapshot(): any[] {
+  if (_bountySnapshotCache !== null) return _bountySnapshotCache as any[];
+  try {
+    const p = path.resolve(process.cwd(), 'config', 'snapshots', 'bounty-programs.json');
+    const raw = fs.readFileSync(p, 'utf8');
+    const d = JSON.parse(raw);
+    _bountySnapshotCache = Array.isArray(d && d.programs) ? d.programs : (Array.isArray(d) ? d : []);
+  } catch {
+    _bountySnapshotCache = [];
+  }
+  return _bountySnapshotCache as any[];
+}
+
+// Pull a field out of a case across the likely shapes — top-level, meta, or
+// nested requirement parameters — so the adapter is forgiving about where the
+// program-id / target lands.
+function extractField(caseObj: any, keys: string[]): string {
+  if (!caseObj || typeof caseObj !== 'object') return '';
+  for (const k of keys) {
+    const v = (caseObj as any)[k];
+    if (v !== undefined && v !== null && v !== '') return String(v);
+  }
+  const meta = (caseObj as any).meta;
+  if (meta && typeof meta === 'object') {
+    for (const k of keys) {
+      const v = meta[k];
+      if (v !== undefined && v !== null && v !== '') return String(v);
+    }
+  }
+  const params = (caseObj as any).params || (caseObj as any).requirement_parameters;
+  if (params && typeof params === 'object') {
+    for (const k of keys) {
+      const v = params[k];
+      if (v !== undefined && v !== null && v !== '') return String(v);
+    }
+  }
+  return '';
+}
+
+// Whether a target domain/IP falls inside a scope entry — exact, wildcard
+// (*.example.com covers subdomains + the apex), or CIDR for IPs.
+function domainInScope(target: string, scope: string): boolean {
+  const t = String(target || '').trim().toLowerCase();
+  const s = String(scope || '').trim().toLowerCase();
+  if (!t || !s) return false;
+  // CIDR
+  if (s.includes('/')) {
+    return cidrMatch(t, s);
+  }
+  // wildcard
+  if (s.startsWith('*.')) {
+    const apex = s.slice(2);
+    return t === apex || t.endsWith('.' + apex);
+  }
+  // exact or suffix-anchored subdomain
+  return t === s || t.endsWith('.' + s);
+}
+
+// Minimal IPv4 CIDR containment — '10.0.0.0/8' covers '10.1.2.3'.
+function cidrMatch(ip: string, cidr: string): boolean {
+  try {
+    const [base, bitsStr] = cidr.split('/');
+    const bits = parseInt(bitsStr, 10);
+    if (isNaN(bits) || bits < 0 || bits > 32) return false;
+    const toInt = (a: string) => a.split('.').reduce((acc, o) => (acc << 8) + parseInt(o, 10), 0) >>> 0;
+    const ipInt = toInt(ip);
+    const baseInt = toInt(base);
+    const mask = bits === 0 ? 0 : (0xffffffff << (32 - bits)) >>> 0;
+    return (ipInt & mask) === (baseInt & mask);
+  } catch {
+    return false;
+  }
+}
+
 // Minimal class-based adapter manager. Adapters can be registered via
 // `registerAdapter(name, fn)` where fn(req, caseObj) => Promise<{result, ok, notes}>.
 /**
@@ -67,6 +144,31 @@ export class CrossCheckAdapter {
       if (quickOk) return { result: true, ok: true, notes: 'email verified (mock quick)' };
       const verified = caseObj && caseObj.meta && !!caseObj.meta.email_verified;
       return { result: !!verified, ok: !!verified, notes: verified ? 'email verified (meta)' : 'email unverified' };
+    });
+
+    // register the offline bounty-scope adapter — verifies a case-claimed bug
+    // bounty program + target domain/IP against the curated offline snapshot in
+    // config/snapshots/bounty-programs.json. Works 100% offline.
+    this.registerAdapter('bounty-scope', async (_req: CrossCheckRequirement, caseObj: any) => {
+      const quickOk = !!(caseObj && (caseObj as any).mock_bounty_scope === true);
+      if (quickOk) return { result: true, ok: true, notes: 'bounty scope matched (mock quick)' };
+      const programId = extractField(caseObj, ['bounty_program_id', 'program_id', 'bounty_program', 'program']);
+      const target = extractField(caseObj, ['target_domain', 'target', 'domain', 'target_ip', 'host']);
+      const snapshot = loadBountySnapshot();
+      if (!snapshot.length) return { result: null, ok: false, notes: 'bounty snapshot unavailable or empty' };
+      const program = snapshot.find((p: any) =>
+        String(p.program_id || '').toLowerCase() === String(programId || '').toLowerCase() ||
+        String(p.platform || '').toLowerCase() === String(programId || '').toLowerCase()
+      );
+      if (!program) return { result: { program_id: programId }, ok: false, notes: `program '${programId}' not found in offline bounty snapshot` };
+      const status = String(program.status || '').toLowerCase();
+      if (status !== 'active') return { result: { program_id: programId, status }, ok: false, notes: `program '${programId}' is not active (status: ${status})` };
+      if (target) {
+        const scopes = Array.isArray(program.in_scope_domains) ? program.in_scope_domains : [];
+        const inScope = scopes.some((s: string) => domainInScope(target, String(s)));
+        if (!inScope) return { result: { program_id: programId, target }, ok: false, notes: `target '${target}' out of scope for program '${programId}'` };
+      }
+      return { result: { program_id: program.program_id, platform: program.platform, target }, ok: true, notes: `program '${program.program_id}' active${target ? ' and target in scope' : ''}` };
     });
   }
 
