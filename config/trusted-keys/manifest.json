@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "note": "Static trusted-signer allow-list for adapter:pgp-verify. Keys are reviewed and committed explicitly — no TOFU, no keyserver fetches.",
+  "keys": [
+    {
+      "file": "test-signer.asc",
+      "fingerprint": "81774725815C27CD3246F158EAF60FCDB9D93B0E",
+      "signer_identity": "AURA Test Signer <test-signer@aura.local>",
+      "authorized_roles": [
+        "testing",
+        "fixture"
+      ],
+      "status": "active",
+      "expires": null
+    }
+  ]
+}

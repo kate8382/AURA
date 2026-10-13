@@ -31,6 +31,149 @@ export type EvaluationSummary = {
   decisionHints: { veto: boolean; require_manual_review: boolean; pending: boolean };
 };
 
+
+// ── pgp-verify helpers ──────────────────────────────────────────────────
+// Pull a field out of a case across the likely shapes — top-level, meta, or
+// nested requirement parameters — so the adapter is forgiving about where the
+// signed message / signature lands. An empty `params` must not shadow a
+// populated `requirement_parameters`.
+const ROUTING_ONLY_KEYS = new Set(['domain', 'category', 'type', 'id']);
+function extractField(caseObj: any, keys: string[]): string {
+  if (!caseObj || typeof caseObj !== 'object') return '';
+  const wanted = keys.filter(k => !ROUTING_ONLY_KEYS.has(k));
+  const sources = [
+    caseObj,
+    (caseObj as any).meta,
+    (caseObj as any).params,
+    (caseObj as any).requirement_parameters,
+  ];
+  for (const src of sources) {
+    if (!src || typeof src !== 'object') continue;
+    for (const k of wanted) {
+      const v = (src as any)[k];
+      if (v !== undefined && v !== null && v !== '') return String(v);
+    }
+  }
+  return '';
+}
+
+// Static trusted-key allow-list — loaded once per process from the reviewed
+// config/trusted-keys/ dir + manifest.json. Zero-trust: keys are committed
+// explicitly, never fetched. Resolved relative to this module (not cwd).
+let _trustedKeysCache: any[] | null = null;
+function loadTrustedKeys(): any[] {
+  if (_trustedKeysCache !== null) return _trustedKeysCache as any[];
+  const base = path.resolve(__dirname, '..', '..', 'config', 'trusted-keys');
+  const out: any[] = [];
+  try {
+    const manifest = JSON.parse(fs.readFileSync(path.join(base, 'manifest.json'), 'utf8'));
+    for (const k of (manifest.keys || [])) {
+      try {
+        const armored = fs.readFileSync(path.join(base, String(k.file || '')), 'utf8');
+        out.push({ ...k, armored });
+      } catch { /* skip unreadable key files */ }
+    }
+  } catch { /* manifest missing/malformed */ }
+  if (out.length) _trustedKeysCache = out;
+  return out;  // not permanently cached on failure — a later call retries
+}
+
+// openpgp is a peer dep — require lazily so the module loads even where it
+// isn't installed.
+let _openpgp: any = null;
+function getOpenPGP(): any {
+  if (_openpgp) return _openpgp;
+  try { _openpgp = require('openpgp'); } catch { _openpgp = null; }
+  return _openpgp;
+}
+
+function isCleartext(sig: string): boolean {
+  return /BEGIN PGP SIGNED MESSAGE/.test(sig);
+}
+
+function fingerprintOf(hexKeyId: string): string {
+  return String(hexKeyId || '').replace(/\s+/g, '').toUpperCase();
+}
+
+// Cryptographically verify a detached or cleartext PGP signature against the
+// trusted allow-list. Fails closed on unknown keys, expired keys, and forged
+// or corrupted signatures.
+async function verifyPGP(message: string, signature: string, trusted: any[]): Promise<{ result: any; ok: boolean; notes: string }> {
+  const op = getOpenPGP();
+  if (!op) return { result: null, ok: false, notes: 'openpgp unavailable — cannot verify' };
+  try {
+    let sigObj: any, msgText = message;
+    if (isCleartext(signature)) {
+      sigObj = await op.readCleartextMessage({ cleartextMessage: signature });
+      msgText = sigObj.getText();
+    } else {
+      sigObj = await op.readSignature({ armoredSignature: signature });
+    }
+    const pubkeys: any[] = [];
+    for (const k of trusted) {
+      try {
+        const pk = await op.readKey({ armoredKey: k.armored });
+        pubkeys.push({ pk, meta: k });
+      } catch { /* skip unparseable keys */ }
+    }
+    if (!pubkeys.length) return { result: null, ok: false, notes: 'no usable trusted keys' };
+    // Identify the signing key from the signature packets first, so an
+    // untrusted signer is reported as untrusted — not conflated with forged.
+    let signerKeyIds: string[] = [];
+    try {
+      const ids = (sigObj.getSigningKeyIDs && sigObj.getSigningKeyIDs()) || [];
+      signerKeyIds = ids.map((id: any) => fingerprintOf(id.toHex ? id.toHex() : id));
+    } catch { /* no signing-key-id readable */ }
+    const signerEntry = pubkeys.find((p: any) => {
+      const fp = fingerprintOf((p.pk.getFingerprint && p.pk.getFingerprint()) || p.meta.fingerprint || '');
+      return signerKeyIds.some((id: string) => fp === id || fp.endsWith(id) || id.endsWith(fp));
+    });
+    if (signerKeyIds.length && !signerEntry) {
+      return { result: { key_id: signerKeyIds[0] }, ok: false, notes: `signature key '${signerKeyIds[0]}' is not in the trusted allow-list` };
+    }
+    if (signerEntry) {
+      try {
+        const exp = await signerEntry.pk.getExpirationTime();
+        if (exp && exp instanceof Date && exp.getTime() < Date.now()) {
+          return { result: { key_id: signerKeyIds[0] || '', fingerprint: fingerprintOf(signerEntry.pk.getFingerprint()) }, ok: false, notes: `trusted signer key expired (${exp.toISOString().slice(0,10)})` };
+        }
+      } catch { /* no expiry info — treated as non-expiring */ }
+    }
+    const verifyArgs: any = {
+      message: isCleartext(signature) ? sigObj : await op.createMessage({ text: msgText }),
+      verificationKeys: pubkeys.map((p: any) => p.pk),
+    };
+    if (!isCleartext(signature)) verifyArgs.signature = sigObj;
+    const verification = await op.verify(verifyArgs);
+    const sigs = (verification && verification.signatures) ? verification.signatures : [];
+    if (!sigs.length) return { result: null, ok: false, notes: 'no verifiable signatures on the message' };
+    for (const s of sigs) {
+      try {
+        const valid = await s.verified;
+        if (valid && signerEntry) {
+          return {
+            result: {
+              key_id: signerKeyIds[0] || '',
+              fingerprint: fingerprintOf(signerEntry.pk.getFingerprint()),
+              signer_identity: signerEntry.meta.signer_identity || '',
+              verification_status: 'verified',
+            },
+            ok: true,
+            notes: `signature verified — trusted signer ${signerEntry.meta.signer_identity || signerKeyIds[0]}`,
+          };
+        }
+        if (valid && !signerEntry) {
+          return { result: null, ok: false, notes: 'signature verified cryptographically but the signing key is not in the trusted allow-list' };
+        }
+      } catch { /* this sub-sig failed to evaluate */ }
+    }
+    return { result: { key_id: signerKeyIds[0] || null }, ok: false, notes: 'signature failed cryptographic verification (forged or corrupted)' };
+  } catch (err) {
+    const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
+    return { result: null, ok: false, notes: `verification failed: ${msg}` };
+  }
+}
+
 // Minimal class-based adapter manager. Adapters can be registered via
 // `registerAdapter(name, fn)` where fn(req, caseObj) => Promise<{result, ok, notes}>.
 /**
@@ -67,6 +210,28 @@ export class CrossCheckAdapter {
       if (quickOk) return { result: true, ok: true, notes: 'email verified (mock quick)' };
       const verified = caseObj && caseObj.meta && !!caseObj.meta.email_verified;
       return { result: !!verified, ok: !!verified, notes: verified ? 'email verified (meta)' : 'email unverified' };
+    });
+    // register the PGP-verification adapter — cryptographically verifies a
+    // detached or cleartext signature against the STATIC trusted-key allow-list
+    // in config/trusted-keys/. Zero-trust: no TOFU, no keyserver fetches —
+    // only reviewed, committed keys. Fails closed on unknown/forged/expired.
+    this.registerAdapter('pgp-verify', async (_req: CrossCheckRequirement, caseObj: any) => {
+      // 'signed_message' etc. are explicit — bare 'message' is excluded because
+      // a case's top-level message field is the case description, not the
+      // signed text.
+      const message = extractField(caseObj, ['signed_message', 'signed_text', 'message_text', 'plaintext', 'signed_body']);
+      const signature = extractField(caseObj, ['signature', 'detached_signature', 'pgp_signature', 'sig']);
+      if (!message) return { result: null, ok: false, notes: 'no signed message supplied' };
+      if (!signature) return { result: null, ok: false, notes: 'no signature supplied' };
+      const trusted = loadTrustedKeys();
+      if (!trusted.length) return { result: null, ok: false, notes: 'trusted-key allow-list unavailable or empty' };
+      try {
+        const res = await verifyPGP(message, signature, trusted);
+        return res;
+      } catch (err) {
+        const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
+        return { result: null, ok: false, notes: `verification error: ${msg}` };
+      }
     });
   }
 
