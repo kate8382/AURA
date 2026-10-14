@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { verifySignature } from './pgpVerify';
 
 export type CrossCheckRequirement = {
   id: string;
@@ -67,6 +68,17 @@ export class CrossCheckAdapter {
       if (quickOk) return { result: true, ok: true, notes: 'email verified (mock quick)' };
       const verified = caseObj && caseObj.meta && !!caseObj.meta.email_verified;
       return { result: !!verified, ok: !!verified, notes: verified ? 'email verified (meta)' : 'email unverified' };
+    });
+
+    // adapter:pgp-verify — cryptographically verify a PGP signature against the
+    // static allow-list in config/trusted-keys/ (issue #88). The signed text and
+    // detached signature come from the requirement params or the case meta.
+    this.registerAdapter('pgp-verify', async (req: CrossCheckRequirement, caseObj: any) => {
+      const params = (caseObj && (caseObj.pgp || (caseObj.meta && caseObj.meta.pgp))) || {};
+      const signedText = params.signed_text ?? (req as any).signed_text ?? params.text;
+      const signature = params.signature ?? (req as any).signature;
+      const res = await verifySignature(String(signedText ?? ''), String(signature ?? ''));
+      return { result: res, ok: res.ok, notes: res.notes };
     });
   }
 

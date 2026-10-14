@@ -1,0 +1,10 @@
+{
+  "keys": [
+    {
+      "key_file": "test-signer@aura.example.asc",
+      "fingerprint": "0f3cccaaf28b7bae1a3a6bf4ed885976b8050833",
+      "signer_identity": "test-signer",
+      "role": "tester"
+    }
+  ]
+}
