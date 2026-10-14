@@ -9,7 +9,10 @@ import fs from 'fs';
 import path from 'path';
 import { verifySignature } from '../policy/pgpVerify';
 
-const KEYS_DIR = path.join(process.cwd(), 'config', 'trusted-keys');
+// Isolate the allow-list in a tmp-dir — the test must never write to the real
+// config/trusted-keys/ (it was mutating the production manifest + leaving keys).
+const KEYS_DIR = fs.mkdtempSync(path.join(require('os').tmpdir(), 'aura-keys-'));
+process.env.AURA_TRUSTED_KEYS_DIR = KEYS_DIR;
 const SIGNED_TEXT = 'Authorize the release of AURA v2';
 
 // A fresh test-keypair, generated per-run, written into the allow-list.

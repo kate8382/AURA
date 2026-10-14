@@ -10,10 +10,31 @@
  */
 import fs from 'fs';
 import path from 'path';
-import * as openpgp from 'openpgp';
 
-const KEYS_DIR = path.join(process.cwd(), 'config', 'trusted-keys');
-const MANIFEST = path.join(KEYS_DIR, 'manifest.json');
+// openpgp is loaded lazily — it's a heavy optional dep only needed when the
+// pgp-verify adapter actually runs; requiring it at module-load would drag it
+// into every code path that imports this file (and break CommonJS/test envs
+// that don't need it).
+type OpenPgp = typeof import('openpgp');
+let _pgp: OpenPgp | null = null;
+async function pgp(): Promise<OpenPgp> {
+  if (!_pgp) _pgp = await import('openpgp');
+  return _pgp;
+}
+// The real openpgp Key type via type-only import — doesn't load the module.
+type PgpKey = import('openpgp').Key;
+
+// The allow-list dir is overridable so tests can point at an isolated tmp-dir
+// instead of mutating the real config/trusted-keys/ (issue #89 review — the
+// test suite must never touch the production allow-list).
+function keysDir(): string {
+  return process.env.AURA_TRUSTED_KEYS_DIR
+    ? path.resolve(process.env.AURA_TRUSTED_KEYS_DIR)
+    : path.join(process.cwd(), 'config', 'trusted-keys');
+}
+function manifestPath(): string {
+  return path.join(keysDir(), 'manifest.json');
+}
 
 export type PgpVerifyResult = {
   ok: boolean;
@@ -35,7 +56,7 @@ type ManifestEntry = {
 
 function loadManifest(): ManifestEntry[] {
   try {
-    const raw = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
+    const raw = JSON.parse(fs.readFileSync(manifestPath(), 'utf8'));
     return Array.isArray(raw.keys) ? raw.keys : [];
   } catch {
     return [];
@@ -43,10 +64,10 @@ function loadManifest(): ManifestEntry[] {
 }
 
 /** Load a trusted public key by its manifest entry's .asc file. */
-async function loadTrustedKey(entry: ManifestEntry): Promise<openpgp.Key | null> {
+async function loadTrustedKey(entry: ManifestEntry): Promise<PgpKey | null> {
   try {
-    const armored = fs.readFileSync(path.join(KEYS_DIR, entry.key_file), 'utf8');
-    return await openpgp.readKey({ armoredKey: armored });
+    const armored = fs.readFileSync(path.join(keysDir(), entry.key_file), 'utf8');
+    return await (await pgp()).readKey({ armoredKey: armored }) as unknown as PgpKey;
   } catch {
     return null;
   }
@@ -89,8 +110,8 @@ export async function verifySignature(
   try {
     // Detached signature: build the message from the signed text, the sig from
     // the armored block. (Cleartext-signed input can be normalized upstream.)
-    const message = await openpgp.createMessage({ text: signedText });
-    const sig = await openpgp.readSignature({ armoredSignature: signature });
+    const message = await (await pgp()).createMessage({ text: signedText });
+    const sig = await (await pgp()).readSignature({ armoredSignature: signature });
     const sigPackets = (sig as any).packets ?? [];
     const fp = sigFingerprint(sigPackets[0]);
 
@@ -119,7 +140,7 @@ export async function verifySignature(
       return { ok: false, verification_status: 'expired', key_id: fp.slice(-16), fingerprint: entry.fingerprint, signer_identity: entry.signer_identity, notes: 'key expired' };
     }
 
-    const verification = await openpgp.verify({
+    const verification = await (await pgp()).verify({
       message,
       signature: sig,
       verificationKeys: pubKey,
