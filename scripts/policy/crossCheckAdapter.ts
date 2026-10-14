@@ -187,7 +187,11 @@ export class CrossCheckAdapter {
       const scopes = Array.isArray(program.in_scope_domains) ? program.in_scope_domains : [];
       const inScope = scopes.some((s: string) => domainInScope(target, String(s)));
       if (!inScope) return { result: { program_id: programId, target }, ok: false, notes: `target '${target}' out of scope for program '${programId}'` };
-      return { result: { program_id: program.program_id, platform: program.platform, target }, ok: true, notes: `program '${program.program_id}' active and target '${target}' in scope` };
+      // NOTE: the offline snapshot is a curated baseline / heuristic — it is
+      // NOT an authoritative directory of live programs. program_id here means
+      // the program's unique ID/handle (e.g. 'mergefi', 'susu-labs'), never a
+      // platform label like 'hackerone'.
+      return { result: { program_id: program.program_id, platform: program.platform, target }, ok: true, notes: `program '${program.program_id}' active and target '${target}' in scope (curated offline baseline — heuristic, not authoritative)` };
     });
   }
 
