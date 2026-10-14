@@ -1,0 +1,111 @@
+{
+ "version": 1,
+ "generated": "offline-curated",
+ "note": "Baseline offline snapshot of public bounty-program scope metadata. Used by adapter:bounty-scope to verify case-claimed program coverage without live API calls. Snapshot data is best-effort and may lag the live programs \u2014 treat as a heuristic, not authoritative.",
+ "programs": [
+  {
+   "platform": "hackerone",
+   "program_id": "hackerone-security",
+   "status": "active",
+   "in_scope_domains": [
+    "hackerone.com",
+    "*.hackerone.com"
+   ],
+   "policy_url": "https://hackerone.com/hackerone"
+  },
+  {
+   "platform": "hackerone",
+   "program_id": "github",
+   "status": "active",
+   "in_scope_domains": [
+    "github.com",
+    "*.github.com",
+    "api.github.com"
+   ],
+   "policy_url": "https://hackerone.com/github"
+  },
+  {
+   "platform": "bugcrowd",
+   "program_id": "example-corp",
+   "status": "active",
+   "in_scope_domains": [
+    "example.com",
+    "*.example.com",
+    "10.0.0.0/8"
+   ],
+   "policy_url": "https://bugcrowd.com/example-corp"
+  },
+  {
+   "platform": "bugcrowd",
+   "program_id": "legacy-app",
+   "status": "suspended",
+   "in_scope_domains": [
+    "legacy.example.org",
+    "*.legacy.example.org"
+   ],
+   "policy_url": "https://bugcrowd.com/legacy-app"
+  },
+  {
+   "platform": "intigriti",
+   "program_id": "closed-pilot",
+   "status": "closed",
+   "in_scope_domains": [
+    "pilot.example.net"
+   ],
+   "policy_url": "https://intigriti.com/closed-pilot"
+  },
+  {
+   "platform": "hackerone",
+   "program_id": "security",
+   "status": "active",
+   "in_scope_domains": [
+    "hackerone.com",
+    "*.hackerone.com"
+   ],
+   "policy_url": "https://hackerone.com/security"
+  },
+  {
+   "platform": "hackerone",
+   "program_id": "ibb",
+   "status": "active",
+   "in_scope_domains": [
+    "*.google.com",
+    "*.youtube.com",
+    "*.android.com",
+    "*.chromium.org"
+   ],
+   "policy_url": "https://hackerone.com/ibb"
+  },
+  {
+   "platform": "intigriti",
+   "program_id": "redbull",
+   "status": "active",
+   "in_scope_domains": [
+    "*.redbull.com",
+    "redbull.com"
+   ],
+   "policy_url": "https://app.intigriti.com/programs/redbull/redbull"
+  },
+  {
+   "platform": "bugcrowd",
+   "program_id": "tesla",
+   "status": "active",
+   "in_scope_domains": [
+    "*.tesla.com",
+    "*.teslamotors.com",
+    "*.tesla.cn"
+   ],
+   "policy_url": "https://bugcrowd.com/tesla"
+  },
+  {
+   "platform": "bugcrowd",
+   "program_id": "adafruit",
+   "status": "suspended",
+   "in_scope_domains": [
+    "*.adafruit.com",
+    "adafruit.com"
+   ],
+   "policy_url": "https://bugcrowd.com/adafruit"
+  }
+ ]
+}
