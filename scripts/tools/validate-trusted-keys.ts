@@ -12,7 +12,9 @@ import fs from 'fs';
 import path from 'path';
 import * as openpgp from 'openpgp';
 
-const KEYS_DIR = path.join(process.cwd(), 'config', 'trusted-keys');
+const KEYS_DIR = process.env.AURA_TRUSTED_KEYS_DIR
+  ? path.resolve(process.env.AURA_TRUSTED_KEYS_DIR)
+  : path.join(process.cwd(), 'config', 'trusted-keys');
 const MANIFEST = path.join(KEYS_DIR, 'manifest.json');
 
 // Minimum acceptable algorithm strength — reject legacy/weak primitives.
