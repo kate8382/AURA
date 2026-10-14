@@ -24,8 +24,17 @@ async function pgp(): Promise<OpenPgp> {
 // The real openpgp Key type via type-only import — doesn't load the module.
 type PgpKey = import('openpgp').Key;
 
-const KEYS_DIR = path.join(process.cwd(), 'config', 'trusted-keys');
-const MANIFEST = path.join(KEYS_DIR, 'manifest.json');
+// The allow-list dir is overridable so tests can point at an isolated tmp-dir
+// instead of mutating the real config/trusted-keys/ (issue #89 review — the
+// test suite must never touch the production allow-list).
+function keysDir(): string {
+  return process.env.AURA_TRUSTED_KEYS_DIR
+    ? path.resolve(process.env.AURA_TRUSTED_KEYS_DIR)
+    : path.join(process.cwd(), 'config', 'trusted-keys');
+}
+function manifestPath(): string {
+  return path.join(keysDir(), 'manifest.json');
+}
 
 export type PgpVerifyResult = {
   ok: boolean;
@@ -47,7 +56,7 @@ type ManifestEntry = {
 
 function loadManifest(): ManifestEntry[] {
   try {
-    const raw = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
+    const raw = JSON.parse(fs.readFileSync(manifestPath(), 'utf8'));
     return Array.isArray(raw.keys) ? raw.keys : [];
   } catch {
     return [];
@@ -57,7 +66,7 @@ function loadManifest(): ManifestEntry[] {
 /** Load a trusted public key by its manifest entry's .asc file. */
 async function loadTrustedKey(entry: ManifestEntry): Promise<PgpKey | null> {
   try {
-    const armored = fs.readFileSync(path.join(KEYS_DIR, entry.key_file), 'utf8');
+    const armored = fs.readFileSync(path.join(keysDir(), entry.key_file), 'utf8');
     return await (await pgp()).readKey({ armoredKey: armored }) as unknown as PgpKey;
   } catch {
     return null;
