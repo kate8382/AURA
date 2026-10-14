@@ -48,7 +48,7 @@ function loadBountySnapshot(): any[] {
       const d = JSON.parse(raw);
       const progs = Array.isArray(d && d.programs) ? d.programs : (Array.isArray(d) ? d : []);
       if (progs.length) { _bountySnapshotCache = progs; return progs; }
-    } catch { /* try the next candidate location */ }
+    } catch { /* fallback: this candidate location is absent/unreadable — try the next */ }
   }
   return [];  // deliberately not cached — a later call retries
 }
