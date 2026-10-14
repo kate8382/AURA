@@ -1,10 +1,13 @@
 {
+  "$comment": "Static, reviewed allow-list of trusted PGP signing keys. Each entry maps a signer identity to a key fingerprint and the organizational role that identity is authorized to act under. Verification is CLOSED-WORLD: a key not listed here is never trusted, regardless of keyserver or web-of-trust state. No TOFU, no dynamic key fetching. Add a reviewed ASCII-armored .asc per signer and record its fingerprint + role here.",
   "keys": [
     {
-      "key_file": "test-signer@aura.example.asc",
-      "fingerprint": "0f3cccaaf28b7bae1a3a6bf4ed885976b8050833",
-      "signer_identity": "test-signer",
-      "role": "tester"
+      "key_file": "releases@aura.example.asc",
+      "fingerprint": "c868b3d83150a4708e9cbb66d752a76327601c07",
+      "signer_identity": "AURA Release Signer",
+      "uid": "releases@aura.example",
+      "role": "release-signer",
+      "comment": "Example/reviewed key for the release-signer role; the test-suite writes its own ephemeral manifest at run-time and never trusts this fixture."
     }
   ]
 }
