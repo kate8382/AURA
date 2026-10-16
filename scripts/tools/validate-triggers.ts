@@ -67,6 +67,11 @@ export function tokenizeText(text: string, stopwords: Set<string>): string[] {
     .filter((t) => t.length > 0 && !stopwords.has(t));
 }
 
+// Extract unique lowercase content tokens from text as a Set, filtering out stopwords
+export function getTokenSet(text: string, stopwords: Set<string>): Set<string> {
+  return new Set(tokenizeText(text, stopwords));
+}
+
 // Main function to validate triggers based on extraction config and signal mapping
 export function validateTriggers(options: ValidateTriggersOptions = {}): ValidationReport {
   const repoRoot = options.repoRoot || path.resolve(__dirname, '..', '..');
@@ -224,7 +229,7 @@ export function validateTriggers(options: ValidateTriggersOptions = {}): Validat
   const stopwords = new Set<string>();
   if (Array.isArray(extractionConfig.stopwords)) {
     for (const sw of extractionConfig.stopwords) {
-      if (typeof sw === 'string') stopwords.add(sw.toLowerCase());
+      if (typeof sw === 'string') stopwords.add(sw.trim().toLowerCase());
     }
   }
 
@@ -342,7 +347,7 @@ export function validateTriggers(options: ValidateTriggersOptions = {}): Validat
           list.push(resolvedTrigger);
           phraseMap.set(normP, list);
 
-          const tokens = new Set(tokenizeText(p, stopwords));
+          const tokens = getTokenSet(p, stopwords);
           allPhrasesList.push({ text: p, trigger: resolvedTrigger, type: 'phrase', tokens });
         }
       }
@@ -438,7 +443,7 @@ export function validateTriggers(options: ValidateTriggersOptions = {}): Validat
           existingTrgCues.push(c);
           triggerCuesMap.set(resolvedTrigger, existingTrgCues);
 
-          const tokens = new Set(tokenizeText(c, stopwords));
+          const tokens = getTokenSet(c, stopwords);
           allCuesList.push({ text: c, trigger: resolvedTrigger, type: 'scoringCue', tokens });
         }
       }
@@ -479,8 +484,8 @@ export function validateTriggers(options: ValidateTriggersOptions = {}): Validat
       const cues2 = triggerCuesMap.get(t2) || [];
       const set1 = new Set<string>();
       const set2 = new Set<string>();
-      for (const c of cues1) tokenizeText(c, stopwords).forEach((tok) => set1.add(tok));
-      for (const c of cues2) tokenizeText(c, stopwords).forEach((tok) => set2.add(tok));
+      for (const c of cues1) getTokenSet(c, stopwords).forEach((tok) => set1.add(tok));
+      for (const c of cues2) getTokenSet(c, stopwords).forEach((tok) => set2.add(tok));
 
       if (set1.size > 0 && set2.size > 0) {
         const sim = jaccardSimilarity(set1, set2);

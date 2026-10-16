@@ -4,6 +4,7 @@ import {
   validateTriggers,
   jaccardSimilarity,
   tokenizeText,
+  getTokenSet,
   formatValidationReport,
   ValidationReport,
 } from '../tools/validate-triggers';
@@ -34,18 +35,43 @@ describe('validate-triggers', () => {
       expect(res.stdout).toContain('Total Errors: 0');
     });
 
-    test('CLI supports --json flag and outputs structured report', () => {
+    test('CLI supports --json flag and outputs structured report cleanly without console noise', () => {
       const res = spawnSync(
         process.execPath,
         ['-r', 'ts-node/register', path.join(repoRoot, 'scripts', 'tools', 'validate-triggers.ts'), '--json'],
         { cwd: repoRoot, encoding: 'utf8' }
       );
       expect(res.status).toBe(0);
+      const trimmed = res.stdout.trim();
+      expect(trimmed.startsWith('{')).toBe(true);
+      expect(trimmed.endsWith('}')).toBe(true);
       const parsed = JSON.parse(res.stdout);
       expect(parsed.ok).toBe(true);
       expect(Array.isArray(parsed.errors)).toBe(true);
       expect(Array.isArray(parsed.warnings)).toBe(true);
       expect(parsed.stats).toBeDefined();
+    });
+
+    test('CLI with --json on validation failure produces pure parseable JSON and exits with code 1', () => {
+      const res = spawnSync(
+        process.execPath,
+        [
+          '-r',
+          'ts-node/register',
+          path.join(repoRoot, 'scripts', 'tools', 'validate-triggers.ts'),
+          '--extraction-config',
+          '/non/existent/config.json',
+          '--json',
+        ],
+        { cwd: repoRoot, encoding: 'utf8' }
+      );
+      expect(res.status).toBe(1);
+      const trimmed = res.stdout.trim();
+      expect(trimmed.startsWith('{')).toBe(true);
+      expect(trimmed.endsWith('}')).toBe(true);
+      const parsed = JSON.parse(res.stdout);
+      expect(parsed.ok).toBe(false);
+      expect(parsed.errors.length).toBeGreaterThan(0);
     });
   });
 
@@ -339,6 +365,20 @@ describe('validate-triggers', () => {
       const stopwords = new Set(['the', 'and']);
       const tokens = tokenizeText("The quick, brown fox! And it's running.", stopwords);
       expect(tokens).toEqual(['quick', 'brown', 'fox', 'it', 's', 'running']);
+    });
+
+    test('getTokenSet returns unique lowercase tokens and strips common stopwords case-insensitively', () => {
+      const stopwords = new Set(['the', 'is', 'for', 'to', 'in', 'on', 'a']);
+      const set1 = getTokenSet('THE System IS for testing ACCESS to data IN server', stopwords);
+      expect(set1).toEqual(new Set(['system', 'testing', 'access', 'data', 'server']));
+      expect(set1.has('the')).toBe(false);
+      expect(set1.has('is')).toBe(false);
+
+      // Verify stopwords prevent false high overlap between distinct phrases that share stopword scaffolding
+      const set2 = getTokenSet('THE System IS on production ACCESS to data IN server', stopwords);
+      // Content tokens: ['system', 'access', 'data', 'server', 'testing'] vs ['system', 'access', 'data', 'server', 'production']
+      // 4 shared out of 6 unique = 0.667 similarity, below default 0.85 collision threshold
+      expect(jaccardSimilarity(set1, set2)).toBeLessThan(0.85);
     });
 
     test('formatValidationReport formats reports cleanly for both pass and fail', () => {
