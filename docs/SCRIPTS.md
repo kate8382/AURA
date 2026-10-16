@@ -172,12 +172,16 @@ node -r ts-node/register scripts/normalize-percases.ts public_cases --extract-tr
 - `scripts/tools/collect-triggers.js` — collects normalized triggers from `public_cases/` and writes
   `tmp/collected-triggers.json`.
 - `scripts/tools/audit-categories.js` — simple directory-vs-category audit; writes `tmp/audit-output.json`.
+- `scripts/tools/validate-triggers.ts` — static validation and overlap detection for
+  `config/trigger-extraction.json` and `config/signal-mapping.json`. Validates canonical trigger registration,
+  reports unmapped triggers, finds duplicate regexes/phrases/cues, and checks token overlap collisions.
 
 Run via npm shortcuts added to `package.json`:
 
 ```bash
 npm run collect:triggers
 npm run audit:categories
+npm run validate:triggers
 ```
 
 6) Signal mapping
@@ -236,5 +240,6 @@ Unit tests for the scripts are located in `scripts/__tests__/` and include:
 - `scripts/__tests__/normalize-percases-extract.test.ts`
 - `scripts/__tests__/recalc_confidence.test.ts`
 - `scripts/__tests__/validate-percases.test.ts`
+- `scripts/__tests__/validate-triggers.test.ts`
 
 Run the full test suite with `npm test`.

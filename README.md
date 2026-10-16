@@ -108,8 +108,7 @@ Short developer reference — full details in [docs/SCRIPTS.md](docs/SCRIPTS.md)
 - `npm run recalc:confidence` — recompute `confidence` fields (see docs for dry-run flags and options).
 - `npm run collect:triggers` — collect normalized triggers into `tmp/collected-triggers.json`.
 - `npm run audit:categories` — run category-vs-directory audit into `tmp/audit-output.json`.
-- `npm run recalc:confidence` — recompute `confidence` fields (see docs for dry-run flags and options).
-- `npm run crosscheck:run` — run cross-check adapter module (default noop adapter).
+- `npm run validate:triggers` — static validation and overlap detection for trigger extraction and signal mapping.
 - `npm run crosscheck:run` — run cross-check adapter module (default noop adapter).
 
 Note: see [docs/SCRIPTS.md](./docs/SCRIPTS.md) for details on cross-check behavior and the `cross_check_audit` field.
