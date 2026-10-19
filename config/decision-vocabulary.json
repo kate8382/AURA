@@ -1,0 +1,27 @@
+{
+  "$schema": "../schemas/decision-vocabulary-schema.json",
+  "version": "1.0.0",
+  "severities": [
+    {
+      "value": "allow",
+      "rank": 1,
+      "description": "Allow the request. No escalation conditions met."
+    },
+    {
+      "value": "review",
+      "rank": 2,
+      "description": "Require human or automated review. Confidence is elevated or soft checks failed."
+    },
+    {
+      "value": "block",
+      "rank": 3,
+      "description": "Block the request. Veto triggers matched, critical thresholds exceeded, or max evasion attempts reached."
+    }
+  ],
+  "workflow_states": [
+    {
+      "value": "pending",
+      "description": "Awaiting further information, cross-check answers, or human interaction. Not a risk severity."
+    }
+  ]
+}

@@ -51,6 +51,7 @@
     "clean:public_cases": "node -r ts-node/register scripts/tools/clean-public-cases.ts",
     "gen:triggers": "node -r ts-node/register scripts/generate-trigger-weights.ts",
     "gen:triggers:apply": "node -r ts-node/register scripts/generate-trigger-weights.ts -- --apply-signal-ids",
+    "gen:signal-hash": "node -r ts-node/register scripts/tools/generate-signal-hash.ts",
     "collect:triggers": "node -r ts-node/register scripts/tools/collect-triggers.js",
     "audit:categories": "node -r ts-node/register scripts/tools/audit-categories.js",
     "migrate:categories": "node -r ts-node/register scripts/tools/migrate-categories.ts",

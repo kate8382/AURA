@@ -44,6 +44,33 @@ function checkSilentCatches(): number {
   return problems;
 }
 
+import { generateSignalHash } from './generate-signal-hash';
+
+// Checks that the signal catalog hash is up to date.
+function checkSignalHash(): number {
+  let problems = 0;
+  const mappingPath = path.join(repoRoot, 'config', 'signal-mapping.json');
+  const metaPath = path.join(repoRoot, 'config', 'signal-catalog-meta.json');
+
+  if (!fs.existsSync(metaPath)) {
+    console.error(`[ERROR] signal catalog meta missing file=${metaPath} (run npm run gen:signal-hash)`);
+    return 1;
+  }
+
+  const currentHash = generateSignalHash(mappingPath).sha256;
+  try {
+    const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+    if (meta.sha256 !== currentHash) {
+      console.error(`[ERROR] signal catalog hash mismatch file=${metaPath} expected=${currentHash} actual=${meta.sha256} (run npm run gen:signal-hash)`);
+      problems += 1;
+    }
+  } catch (err) {
+    console.error(`[ERROR] failed to read signal catalog meta file=${metaPath}`);
+    problems += 1;
+  }
+  return problems;
+}
+
 // Defines the sequence of pipeline steps to run for error-handling checks.
 const PIPELINE: Array<{ name: string; args: string[] }> = [
   { name: 'validate', args: ['scripts/validate-percases.ts', 'public_cases', '--dry-run'] },
@@ -74,7 +101,7 @@ function checkPipeline(): number {
 }
 
 if (require.main === module) {
-  const problems = checkSilentCatches() + checkPipeline();
+  const problems = checkSilentCatches() + checkPipeline() + checkSignalHash();
   if (problems > 0) {
     console.error(`[ERROR] error-handling check failed problems=${problems}`);
     process.exitCode = 1;
