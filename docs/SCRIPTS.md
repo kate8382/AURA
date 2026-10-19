@@ -190,7 +190,18 @@ npm run validate:triggers
 - New format: mapping uses compact namespaced keys (for example `camouflage:naive`) where each key maps to an object with `id`, `description`, and a `triggers` array. The generator and recalculator expand mapped keys into normalized triggers when computing weights.
 - See [SIGNAL_IDS.md](./SIGNAL_IDS.md) for the recommended workflow to collect triggers and update the mapping.
 
-7) Files and outputs
+7) Downstream Contracts & Signal Catalog Hash (`config/decision-vocabulary.json` & `config/signal-catalog-meta.json`)
+
+- Purpose: Provide stable, versioned contracts for external systems (such as automated action gates and policy enforcers) consuming AURA's evaluation outputs.
+- `config/decision-vocabulary.json`: Defines canonical decision values (`allow`, `review`, `block`), their monotonic severity ranks (`allow` < `review` < `block`), and workflow states (`pending`).
+- `config/signal-catalog-meta.json`: Contains a versioned SHA-256 cryptographic hash of `config/signal-mapping.json`. Downstream consumers pin this hash to detect unintended structural drift in the signal catalog.
+- Main command to generate/update the signal catalog hash:
+  ```bash
+  npm run gen:signal-hash
+  ```
+-CI integration: `npm run check:errors` and the main test suite verify that the signal catalog hash is up-to-date with `signal-mapping.json`.
+
+8) Files and outputs
 
 - Generated configs and intermediate outputs are written to `config/` and `tmp/`. Add `tmp/` to
   `.gitignore` (already recommended) to avoid checking generated artifacts into Git.
@@ -198,12 +209,12 @@ npm run validate:triggers
   - `npm run migrate:categories` — migrate legacy `category` field into `domain` + human `category` label in `public_cases/`.
   - `npm run migrate:signals` — preview and apply signal ID compaction and update `public_cases.signal_ids`.
 
-8) Automation suggestions
+9) Automation suggestions
 
 - Consider a CI workflow that runs the generator on changes to `public_cases/`, writes updated
   `config/trigger-weights.json` to a branch and opens a PR for review.
 
-9) Error handling and exit codes
+10) Error handling and exit codes
 
 Scripts fail loudly. The rules, implemented in `scripts/logger.ts` (`runCli`, `logError`):
 
@@ -224,7 +235,7 @@ Log format and verbosity:
 - `AURA_LOG_LEVEL=debug|info|warn|error|silent` controls verbosity (default `info`); stack traces are included at `debug`.
 - `npm run check:errors` is part of CI: it rejects silent `catch` blocks and runs normalize, recalc and validate in `--dry-run` on `public_cases/`, failing on a non-zero exit code, an `[ERROR]` log line or an unhandled rejection.
 
-10) Tests
+11) Tests
 
 Unit tests for the scripts are located in `scripts/__tests__/` and include:
 
@@ -232,6 +243,7 @@ Unit tests for the scripts are located in `scripts/__tests__/` and include:
 - `scripts/__tests__/error-handling.test.ts`
 - `scripts/__tests__/logger.test.ts`
 - `scripts/__tests__/check-error-handling.test.ts`
+- `scripts/__tests__/contract-stability.test.ts`
 - `scripts/__tests__/extract-triggers.test.ts`
 - `scripts/__tests__/generate-trigger-weights.test.ts`
 - `scripts/__tests__/new-case-template.test.ts`

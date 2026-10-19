@@ -44,7 +44,21 @@ npm run collect:triggers
 
 Note: Each signal entry's `id` field strictly matches its JSON mapping key (e.g., `"id": "camouflage:naive"`).
 
-3. Generate trigger weights and (optionally) apply `signal_ids` into case files:
+3. Signal Catalog Versioning & Hashing for Downstream Consumers
+
+To prevent silent drift when external gates or security proxies consume AURA signals, every change to `config/signal-mapping.json` must be accompanied by an updated catalog hash.
+
+- Edit `config/signal-mapping.json` as needed.
+- Regenerate the deterministic SHA-256 hash and metadata file:
+
+   ```bash
+   npm run gen:signal-hash
+   ```
+- This updates `config/signal-catalog-meta.json`, which tracks the catalog version, signal count, and SHA-256 checksum.
+
+Note: Commit both files together (`signal-mapping.json` and `signal-catalog-meta.json`). CI will fail if the hash does not match the current mapping contents.
+
+4. Generate trigger weights and (optionally) apply `signal_ids` into case files:
 
 ```bash
 npm run gen:triggers

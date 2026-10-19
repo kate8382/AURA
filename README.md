@@ -124,6 +124,13 @@ Note: see [docs/SCRIPTS.md](./docs/SCRIPTS.md) for details on cross-check behavi
 - Final `confidence` for a case is computed as: base (by category) + boost, where `boost = min(maxBoost, totalTriggerWeight + crossCheckWeight*questions + signalIdWeight*unmappedSignalCount)`.
 - The generator preserves any existing trigger keys from the current `config/trigger-weights.json` to avoid accidentally dropping curated keys.
 
+### Downstream Contracts
+
+For external consumers (e.g., downstream gates or analysis tools), AURA publishes versioned contracts in `config/`:
+
+- `decision-vocabulary.json`: Defines the canonical set of decision values, their monotonic severity ranks (`allow` < `review` < `block`), and workflow states (e.g., `pending`).
+- `signal-catalog-meta.json`: Contains a versioned SHA-256 hash of `signal-mapping.json`. Consumers can pin this hash to detect drift in the signal catalog. Regenerate via `npm run gen:signal-hash`.
+
 ### Error handling
 
 Scripts exit with a non-zero code on unexpected errors, including in `--dry-run`, and log them as `[ERROR] ... file=... error=...` (`AURA_LOG_FORMAT=json` for JSON, `AURA_LOG_LEVEL` for verbosity). `npm run check:errors` runs the same checks as CI. Details and exit codes: [docs/SCRIPTS.md](docs/SCRIPTS.md).
