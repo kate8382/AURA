@@ -493,5 +493,27 @@
       "count": 41,
       "uniques": 19
     }
+  },
+  {
+    "date": "2026-10-17",
+    "views": {
+      "count": 27,
+      "uniques": 4
+    },
+    "clones": {
+      "count": 25,
+      "uniques": 12
+    }
+  },
+  {
+    "date": "2026-10-18",
+    "views": {
+      "count": 10,
+      "uniques": 4
+    },
+    "clones": {
+      "count": 5,
+      "uniques": 3
+    }
   }
 ]
