@@ -27,13 +27,17 @@
               "type": "string"
             },
             "implied_action": {
-              "type": "string",
-              "enum": [
-                "egress:outbound",
-                "execute:command",
-                "disclosure:external",
-                "access:privilege"
-              ]
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "egress:outbound",
+                  "execute:command",
+                  "disclosure:external",
+                  "access:privilege"
+                ]
+              },
+              "uniqueItems": true
             },
             "triggers": {
               "type": "array",

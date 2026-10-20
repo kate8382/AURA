@@ -4,7 +4,7 @@ This document explains how AURA maps human-friendly `triggers` (from `scenarios[
 
 ### Key changes
 - Signal IDs moved to a compact, namespaced key format such as `camouflage:naive` or `recon:targeted`.
-- `config/signal-mapping.json` uses a mapping-driven object format where each key is the compact signal ID and the value is an object describing the signal (for example: `{ "id": "camouflage:naive", "description": "...", "triggers": ["..."] }`).
+- `config/signal-mapping.json` uses a mapping-driven object format where each key is the compact signal ID and the value is an object describing the signal (for example: `{ "id": "camouflage:naive", "description": "...", "implied_action": ["access:privilege"], "triggers": ["..."] }`).
 - One-off migration utilities were added under `scripts/tools/` to help update `public_cases/` and the mapping file. Use `npm run migrate:signals` in dry-run mode first to preview changes.
 
 ### How the new mapping is used
@@ -30,20 +30,29 @@ npm run collect:triggers
 
 ```json
 {
-  "$schema": "[http://json-schema.org/draft-07/schema#](http://json-schema.org/draft-07/schema#)",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "description": "AURA Signal Mapping",
   "signals": {
     "camouflage:naive": {
       "id": "camouflage:naive",
       "description": "Naive persona framing, including false innocence or hobbyist disguises",
-      "implied_action": "access:privilege",
+      "implied_action": ["access:privilege"],
       "triggers": ["naive tech hobbyist camouflage", "naive victim camouflage"]
     }
   }
 }
 ```
 - Implied Actions for Downstream Egress Checks (`implied_action`):
-Each signal entry may optionally include an `implied_action` field mapping the psychological threat intent to a concrete system action class (e.g., `egress:outbound`, `execute:command`, `disclosure:external`). This allows downstream action gates to correlate abstract risk signals with actual execution steps without breaking backward compatibility for existing consumers.
+Each signal entry may optionally include an `implied_action` field as a `string[]` mapping the psychological threat intent to one or more concrete system action classes (for example `egress:outbound`, `execute:command`, `disclosure:external`). This allows downstream action gates to correlate abstract risk signals with actual execution steps while preserving backward compatibility.
+
+Consumer helper example:
+
+```ts
+import { getImpliedActions } from './scripts/tools/signal-action-consumer';
+
+const actions = getImpliedActions('exploit:actionable', ['execute:command', 'egress:outbound']);
+// => ['execute:command', 'egress:outbound']
+```
 
 **Note:** Each signal entry's `id` field strictly matches its JSON mapping key (e.g., `"id": "camouflage:naive"`).
 

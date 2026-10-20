@@ -116,7 +116,8 @@ Note: see [docs/SCRIPTS.md](./docs/SCRIPTS.md) for details on cross-check behavi
 **Signal IDs and mappings**
 - Reference: the signal ID mapping is documented in [docs/SIGNAL_IDS.md](docs/SIGNAL_IDS.md).
 - The canonical mapping file is `config/signal-mapping.json` and the generator/recalculator consults it at runtime. See `docs/SIGNAL_IDS.md` for the recommended workflow: collecting triggers, editing `config/signal-mapping.json`, and regenerating weights.
- - Notes on recent changes: signal IDs were compacted to a namespaced key format (for example `camouflage:naive`, `recon:targeted`), where each mapping entry is keyed by the compact signal ID and includes an `id`, a human-readable `description`, and a `triggers` list. One-off migration scripts were added under `scripts/tools/` and exposed as `npm run migrate:categories` and `npm run migrate:signals` for convenience.
+- Signal entries may optionally declare `implied_action` as a `string[]` (for example `['egress:outbound']` or `['execute:command', 'egress:outbound']`).
+- Notes on recent changes: signal IDs were compacted to a namespaced key format (for example `camouflage:naive`, `recon:targeted`), where each mapping entry is keyed by the compact signal ID and includes an `id`, a human-readable `description`, and a `triggers` list. One-off migration scripts were added under `scripts/tools/` and exposed as `npm run migrate:categories` and `npm run migrate:signals` for convenience.
 
 ### How trigger weights are computed
 
@@ -130,7 +131,7 @@ For external consumers (e.g., downstream gates or analysis tools), AURA publishe
 
 - `decision-vocabulary.json`: Defines the canonical set of decision values, their monotonic severity ranks (`allow` < `review` < `block`), and workflow states (e.g., `pending`).
 - `signal-catalog-meta.json`: Contains a versioned SHA-256 hash of `signal-mapping.json`. Consumers can pin this hash to detect drift in the signal catalog. Regenerate via `npm run gen:signal-hash`.
-- `signal-mapping.json`: Maps raw behavioral triggers to standardized system Signal IDs, now including an optional `implied_action` (such as `egress:outbound` or `execute:command`) to bind psychological risk signals to concrete action classes for external policy gates.
+- `signal-mapping.json`: Defines the canonical signal catalog used by AURA, including optional `implied_action` arrays that map risk signals to downstream action classes for policy enforcement.
 
 ### Error handling
 

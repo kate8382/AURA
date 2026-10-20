@@ -187,7 +187,7 @@ npm run validate:triggers
 6) Signal mapping
 
 - Canonical mapping file: `config/signal-mapping.json`.
-- New format: mapping uses compact namespaced keys (for example `camouflage:naive`) where each key maps to an object with `id`, `description`, and a `triggers` array. The generator and recalculator expand mapped keys into normalized triggers when computing weights.
+- New format: mapping uses compact namespaced keys (for example `camouflage:naive`) where each key maps to an object with `id`, `description`, `implied_action` (optional `string[]`), and a `triggers` array. The generator and recalculator expand mapped keys into normalized triggers when computing weights.
 - See [SIGNAL_IDS.md](./SIGNAL_IDS.md) for the recommended workflow to collect triggers and update the mapping.
 
 7) Downstream Contracts & Signal Catalog Hash (`config/decision-vocabulary.json` & `config/signal-catalog-meta.json`)
@@ -199,7 +199,6 @@ npm run validate:triggers
   ```bash
   npm run gen:signal-hash
   ```
-- `implied_action` taxonomy support: The signal mapping parser recognizes optional action classes, ensuring that running `npm run gen:signal-hash` correctly incorporates the updated metadata into the deterministic SHA-256 catalog hash (`config/signal-catalog-meta.json`).
 - CI integration: `npm run check:errors` and the main test suite verify that the signal catalog hash is up-to-date with `signal-mapping.json`.
 
 8) Files and outputs
