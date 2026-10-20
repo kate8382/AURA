@@ -130,6 +130,7 @@ For external consumers (e.g., downstream gates or analysis tools), AURA publishe
 
 - `decision-vocabulary.json`: Defines the canonical set of decision values, their monotonic severity ranks (`allow` < `review` < `block`), and workflow states (e.g., `pending`).
 - `signal-catalog-meta.json`: Contains a versioned SHA-256 hash of `signal-mapping.json`. Consumers can pin this hash to detect drift in the signal catalog. Regenerate via `npm run gen:signal-hash`.
+- `signal-mapping.json`: Maps raw behavioral triggers to standardized system Signal IDs, now including an optional `implied_action` (such as `egress:outbound` or `execute:command`) to bind psychological risk signals to concrete action classes for external policy gates.
 
 ### Error handling
 

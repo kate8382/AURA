@@ -5,6 +5,7 @@
     "camouflage:naive": {
       "id": "camouflage:naive",
       "description": "Naive persona framing, including false innocence, victim, or hobbyist disguises",
+      "implied_action": "access:privilege",
       "triggers": [
         "academic & self-taught framing",
         "false naivety / persona discrepancy",
@@ -73,6 +74,7 @@
     "exploit:actionable": {
       "id": "exploit:actionable",
       "description": "Requests for functional exploits, weaponized assets, or executable payloads",
+      "implied_action": "execute:command",
       "triggers": [
         "actionable geolocation payload",
         "actionable hardware exploit",
@@ -85,6 +87,7 @@
     "evasion:control": {
       "id": "evasion:control",
       "description": "Techniques aimed at bypassing security controls, compliance, or access restrictions",
+      "implied_action": "access:privilege",
       "triggers": [
         "bypass_auth",
         "compliance evasion",
@@ -98,6 +101,7 @@
     "recon:targeted": {
       "id": "recon:targeted",
       "description": "Targeted intelligence gathering, infrastructure fixation, or automated OSINT scraping",
+      "implied_action": "egress:outbound",
       "triggers": [
         "automated reconnaissance / osint",
         "data scraping / stalking",
@@ -109,6 +113,7 @@
     "extortion:leverage": {
       "id": "extortion:leverage",
       "description": "Extortion tactics using psychological leverage, reputational threats, or coercion assets",
+      "implied_action": "disclosure:external",
       "triggers": [
         "intimidation asset",
         "psychological leverage",
@@ -138,6 +143,7 @@
     "fin:suspicious": {
       "id": "fin:suspicious",
       "description": "Suspicious financial requests, direct fraud indicators, or payment manipulation alibis",
+      "implied_action": "disclosure:external",
       "triggers": [
         "direct fraud intent",
         "financial_request",

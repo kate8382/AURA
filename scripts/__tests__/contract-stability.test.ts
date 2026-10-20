@@ -27,6 +27,24 @@ describe('contract-stability', () => {
     expect(vocab.workflow_states[0].value).toBe('pending');
   });
 
+  test('signal schema accepts implied_action and keeps missing action optional', () => {
+    const mappingPath = path.join(repoRoot, 'config', 'signal-mapping.json');
+    const schemaPath = path.join(repoRoot, 'schemas', 'signal-mapping-schema.json');
+
+    const mapping = JSON.parse(fs.readFileSync(mappingPath, 'utf8'));
+    const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+
+    const ajv = new Ajv();
+    const validate = ajv.compile(schema);
+
+    const withAction = mapping.signals['recon:targeted'];
+    const withoutAction = { id: 'sample:safe', description: 'signal without action metadata', triggers: ['safe phrase'] };
+
+    expect(validate(mapping)).toBe(true);
+    expect(withAction.implied_action).toBe('egress:outbound');
+    expect(validate({ signals: { 'sample:safe': withoutAction } })).toBe(true);
+  });
+
   test('signal-mapping.json SHA-256 hash is deterministic', () => {
     const mappingPath = path.join(repoRoot, 'config', 'signal-mapping.json');
     const res1 = generateSignalHash(mappingPath);

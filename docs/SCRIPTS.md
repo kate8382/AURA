@@ -199,7 +199,8 @@ npm run validate:triggers
   ```bash
   npm run gen:signal-hash
   ```
--CI integration: `npm run check:errors` and the main test suite verify that the signal catalog hash is up-to-date with `signal-mapping.json`.
+- `implied_action` taxonomy support: The signal mapping parser recognizes optional action classes, ensuring that running `npm run gen:signal-hash` correctly incorporates the updated metadata into the deterministic SHA-256 catalog hash (`config/signal-catalog-meta.json`).
+- CI integration: `npm run check:errors` and the main test suite verify that the signal catalog hash is up-to-date with `signal-mapping.json`.
 
 8) Files and outputs
 
