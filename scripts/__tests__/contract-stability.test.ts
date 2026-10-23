@@ -3,6 +3,7 @@ import path from 'path';
 import Ajv from 'ajv';
 import { generateSignalHash, canonicalize } from '../tools/generate-signal-hash';
 import { getImpliedActions } from '../tools/signal-action-consumer';
+import { getDeclaredShape, getNegativeLabel } from '../tools/shape-metadata-consumer';
 
 describe('contract-stability', () => {
   const repoRoot = path.resolve(__dirname, '..', '..');
@@ -47,6 +48,36 @@ describe('contract-stability', () => {
     expect(validate({ signals: { 'sample:safe': withoutAction } })).toBe(true);
   });
 
+  test('case schema accepts declared_shape and negative_labels when present and remains valid without them', () => {
+    const schemaPath = path.join(repoRoot, 'schemas', 'per-case-schema.json');
+    const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+    const ajv = new Ajv();
+    const validate = ajv.compile(schema);
+
+    const withMetadata = {
+      case_id: 'CASE-NEG-001',
+      category: 'access/test',
+      declared_shape: {
+        operation_type: 'read',
+        signal_ids: ['camouflage:naive']
+      },
+      negative_labels: {
+        status: 'confirmed_negative',
+        reason: 'known safe baseline'
+      },
+      scenarios: [{ name: 'Example', text: 'This request is a benign comparison.' }]
+    };
+
+    const withoutMetadata = {
+      case_id: 'CASE-NORMAL-001',
+      category: 'access/test',
+      scenarios: [{ name: 'Example', text: 'This is a normal request.' }]
+    };
+
+    expect(validate(withMetadata)).toBe(true);
+    expect(validate(withoutMetadata)).toBe(true);
+  });
+
   test('getImpliedActions reads and filters action classes', () => {
     const actions = getImpliedActions('exploit:actionable', ['execute:command', 'egress:outbound', 'access:privilege']);
     const filtered = getImpliedActions('exploit:actionable', ['access:privilege']);
@@ -55,6 +86,16 @@ describe('contract-stability', () => {
     expect(actions).toEqual(['execute:command', 'egress:outbound']);
     expect(filtered).toEqual([]);
     expect(missing).toEqual([]);
+  });
+
+  test('shape metadata helpers default safely when metadata is absent', () => {
+    expect(getDeclaredShape({})).toEqual({});
+    expect(getDeclaredShape({ declared_shape: { operation_type: 'read', signal_ids: ['camouflage:naive'] } })).toEqual({
+      operation_type: 'read',
+      signal_ids: ['camouflage:naive']
+    });
+    expect(getNegativeLabel({})).toEqual({ status: 'unknown' });
+    expect(getNegativeLabel({ annotation: 'labelled benign' })).toEqual({ status: 'unknown', annotation: 'labelled benign' });
   });
 
   test('signal-mapping.json SHA-256 hash is deterministic', () => {

@@ -201,6 +201,11 @@ npm run validate:triggers
   ```
 - CI integration: `npm run check:errors` and the main test suite verify that the signal catalog hash is up-to-date with `signal-mapping.json`.
 
+Additional case-level metadata for trial engines:
+- `declared_shape` is an optional object with `operation_type` and `signal_ids` used to declare the expected request shape for candidate rule experiments.
+- `negative_labels` is an optional object carrying `status` values such as `confirmed_negative`, `benign`, or `unknown` to distinguish known safe cases from cases that should remain unclassified.
+- These fields are intentionally optional and are safe to omit in current case files without breaking the schema or existing workflows.
+
 8) Files and outputs
 
 - Generated configs and intermediate outputs are written to `config/` and `tmp/`. Add `tmp/` to

@@ -153,6 +153,7 @@ See the full schema at `schemas/per-case-schema.json`. Important note about `con
 - `confidence` is the normalized score in the [0..1] range used by policy and decision logic.
   It is computed from `confidence_raw` using a diminishing-returns transform — see the
   developer documentation for the exact formula and tuning guidance: [docs/SCRIPTS.md](docs/SCRIPTS.md).
+- Optional metadata for trial engines: `declared_shape` can be used to record the expected request shape and relevant signal IDs, while `negative_labels` can explicitly mark `confirmed_negative`, `benign`, or `unknown` cases to keep trial evaluation safe and non-destructive.
 
 Example minimal valid case (note `confidence_raw` placed at the end for auditability):
 
