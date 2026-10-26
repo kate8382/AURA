@@ -8,9 +8,32 @@ import { logError, runCli } from './logger';
 
 type AnyObj = { [k: string]: any };
 
-/** NormalizePerCases - класс для нормализации per-case файлов: распаковывает обёртки (MANIPULATION/FRAUD/ACCESS) и приводит к каноническому порядку ключей. */
-
+/** NormalizePerCases: normalize per-case JSON and keep optional trial metadata safe for older files. */
 export class NormalizePerCases {
+  // Normalize optional declared-shape and negative-label metadata without breaking legacy case files.
+  private normalizeOptionalMetadata(obj: AnyObj) {
+    if (!obj || typeof obj !== 'object') return;
+
+    if (obj.declared_shape !== undefined) {
+      if (!obj.declared_shape || typeof obj.declared_shape !== 'object') obj.declared_shape = {};
+      const shape = obj.declared_shape;
+      if (shape.operation_type !== undefined && typeof shape.operation_type !== 'string') {
+        shape.operation_type = String(shape.operation_type);
+      }
+      if (shape.signal_ids !== undefined && (!Array.isArray(shape.signal_ids) || shape.signal_ids.some((v: any) => typeof v !== 'string'))) {
+        shape.signal_ids = Array.isArray(shape.signal_ids) ? shape.signal_ids.filter((v: any) => typeof v === 'string') : [];
+      }
+    }
+
+    if (obj.negative_labels !== undefined) {
+      if (!obj.negative_labels || typeof obj.negative_labels !== 'object') obj.negative_labels = { status: 'unknown' };
+      const labels = obj.negative_labels;
+      if (labels.status === undefined) labels.status = 'unknown';
+      if (!['confirmed_negative', 'benign', 'unknown'].includes(labels.status)) labels.status = 'unknown';
+      if (labels.reason !== undefined && typeof labels.reason !== 'string') labels.reason = String(labels.reason);
+      if (labels.source !== undefined && typeof labels.source !== 'string') labels.source = String(labels.source);
+    }
+  }
   dry: boolean;
   // Files that failed; run() reports them and fails after processing everything.
   failures: string[] = [];
@@ -212,6 +235,8 @@ export class NormalizePerCases {
       }
       if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
       if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
+      // Keep optional field-level metadata safe and deterministic for downstream trial engines.
+      this.normalizeOptionalMetadata(obj);
       // Ensure decision field exists; default to 'pending' when normalizing
       if (typeof obj.decision === 'undefined') obj.decision = 'pending';
 

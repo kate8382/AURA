@@ -15,6 +15,44 @@ export class ValidatePerCases {
     this.ajv = new Ajv({ allErrors: true, strict: false });
   }
 
+  // Validate optional trial metadata without breaking legacy records that do not declare any of it.
+  private validateOptionalMetadata(obj: any) {
+    const errors: string[] = [];
+
+    if (obj && obj.declared_shape !== undefined) {
+      if (obj.declared_shape === null || typeof obj.declared_shape !== 'object') {
+        errors.push('declared_shape must be an object when present');
+      } else {
+        const shape = obj.declared_shape;
+        if (shape.operation_type !== undefined && typeof shape.operation_type !== 'string') {
+          errors.push('declared_shape.operation_type must be a string when present');
+        }
+        if (shape.signal_ids !== undefined && (!Array.isArray(shape.signal_ids) || shape.signal_ids.some((v: any) => typeof v !== 'string'))) {
+          errors.push('declared_shape.signal_ids must be a string array when present');
+        }
+      }
+    }
+
+    if (obj && obj.negative_labels !== undefined) {
+      if (obj.negative_labels === null || typeof obj.negative_labels !== 'object') {
+        errors.push('negative_labels must be an object when present');
+      } else {
+        const labels = obj.negative_labels;
+        if (labels.status !== undefined && !['confirmed_negative', 'benign', 'unknown'].includes(labels.status)) {
+          errors.push('negative_labels.status must be one of confirmed_negative, benign, or unknown');
+        }
+        if (labels.reason !== undefined && typeof labels.reason !== 'string') {
+          errors.push('negative_labels.reason must be a string when present');
+        }
+        if (labels.source !== undefined && typeof labels.source !== 'string') {
+          errors.push('negative_labels.source must be a string when present');
+        }
+      }
+    }
+
+    return errors;
+  }
+
   // Load the JSON Schema for per-case validation
   async loadSchema() {
     const s = await fs.readFile(path.join(__dirname, '..', 'schemas', 'per-case-schema.json'), 'utf8');
@@ -39,6 +77,10 @@ export class ValidatePerCases {
       const valid = validate(obj);
       if (!valid) {
         return { ok: false, errs: validate.errors };
+      }
+      const metadataErrors = this.validateOptionalMetadata(obj);
+      if (metadataErrors.length > 0) {
+        return { ok: false, errs: metadataErrors };
       }
       return { ok: true };
     } catch (e: any) {

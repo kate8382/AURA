@@ -132,6 +132,7 @@ For external consumers (e.g., downstream gates or analysis tools), AURA publishe
 - `decision-vocabulary.json`: Defines the canonical set of decision values, their monotonic severity ranks (`allow` < `review` < `block`), and workflow states (e.g., `pending`).
 - `signal-catalog-meta.json`: Contains a versioned SHA-256 hash of `signal-mapping.json`. Consumers can pin this hash to detect drift in the signal catalog. Regenerate via `npm run gen:signal-hash`.
 - `signal-mapping.json`: Defines the canonical signal catalog used by AURA, including optional `implied_action` arrays that map risk signals to downstream action classes for policy enforcement.
+- `schemas/per-case-schema.json`: case records may also include optional `declared_shape` and `negative_labels` metadata. This supports safe trial evaluation by exposing the expected rule shape and distinguishing `confirmed_negative` / `benign` from `unknown` cases without breaking older corpus files.
 
 ### Error handling
 

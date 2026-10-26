@@ -4,6 +4,7 @@ import Ajv from 'ajv';
 import { generateSignalHash, canonicalize } from '../tools/generate-signal-hash';
 import { getImpliedActions } from '../tools/signal-action-consumer';
 import { getDeclaredShape, getNegativeLabel } from '../tools/shape-metadata-consumer';
+import { sameShape, calculateFalsePositiveRate } from '../tools/trial-engine';
 
 describe('contract-stability', () => {
   const repoRoot = path.resolve(__dirname, '..', '..');
@@ -106,6 +107,29 @@ describe('contract-stability', () => {
     expect(res1.sha256).toBe(res2.sha256);
     expect(res1.signalCount).toBeGreaterThan(0);
     expect(res1.signalCount).toBe(Object.keys(JSON.parse(fs.readFileSync(mappingPath, 'utf8')).signals).length);
+  });
+
+  test('same_shape fails closed when declared shapes differ', () => {
+    const candidate = { declared_shape: { operation_type: 'read', signal_ids: ['camouflage:naive'] } };
+    const baseline = { declared_shape: { operation_type: 'write', signal_ids: ['camouflage:naive'] } };
+    expect(sameShape(candidate, baseline)).toBe(false);
+    expect(sameShape(candidate, candidate)).toBe(true);
+  });
+
+  test('FPR calculation excludes unknown labels and counts confirmed-negative/benign as negatives', () => {
+    const samples = [
+      { isPositive: true, negative_labels: { status: 'confirmed_negative' } },
+      { isPositive: false, negative_labels: { status: 'confirmed_negative' } },
+      { isPositive: false, negative_labels: { status: 'benign' } },
+      { isPositive: true, negative_labels: { status: 'unknown' } },
+      { isPositive: false, negative_labels: { status: 'unknown' } }
+    ];
+
+    const result = calculateFalsePositiveRate(samples as any[]);
+    expect(result.false_positives).toBe(1);
+    expect(result.true_negatives).toBe(2);
+    expect(result.evaluated).toBe(3);
+    expect(result.fpr).toBeCloseTo(1 / 3, 6);
   });
 
   test('canonicalize produces sorted keys', () => {

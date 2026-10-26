@@ -8,10 +8,20 @@ export class NewCaseTemplate {
   createTemplate(caseId?: string) {
     const id = caseId || `X-CASE-000`;
     // Поля упорядочены намеренно: confidence_raw до scenarios; confidence идёт после cross_check
+    // Seed the template with optional trial metadata, but keep all values empty so legacy case files stay valid.
     const tpl: any = {
       case_id: id,
       category: "",
       signal_ids: [],
+      declared_shape: {
+        operation_type: "",
+        signal_ids: []
+      },
+      negative_labels: {
+        status: "unknown",
+        reason: "",
+        source: "template"
+      },
       scenarios: [
         { name: "", text: "", triggers: [] },
         { name: "", text: "", triggers: [] },
@@ -40,7 +50,7 @@ export class NewCaseTemplate {
     } as any;
     // place audit-only `confidence_raw` at the end of the object so it does not interfere with main schema ordering
     tpl.confidence_raw = PROMPT_BASE;
-    
+
     return tpl;
   }
 

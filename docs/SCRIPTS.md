@@ -205,6 +205,7 @@ Additional case-level metadata for trial engines:
 - `declared_shape` is an optional object with `operation_type` and `signal_ids` used to declare the expected request shape for candidate rule experiments.
 - `negative_labels` is an optional object carrying `status` values such as `confirmed_negative`, `benign`, or `unknown` to distinguish known safe cases from cases that should remain unclassified.
 - These fields are intentionally optional and are safe to omit in current case files without breaking the schema or existing workflows.
+- Trial engines should treat `same_shape` as a fail-closed gate and compute FPR only from `confirmed_negative` / `benign` samples, excluding `unknown` values from the denominator.
 
 8) Files and outputs
 
