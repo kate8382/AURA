@@ -31,6 +31,11 @@
       ]
     }
   ],
+  "declared_shape": {
+    "operation_type": "unauthorized_access",
+    "signal_ids": ["camouflage:naive", "target:highvalue", "exploit:actionable", "alibi:general", "camouflage:role", "evasion:control"]
+  },
+  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Development of Actionable Exploits & Data Integrity Violation",

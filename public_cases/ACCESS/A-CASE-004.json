@@ -45,6 +45,11 @@
       ]
     }
   ],
+  "declared_shape": {
+    "operation_type": "unauthorized_access",
+    "signal_ids": ["alibi:academic", "recon:targeted", "alibi:general", "camouflage:role", "evasion:control", "exploit:actionable", "behavior:urgency", "camouflage:naive", "target:highvalue"]
+  },
+  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Kinetic Infrastructure Sabotage & Unauthorized Operational Control Interference",

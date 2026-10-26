@@ -116,6 +116,16 @@ describe('contract-stability', () => {
     expect(sameShape(candidate, candidate)).toBe(true);
   });
 
+  test('same_shape fails closed when a declared shape is missing or operation_type is empty', () => {
+    const shaped = { declared_shape: { operation_type: 'read', signal_ids: [] } };
+    expect(sameShape({}, {})).toBe(false);
+    expect(sameShape({}, shaped)).toBe(false);
+    expect(sameShape(shaped, {})).toBe(false);
+    const empty = { declared_shape: { operation_type: '', signal_ids: [] } };
+    expect(sameShape(empty, empty)).toBe(false);
+    expect(sameShape({ declared_shape: { operation_type: '  ' } }, { declared_shape: { operation_type: '  ' } })).toBe(false);
+  });
+
   test('FPR calculation excludes unknown labels and counts confirmed-negative/benign as negatives', () => {
     const samples = [
       { isPositive: true, negative_labels: { status: 'confirmed_negative' } },
@@ -130,6 +140,16 @@ describe('contract-stability', () => {
     expect(result.true_negatives).toBe(2);
     expect(result.evaluated).toBe(3);
     expect(result.fpr).toBeCloseTo(1 / 3, 6);
+  });
+
+  test('FPR is null when there are no labelled negatives', () => {
+    const samples = [
+      { isPositive: true, negative_labels: { status: 'unknown' } },
+      { isPositive: false, negative_labels: { status: 'unknown' } }
+    ];
+    const result = calculateFalsePositiveRate(samples as any[]);
+    expect(result.evaluated).toBe(0);
+    expect(result.fpr).toBeNull();
   });
 
   test('canonicalize produces sorted keys', () => {

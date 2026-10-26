@@ -43,6 +43,11 @@
       ]
     }
   ],
+  "declared_shape": {
+    "operation_type": "manipulation",
+    "signal_ids": ["camouflage:domestic", "recon:targeted", "exploit:actionable", "behavior:urgency", "camouflage:role", "evasion:control", "camouflage:naive", "target:highvalue"]
+  },
+  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Violation of Individual Privacy & Unauthorized Personal Data Processing",

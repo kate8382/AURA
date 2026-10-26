@@ -41,6 +41,11 @@
       ]
     }
   ],
+  "declared_shape": {
+    "operation_type": "fraud",
+    "signal_ids": ["evasion:control", "deception:fact", "exploit:actionable", "camouflage:role", "alibi:general", "camouflage:naive", "target:highvalue"]
+  },
+  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Generation of high-quality phishing assets / Facilitating Wire Fraud",

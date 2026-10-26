@@ -18,7 +18,7 @@ export class ValidatePerCases {
   }
 
   // Validate optional trial metadata without breaking legacy records that do not declare any of it.
-  private validateOptionalMetadata(obj: any) {
+  validateOptionalMetadata(obj: any): string[] {
     const errors: string[] = [];
 
     if (obj && obj.declared_shape !== undefined) {
@@ -26,8 +26,8 @@ export class ValidatePerCases {
         errors.push('declared_shape must be an object when present');
       } else {
         const shape = obj.declared_shape;
-        if (shape.operation_type !== undefined && typeof shape.operation_type !== 'string') {
-          errors.push('declared_shape.operation_type must be a string when present');
+        if (typeof shape.operation_type !== 'string' || shape.operation_type.trim() === '') {
+          errors.push('declared_shape.operation_type must be a non-empty string when declared_shape is present');
         }
         if (shape.signal_ids !== undefined && (!Array.isArray(shape.signal_ids) || shape.signal_ids.some((v: any) => typeof v !== 'string'))) {
           errors.push('declared_shape.signal_ids must be a string array when present');

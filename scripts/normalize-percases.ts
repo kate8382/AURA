@@ -5,39 +5,26 @@ import GenerateTriggerWeights from './generate-trigger-weights';
 import { DEFAULT_CONFIDENCE } from './recalc_confidence';
 import { getSharedExtractor, normalizeTriggerIdentity, defaultRepoRoot } from './extract-triggers';
 import { logError, runCli } from './logger';
+import { ValidatePerCases } from './validate-percases';
 
 type AnyObj = { [k: string]: any };
 
-/** NormalizePerCases: normalize per-case JSON and keep optional trial metadata safe for older files. */
+/** NormalizePerCases - класс для нормализации per-case файлов: распаковывает обёртки (MANIPULATION/FRAUD/ACCESS) и приводит к каноническому порядку ключей. */
 export class NormalizePerCases {
-  // Normalize optional declared-shape and negative-label metadata without breaking legacy case files.
-  private normalizeOptionalMetadata(obj: AnyObj) {
-    if (!obj || typeof obj !== 'object') return;
-
-    if (obj.declared_shape !== undefined) {
-      if (!obj.declared_shape || typeof obj.declared_shape !== 'object') obj.declared_shape = {};
-      const shape = obj.declared_shape;
-      if (shape.operation_type !== undefined && typeof shape.operation_type !== 'string') {
-        shape.operation_type = String(shape.operation_type);
-      }
-      if (shape.signal_ids !== undefined && (!Array.isArray(shape.signal_ids) || shape.signal_ids.some((v: any) => typeof v !== 'string'))) {
-        shape.signal_ids = Array.isArray(shape.signal_ids) ? shape.signal_ids.filter((v: any) => typeof v === 'string') : [];
-      }
-    }
-
-    if (obj.negative_labels !== undefined) {
-      if (!obj.negative_labels || typeof obj.negative_labels !== 'object') obj.negative_labels = { status: 'unknown' };
-      const labels = obj.negative_labels;
-      if (labels.status === undefined) labels.status = 'unknown';
-      if (!['confirmed_negative', 'benign', 'unknown'].includes(labels.status)) labels.status = 'unknown';
-      if (labels.reason !== undefined && typeof labels.reason !== 'string') labels.reason = String(labels.reason);
-      if (labels.source !== undefined && typeof labels.source !== 'string') labels.source = String(labels.source);
-    }
-  }
   dry: boolean;
   // Files that failed; run() reports them and fails after processing everything.
   failures: string[] = [];
+  private metadataValidator = new ValidatePerCases();
   constructor(dry = false) { this.dry = dry; }
+
+  // Logs invalid optional metadata and marks the file failed; values are never rewritten.
+  private rejectInvalidMetadata(obj: AnyObj, filePath: string): boolean {
+    const errors = this.metadataValidator.validateOptionalMetadata(obj);
+    if (errors.length === 0) return false;
+    logError('invalid optional metadata', { file: filePath, case_id: obj.case_id, error: errors.join('; ') });
+    this.failures.push(filePath);
+    return true;
+  }
 
   // Recursively walk a directory and process each JSON file
   async walkDir(dir: string) {
@@ -150,6 +137,7 @@ export class NormalizePerCases {
           }
           obj = tmp;
         }
+        if (this.rejectInvalidMetadata(obj, filePath)) { fileFailed = true; continue; }
         // If confidence_raw missing but confidence present, keep it; otherwise initialize
         if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
         // Ensure confidence default after cross_check if missing
@@ -235,8 +223,7 @@ export class NormalizePerCases {
       }
       if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
       if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
-      // Keep optional field-level metadata safe and deterministic for downstream trial engines.
-      this.normalizeOptionalMetadata(obj);
+      if (this.rejectInvalidMetadata(obj, filePath)) return;
       // Ensure decision field exists; default to 'pending' when normalizing
       if (typeof obj.decision === 'undefined') obj.decision = 'pending';
 
