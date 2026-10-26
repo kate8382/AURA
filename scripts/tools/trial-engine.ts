@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { logError, runCli } from '../logger';
+import { logError, logWarn, runCli } from '../logger';
 
 export type TrialShape = {
   operation_type?: string;
@@ -64,16 +64,28 @@ async function listJsonFiles(dir: string): Promise<string[]> {
   return out;
 }
 
-// Usage: trial-engine [dir] [--signal <signal_id>]. A case is a rule hit when it carries the signal; without --signal, FPR is null.
+// Usage: trial-engine [dir] [--signal <signal_id> --baseline <case.json>].
+// Fail closed: with --signal, only cases whose declared_shape matches the baseline shape are evaluated.
 async function main(argv: string[]): Promise<number> {
   const signalIdx = argv.indexOf('--signal');
+  const baselineIdx = argv.indexOf('--baseline');
   const signal = signalIdx >= 0 ? argv[signalIdx + 1] : undefined;
-  const positional = argv.filter((arg, i) => !arg.startsWith('--') && i !== signalIdx + 1);
+  const baselineArg = baselineIdx >= 0 ? argv[baselineIdx + 1] : undefined;
+  const positional = argv.filter((arg, i) => !arg.startsWith('--') && i !== signalIdx + 1 && i !== baselineIdx + 1);
   const dir = path.resolve(process.cwd(), positional[0] ?? 'public_cases');
+
+  if (signal !== undefined && baselineArg === undefined) {
+    logError('--signal requires --baseline for the same_shape gate');
+    return 1;
+  }
+  const baseline = baselineArg !== undefined
+    ? JSON.parse(await fs.readFile(path.resolve(process.cwd(), baselineArg), 'utf8'))
+    : undefined;
 
   const summary = {
     cases: 0,
     declared_shape: 0,
+    shape_mismatch: 0,
     negative_labels: { confirmed_negative: 0, benign: 0, unknown: 0, missing: 0 }
   };
   const rows: Array<{ isPositive?: boolean; negative_labels?: TrialNegativeLabel }> = [];
@@ -93,6 +105,12 @@ async function main(argv: string[]): Promise<number> {
     const status = obj.negative_labels?.status as string | undefined;
     if (status === 'confirmed_negative' || status === 'benign' || status === 'unknown') summary.negative_labels[status] += 1;
     else summary.negative_labels.missing += 1;
+
+    if (signal !== undefined && !sameShape(obj, baseline)) {
+      summary.shape_mismatch += 1;
+      logWarn('case excluded: declared_shape does not match baseline', { file, case_id: obj.case_id });
+      continue;
+    }
 
     rows.push({
       isPositive: signal !== undefined && Array.isArray(obj.signal_ids) && obj.signal_ids.includes(signal),

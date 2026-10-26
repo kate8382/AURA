@@ -1,10 +1,13 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import Ajv from 'ajv';
 import { generateSignalHash, canonicalize } from '../tools/generate-signal-hash';
 import { getImpliedActions } from '../tools/signal-action-consumer';
 import { getDeclaredShape, getNegativeLabel } from '../tools/shape-metadata-consumer';
 import { sameShape, calculateFalsePositiveRate } from '../tools/trial-engine';
+import { NormalizePerCases } from '../normalize-percases';
+import { getErrorCount, resetErrorCount } from '../logger';
 
 describe('contract-stability', () => {
   const repoRoot = path.resolve(__dirname, '..', '..');
@@ -150,6 +153,35 @@ describe('contract-stability', () => {
     const result = calculateFalsePositiveRate(samples as any[]);
     expect(result.evaluated).toBe(0);
     expect(result.fpr).toBeNull();
+  });
+
+  test('normalize-percases rejects an invalid negative_labels.status instead of rewriting it', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-norm-'));
+    const file = path.join(dir, 'X-CASE-900.json');
+    const original = {
+      case_id: 'X-CASE-900',
+      category: 'test',
+      signal_ids: [],
+      negative_labels: { status: 'confirmed-negative' },
+      scenarios: []
+    };
+    fs.writeFileSync(file, JSON.stringify(original, null, 2), 'utf8');
+    resetErrorCount();
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      const normalizer = new NormalizePerCases(false);
+      await normalizer.processFile(file);
+
+      expect(normalizer.failures).toContain(file);
+      expect(getErrorCount()).toBeGreaterThan(0);
+      expect(errorSpy.mock.calls.join('\n')).toContain('invalid optional metadata');
+      expect(JSON.parse(fs.readFileSync(file, 'utf8')).negative_labels).toEqual({ status: 'confirmed-negative' });
+    } finally {
+      errorSpy.mockRestore();
+      resetErrorCount();
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   test('canonicalize produces sorted keys', () => {

@@ -208,7 +208,7 @@ Additional case-level metadata for trial engines:
 - `same_shape` is fail-closed: it returns false when either case lacks `declared_shape` or its `operation_type` is empty.
 - The validator rejects a present `declared_shape` with an empty `operation_type`; the normalizer logs and fails on invalid metadata instead of rewriting it.
 - FPR uses only `confirmed_negative` / `benign` samples; `unknown` is excluded. It returns `null` when the denominator is 0.
-- `npm run trial:engine -- [dir] [--signal <signal_id>]` prints annotation coverage and, with `--signal`, the FPR for a rule that fires on that signal.
+- `npm run trial:engine -- [dir] [--signal <signal_id> --baseline <case.json>]` prints annotation coverage and, with `--signal`, the FPR for a rule that fires on that signal. With `--signal`, `--baseline` is required; cases whose `declared_shape` does not match the baseline are excluded (logged as warnings).
 
 8) Files and outputs
 
