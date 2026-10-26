@@ -5,16 +5,26 @@ import GenerateTriggerWeights from './generate-trigger-weights';
 import { DEFAULT_CONFIDENCE } from './recalc_confidence';
 import { getSharedExtractor, normalizeTriggerIdentity, defaultRepoRoot } from './extract-triggers';
 import { logError, runCli } from './logger';
+import { ValidatePerCases } from './validate-percases';
 
 type AnyObj = { [k: string]: any };
 
 /** NormalizePerCases - класс для нормализации per-case файлов: распаковывает обёртки (MANIPULATION/FRAUD/ACCESS) и приводит к каноническому порядку ключей. */
-
 export class NormalizePerCases {
   dry: boolean;
   // Files that failed; run() reports them and fails after processing everything.
   failures: string[] = [];
+  private metadataValidator = new ValidatePerCases();
   constructor(dry = false) { this.dry = dry; }
+
+  // Logs invalid optional metadata and marks the file failed; values are never rewritten.
+  private rejectInvalidMetadata(obj: AnyObj, filePath: string): boolean {
+    const errors = this.metadataValidator.validateOptionalMetadata(obj);
+    if (errors.length === 0) return false;
+    logError('invalid optional metadata', { file: filePath, case_id: obj.case_id, error: errors.join('; ') });
+    this.failures.push(filePath);
+    return true;
+  }
 
   // Recursively walk a directory and process each JSON file
   async walkDir(dir: string) {
@@ -127,6 +137,7 @@ export class NormalizePerCases {
           }
           obj = tmp;
         }
+        if (this.rejectInvalidMetadata(obj, filePath)) { fileFailed = true; continue; }
         // If confidence_raw missing but confidence present, keep it; otherwise initialize
         if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
         // Ensure confidence default after cross_check if missing
@@ -212,6 +223,7 @@ export class NormalizePerCases {
       }
       if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
       if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
+      if (this.rejectInvalidMetadata(obj, filePath)) return;
       // Ensure decision field exists; default to 'pending' when normalizing
       if (typeof obj.decision === 'undefined') obj.decision = 'pending';
 

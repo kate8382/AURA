@@ -43,6 +43,11 @@
       ]
     }
   ],
+  "declared_shape": {
+    "operation_type": "unauthorized_access",
+    "signal_ids": ["alibi:academic", "target:highvalue", "recon:targeted", "alibi:general", "camouflage:role", "evasion:control", "exploit:actionable", "camouflage:naive"]
+  },
+  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Violation of Market Integrity & Unauthorized Corporate Data Misappropriation",

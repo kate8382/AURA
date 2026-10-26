@@ -1,9 +1,13 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import Ajv from 'ajv';
 import { generateSignalHash, canonicalize } from '../tools/generate-signal-hash';
 import { getImpliedActions } from '../tools/signal-action-consumer';
 import { getDeclaredShape, getNegativeLabel } from '../tools/shape-metadata-consumer';
+import { sameShape, calculateFalsePositiveRate } from '../tools/trial-engine';
+import { NormalizePerCases } from '../normalize-percases';
+import { getErrorCount, resetErrorCount } from '../logger';
 
 describe('contract-stability', () => {
   const repoRoot = path.resolve(__dirname, '..', '..');
@@ -106,6 +110,78 @@ describe('contract-stability', () => {
     expect(res1.sha256).toBe(res2.sha256);
     expect(res1.signalCount).toBeGreaterThan(0);
     expect(res1.signalCount).toBe(Object.keys(JSON.parse(fs.readFileSync(mappingPath, 'utf8')).signals).length);
+  });
+
+  test('same_shape fails closed when declared shapes differ', () => {
+    const candidate = { declared_shape: { operation_type: 'read', signal_ids: ['camouflage:naive'] } };
+    const baseline = { declared_shape: { operation_type: 'write', signal_ids: ['camouflage:naive'] } };
+    expect(sameShape(candidate, baseline)).toBe(false);
+    expect(sameShape(candidate, candidate)).toBe(true);
+  });
+
+  test('same_shape fails closed when a declared shape is missing or operation_type is empty', () => {
+    const shaped = { declared_shape: { operation_type: 'read', signal_ids: [] } };
+    expect(sameShape({}, {})).toBe(false);
+    expect(sameShape({}, shaped)).toBe(false);
+    expect(sameShape(shaped, {})).toBe(false);
+    const empty = { declared_shape: { operation_type: '', signal_ids: [] } };
+    expect(sameShape(empty, empty)).toBe(false);
+    expect(sameShape({ declared_shape: { operation_type: '  ' } }, { declared_shape: { operation_type: '  ' } })).toBe(false);
+  });
+
+  test('FPR calculation excludes unknown labels and counts confirmed-negative/benign as negatives', () => {
+    const samples = [
+      { isPositive: true, negative_labels: { status: 'confirmed_negative' } },
+      { isPositive: false, negative_labels: { status: 'confirmed_negative' } },
+      { isPositive: false, negative_labels: { status: 'benign' } },
+      { isPositive: true, negative_labels: { status: 'unknown' } },
+      { isPositive: false, negative_labels: { status: 'unknown' } }
+    ];
+
+    const result = calculateFalsePositiveRate(samples as any[]);
+    expect(result.false_positives).toBe(1);
+    expect(result.true_negatives).toBe(2);
+    expect(result.evaluated).toBe(3);
+    expect(result.fpr).toBeCloseTo(1 / 3, 6);
+  });
+
+  test('FPR is null when there are no labelled negatives', () => {
+    const samples = [
+      { isPositive: true, negative_labels: { status: 'unknown' } },
+      { isPositive: false, negative_labels: { status: 'unknown' } }
+    ];
+    const result = calculateFalsePositiveRate(samples as any[]);
+    expect(result.evaluated).toBe(0);
+    expect(result.fpr).toBeNull();
+  });
+
+  test('normalize-percases rejects an invalid negative_labels.status instead of rewriting it', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-norm-'));
+    const file = path.join(dir, 'X-CASE-900.json');
+    const original = {
+      case_id: 'X-CASE-900',
+      category: 'test',
+      signal_ids: [],
+      negative_labels: { status: 'confirmed-negative' },
+      scenarios: []
+    };
+    fs.writeFileSync(file, JSON.stringify(original, null, 2), 'utf8');
+    resetErrorCount();
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      const normalizer = new NormalizePerCases(false);
+      await normalizer.processFile(file);
+
+      expect(normalizer.failures).toContain(file);
+      expect(getErrorCount()).toBeGreaterThan(0);
+      expect(errorSpy.mock.calls.join('\n')).toContain('invalid optional metadata');
+      expect(JSON.parse(fs.readFileSync(file, 'utf8')).negative_labels).toEqual({ status: 'confirmed-negative' });
+    } finally {
+      errorSpy.mockRestore();
+      resetErrorCount();
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   test('canonicalize produces sorted keys', () => {

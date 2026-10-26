@@ -45,6 +45,11 @@
       ]
     }
   ],
+  "declared_shape": {
+    "operation_type": "fraud",
+    "signal_ids": ["camouflage:domestic", "evasion:control", "behavior:urgency", "camouflage:role", "exploit:actionable", "camouflage:naive", "target:highvalue"]
+  },
+  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Unauthorized Access & Critical Infrastructure Vulnerability Exposure",

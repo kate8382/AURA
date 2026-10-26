@@ -8,10 +8,12 @@ export class NewCaseTemplate {
   createTemplate(caseId?: string) {
     const id = caseId || `X-CASE-000`;
     // Поля упорядочены намеренно: confidence_raw до scenarios; confidence идёт после cross_check
+    // declared_shape is omitted: a present one needs a non-empty operation_type from the author.
     const tpl: any = {
       case_id: id,
       category: "",
       signal_ids: [],
+      negative_labels: { status: "unknown" },
       scenarios: [
         { name: "", text: "", triggers: [] },
         { name: "", text: "", triggers: [] },
@@ -40,7 +42,7 @@ export class NewCaseTemplate {
     } as any;
     // place audit-only `confidence_raw` at the end of the object so it does not interfere with main schema ordering
     tpl.confidence_raw = PROMPT_BASE;
-    
+
     return tpl;
   }
 

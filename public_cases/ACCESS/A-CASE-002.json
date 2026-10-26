@@ -45,6 +45,11 @@
       ]
     }
   ],
+  "declared_shape": {
+    "operation_type": "unauthorized_access",
+    "signal_ids": ["camouflage:role", "camouflage:domestic", "deception:fact", "recon:targeted", "alibi:general", "evasion:control", "exploit:actionable", "camouflage:naive", "target:highvalue"]
+  },
+  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Facilitating Targeted Cyber-Stalking & Unauthorized Data Harvesting",

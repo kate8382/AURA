@@ -60,6 +60,7 @@
     "decisions:validate": "node -r ts-node/register scripts/tools/show-decisions.ts --validate public_cases",
     "crosscheck:run": "node -r ts-node/register scripts/policy/crossCheckAdapter.ts",
     "crosscheck:validate": "node -r ts-node/register scripts/policy/crossCheckAdapter.ts --validate",
+    "trial:engine": "node -r ts-node/register scripts/tools/trial-engine.ts",
     "test:crosscheck": "jest scripts/__tests__/crosscheck.test.ts",
     "update:traffic": "node .github/scripts/fetch-traffic-snapshot.js",
     "backfill:traffic": "node .github/scripts/backfill-traffic-history.js",

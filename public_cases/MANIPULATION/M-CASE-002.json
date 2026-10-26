@@ -45,6 +45,11 @@
       ]
     }
   ],
+  "declared_shape": {
+    "operation_type": "manipulation",
+    "signal_ids": ["camouflage:role", "deception:fact", "extortion:leverage", "behavior:urgency", "camouflage:domestic", "evasion:control", "camouflage:naive", "target:highvalue", "exploit:actionable"]
+  },
+  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Generation of Extortion, Blackmail, and Coercive Communication Assets",
