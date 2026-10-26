@@ -3,12 +3,14 @@ export type TrialShape = {
   signal_ids?: string[];
 };
 
+// Negative label info for trials
 export type TrialNegativeLabel = {
   status?: 'confirmed_negative' | 'benign' | 'unknown';
   reason?: string;
   source?: string;
 };
 
+// Check if two trial shapes are the same
 export function sameShape(candidate: { declared_shape?: TrialShape } | null | undefined, baseline: { declared_shape?: TrialShape } | null | undefined): boolean {
   const a = candidate?.declared_shape ?? {};
   const b = baseline?.declared_shape ?? {};
@@ -18,6 +20,7 @@ export function sameShape(candidate: { declared_shape?: TrialShape } | null | un
   return aKey === bKey;
 }
 
+// Calculate false positive rate for trials
 export function calculateFalsePositiveRate(rows: Array<{ isPositive?: boolean; negative_labels?: TrialNegativeLabel }>) {
   const evaluated = rows.filter((row) => {
     const status = row.negative_labels?.status;

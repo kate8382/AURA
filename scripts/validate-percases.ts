@@ -4,9 +4,11 @@ import Ajv from 'ajv';
 
 // ValidatePerCases - класс-обёртка для валидации per-case JSON файлов против схемы.
 // Методы:
+// - validateOptionalMetadata(): проверяет опциональные метаданные
 // - loadSchema(): загружает JSON Schema
 // - walk(): рекурсивно обходит директорию
 // - validateFile(): валидирует один файл
+// - parseArgs(): парсит аргументы командной строки
 // - run(): выполняет процесс валидации для директории
 
 export class ValidatePerCases {
