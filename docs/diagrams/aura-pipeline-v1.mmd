@@ -6,7 +6,7 @@ flowchart TD
   B --> B3["Load signal-mapping (config/signal-mapping.json) if present"]
 
   subgraph INPUT[Input data]
-    C["Case JSON(s) from synthetic_cases/ or file"]
+    C["Case JSON(s) from public_cases/ or file"]
   end
 
   C --> D["Extract: category, scenarios[], signal_ids, cross_check"]
