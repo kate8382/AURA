@@ -17,7 +17,7 @@ function isValidDecision(d: any) {
 function main() {
   const argv = process.argv.slice(2);
   const validate = argv.includes('--validate');
-  const dir = argv.find(a => a !== '--validate') || 'public_cases';
+  const dir = argv.find(a => a !== '--validate') || 'synthetic_cases';
   const abs = path.resolve(process.cwd(), dir);
   if (!fs.existsSync(abs) || !fs.statSync(abs).isDirectory()) {
     console.error('Path not found or not a directory:', abs);

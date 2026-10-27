@@ -69,11 +69,11 @@ describe('error handling policy', () => {
     expect(entry.file).toContain('broken.json');
   }, 30000);
 
-  test('clean-public-cases exits 1 when a case file cannot be parsed', () => {
-    const cases = path.join(tmp, 'public_cases');
+  test('clean-cases exits 1 when a case file cannot be parsed', () => {
+    const cases = path.join(tmp, 'synthetic_cases');
     fs.mkdirSync(cases);
     fs.writeFileSync(path.join(cases, 'broken.json'), '{ not json', 'utf8');
-    const res = runScript('scripts/tools/clean-public-cases.ts', [], tmp);
+    const res = runScript('scripts/tools/clean-cases.ts', [], tmp);
     expect(res.status).toBe(1);
     expect(res.stderr).toContain('[ERROR] cannot clean case file');
   }, 30000);
@@ -121,8 +121,8 @@ describe('error handling policy', () => {
   });
 
   test('migrate-categories records unreadable files instead of ignoring them', () => {
-    fs.mkdirSync(path.join(tmp, 'public_cases', 'ACCESS'), { recursive: true });
-    const broken = path.join(tmp, 'public_cases', 'ACCESS', 'broken.json');
+    fs.mkdirSync(path.join(tmp, 'synthetic_cases', 'ACCESS'), { recursive: true });
+    const broken = path.join(tmp, 'synthetic_cases', 'ACCESS', 'broken.json');
     fs.writeFileSync(broken, '{ not json', 'utf8');
     const migrator = new MigrateCategories(tmp);
     migrator.migrate();

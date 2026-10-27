@@ -72,7 +72,7 @@ async function main(argv: string[]): Promise<number> {
   const signal = signalIdx >= 0 ? argv[signalIdx + 1] : undefined;
   const baselineArg = baselineIdx >= 0 ? argv[baselineIdx + 1] : undefined;
   const positional = argv.filter((arg, i) => !arg.startsWith('--') && i !== signalIdx + 1 && i !== baselineIdx + 1);
-  const dir = path.resolve(process.cwd(), positional[0] ?? 'public_cases');
+  const dir = path.resolve(process.cwd(), positional[0] ?? 'synthetic_cases');
 
   if (signal !== undefined && baselineArg === undefined) {
     logError('--signal requires --baseline for the same_shape gate');

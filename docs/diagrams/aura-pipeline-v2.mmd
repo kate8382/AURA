@@ -2,7 +2,7 @@ flowchart LR
   %% Compact A4-friendly AURA pipeline (current)
 
   Start[[Start]] --> Load["Load configs & mappings\n(config/trigger-weights.json, config/signal-mapping.json)"]
-  Load --> CollectCases["Input: public_cases/ (or single file)"]
+  Load --> CollectCases["Input: synthetic_cases/ (or single file)"]
   CollectCases --> Extract["Extract: category, scenarios, signal_ids, cross_check"]
 
   subgraph G[Trigger expansion]

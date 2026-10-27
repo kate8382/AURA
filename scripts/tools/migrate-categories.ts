@@ -16,7 +16,7 @@ export class MigrateCategories {
    */
   constructor(root?: string) {
     this.root = root ? path.resolve(root) : path.resolve(__dirname, '..', '..');
-    this.casesDir = path.join(this.root, 'public_cases');
+    this.casesDir = path.join(this.root, 'synthetic_cases');
   }
 
   /**

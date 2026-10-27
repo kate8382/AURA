@@ -12,7 +12,7 @@ A clear and concise description of what the bug is.
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
-2. Run `node -r ts-node/register scripts/validate-percases.ts public_cases`
+2. Run `node -r ts-node/register scripts/validate-percases.ts synthetic_cases`
 3. Observe the error
 
 **Expected behavior**

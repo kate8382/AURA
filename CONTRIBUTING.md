@@ -18,13 +18,13 @@ Even though we do not accept direct code or data PRs, community feedback is valu
 - If the suggestion is accepted, the maintainer may implement, validate, and commit the case; contributors who provided the idea will be credited in release notes on request.
 
 ### 3) Integration feedback & evaluation reports
-- If you integrate `public_cases/` into pipelines, share aggregated evaluation metrics (false positives/negatives), environment details, and example inputs (anonymized). This helps improve heuristics.
+- If you integrate `synthetic_cases/` into pipelines, share aggregated evaluation metrics (false positives/negatives), environment details, and example inputs (anonymized). This helps improve heuristics.
 
 ---
 
 ## Private / Commercial Requests
 
-- **Public dataset:** `public_cases/` is available under CC BY‑NC 4.0 for non‑commercial use. Do not expect direct support or PR merges for public cases.
+- **Public dataset:** `synthetic_cases/` is available under CC BY‑NC 4.0 for non‑commercial use. Do not expect direct support or PR merges for public cases.
 - **Commercial licensing:** For commercial access to expanded datasets, private branches, or API access, contact: [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com) or via LinkedIn: [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/). Commercial arrangements may include NDA, dataset export, or private repository access.
 - **Non‑commercial private testing option:** If you are a non‑commercial developer or researcher and want private‑case testing, we offer a collaborative evaluation: you may provide a sandboxed agent endpoint or temporary access credentials; the maintainer will run private cases locally (no private data will be published) and return evaluation results or trained model artifacts as agreed. Contact via the email above to arrange terms.
 
@@ -41,7 +41,7 @@ Even though we do not accept direct code or data PRs, community feedback is valu
 ## Licensing reminder
 
 - **Code & Tooling:** Business Source License 1.1 (BSL 1.1) — see [LICENSE](./LICENSE). The Licensor permits non‑commercial use (research, education, testing, and evaluation) under the terms of the BSL. Commercial production use or providing the Software as a commercial hosted service requires a separate commercial license; contact the maintainer for details. The Licensed Work will be relicensed under Apache‑2.0 on the Change Date specified in `LICENSE` (2029-10-05).
-- **Public cases (`public_cases/`):** CC BY‑NC 4.0 — see [DATA_LICENSE](./DATA_LICENSE).
+- **Public cases (`synthetic_cases/`):** CC BY‑NC 4.0 — see [DATA_LICENSE](./DATA_LICENSE).
 
 If a suggestion is implemented by the maintainer, contributed ideas will be credited in release notes upon request.
 

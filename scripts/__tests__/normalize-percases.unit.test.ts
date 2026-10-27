@@ -8,7 +8,7 @@ import GenerateTriggerWeights from '../generate-trigger-weights';
 
 describe('normalize-percases (unit)', () => {
   test('dry-run executes and reports actions', () => {
-    const cmd = 'node -r ts-node/register scripts/normalize-percases.ts public_cases --dry-run';
+    const cmd = 'node -r ts-node/register scripts/normalize-percases.ts synthetic_cases --dry-run';
     const out = execSync(cmd, { encoding: 'utf8' });
     expect(out).toMatch(/\[dry\] WOULD|Dry-run mode/);
   });

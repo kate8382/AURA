@@ -29,7 +29,7 @@ const isSharedWithOtherSuites = (rel: string) => rel.startsWith('trigger-weights
 function snapshotRepoState() {
   const config = snapshotTree(path.join(repoRoot, 'config'));
   for (const rel of Object.keys(config)) if (isSharedWithOtherSuites(rel)) delete config[rel];
-  return { public_cases: snapshotTree(path.join(repoRoot, 'public_cases')), config };
+  return { synthetic_cases: snapshotTree(path.join(repoRoot, 'synthetic_cases')), config };
 }
 
 function auditSummary(id: string, weight: number) {

@@ -1,6 +1,6 @@
-AURA data license (public_cases)
+AURA data license (synthetic_cases)
 
-This directory (`public_cases/`) is licensed under Creative Commons
+This directory (`synthetic_cases/`) is licensed under Creative Commons
 Attribution-NonCommercial 4.0 International (CC BY-NC 4.0).
 
 Summary:
@@ -10,4 +10,4 @@ Summary:
 
 Full license text and legal code: https://creativecommons.org/licenses/by-nc/4.0/legalcode
 
-If you want to use the `public_cases/` dataset for commercial purposes, contact the project maintainers to obtain a commercial license.
+If you want to use the `synthetic_cases/` dataset for commercial purposes, contact the project maintainers to obtain a commercial license.

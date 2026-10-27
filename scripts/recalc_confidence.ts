@@ -277,7 +277,7 @@ export class RecalcConfidence {
 
   // parse command-line args and run recalc on a file or directory
   parseArgs(argv: string[]) {
-    const defaultDir = process.env.CASES_DIR || 'public_cases';
+    const defaultDir = process.env.CASES_DIR || 'synthetic_cases';
     const result: { file: string; dryRun: boolean; preserve: boolean } = { file: defaultDir, dryRun: false, preserve: false };
     for (let i = 0; i < argv.length; i++) {
       const a = argv[i];
