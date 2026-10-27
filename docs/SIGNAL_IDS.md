@@ -5,7 +5,7 @@ This document explains how AURA maps human-friendly `triggers` (from `scenarios[
 ### Key changes
 - Signal IDs moved to a compact, namespaced key format such as `camouflage:naive` or `recon:targeted`.
 - `config/signal-mapping.json` uses a mapping-driven object format where each key is the compact signal ID and the value is an object describing the signal (for example: `{ "id": "camouflage:naive", "description": "...", "implied_action": ["access:privilege"], "triggers": ["..."] }`).
-- One-off migration utilities were added under `scripts/tools/` to help update `public_cases/` and the mapping file. Use `npm run migrate:signals` in dry-run mode first to preview changes.
+- One-off migration utilities were added under `scripts/tools/` to help update `synthetic_cases/` and the mapping file. Use `npm run migrate:signals` in dry-run mode first to preview changes.
 
 ### How the new mapping is used
 - The canonical mapping lives in `config/signal-mapping.json`.
@@ -19,7 +19,7 @@ This document explains how AURA maps human-friendly `triggers` (from `scenarios[
 When editing `config/signal-mapping.json` or performing bulk migrations, prefer the runtime expansion approach (letting the generator/recalculator apply mappings) rather than manually editing `confidence_raw` values in case files.
 
 ### Generating trigger lists and editing the mapping
-1. Collect unique normalized triggers from `public_cases/` (writes into `tmp/`):
+1. Collect unique normalized triggers from `synthetic_cases/` (writes into `tmp/`):
 
 ```bash
 npm run collect:triggers

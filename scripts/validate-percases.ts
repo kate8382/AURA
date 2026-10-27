@@ -107,10 +107,10 @@ export class ValidatePerCases {
       if (positionalDir) throw new Error(`Unexpected argument: ${arg}`);
       positionalDir = arg;
     }
-    return optionDir || positionalDir || process.env.CASES_DIR || 'public_cases';
+    return optionDir || positionalDir || process.env.CASES_DIR || 'synthetic_cases';
   }
 
-  // Run the validation process on a target directory (or default to public_cases)
+  // Run the validation process on a target directory (or default to synthetic_cases)
   async run(targetDir?: string) {
     const schema = await this.loadSchema();
     const validate = this.ajv.compile(schema);

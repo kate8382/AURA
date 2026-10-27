@@ -49,7 +49,7 @@ async function main() {
   const dry = process.argv.includes('--dry-run');
   const repoRoot = path.resolve(__dirname, '..', '..');
   const mappingPath = path.join(repoRoot, 'config', 'signal-mapping.json');
-  const casesDir = path.join(repoRoot, 'public_cases');
+  const casesDir = path.join(repoRoot, 'synthetic_cases');
 
   const mapping = await readJson(mappingPath).catch(() => null);
   if (!mapping || !mapping.signals) {
@@ -86,7 +86,7 @@ async function main() {
     console.log('[dry] Would write new mapping with keys:', Object.keys(newSignals));
   }
 
-  // Now update public_cases signal_ids
+  // Now update synthetic_cases signal_ids
   const files = await walkJsonFiles(casesDir);
   let changed = 0;
   const failedFiles: string[] = [];

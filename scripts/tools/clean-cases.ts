@@ -32,7 +32,7 @@ function cleanObj(o: any): boolean {
 }
 
 runCli(() => {
-  const base = path.join(process.cwd(), 'public_cases');
+  const base = path.join(process.cwd(), 'synthetic_cases');
   let total = 0;
   let cleaned = 0;
   const failures: string[] = [];

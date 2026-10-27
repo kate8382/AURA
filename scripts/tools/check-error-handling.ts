@@ -73,9 +73,9 @@ function checkSignalHash(): number {
 
 // Defines the sequence of pipeline steps to run for error-handling checks.
 const PIPELINE: Array<{ name: string; args: string[] }> = [
-  { name: 'validate', args: ['scripts/validate-percases.ts', 'public_cases', '--dry-run'] },
-  { name: 'normalize --dry-run', args: ['scripts/normalize-percases.ts', 'public_cases', '--dry-run', '--extract-triggers', '--apply-signal-ids'] },
-  { name: 'recalc --dry-run', args: ['scripts/recalc_confidence.ts', '--dir', 'public_cases', '--dry-run'] }
+  { name: 'validate', args: ['scripts/validate-percases.ts', 'synthetic_cases', '--dry-run'] },
+  { name: 'normalize --dry-run', args: ['scripts/normalize-percases.ts', 'synthetic_cases', '--dry-run', '--extract-triggers', '--apply-signal-ids'] },
+  { name: 'recalc --dry-run', args: ['scripts/recalc_confidence.ts', '--dir', 'synthetic_cases', '--dry-run'] }
 ];
 
 // Determines if the given output text contains any error messages.

@@ -6,7 +6,7 @@ high-level commands and links to this file.
 
 1) Generator: `scripts/generate-trigger-weights.ts`
 
-- Purpose: scan `public_cases/`, normalize triggers, and compute per-trigger weights written to
+- Purpose: scan `synthetic_cases/`, normalize triggers, and compute per-trigger weights written to
   `config/trigger-weights.json`.
 - Uses `config/signal-mapping.json` as the canonical mapping between `signal_id` and normalized
   trigger strings. Mapped `signal_id`s are expanded to triggers when computing weights.
@@ -14,7 +14,7 @@ high-level commands and links to this file.
 
 ```bash
 npm run gen:triggers
-CASES_DIR=public_cases npm run gen:triggers
+CASES_DIR=synthetic_cases npm run gen:triggers
 npm run gen:triggers:apply   # run generator and apply `signal_ids` into case files (.bak created)
 ```
 
@@ -88,10 +88,10 @@ Usage examples:
 
 ```bash
 # dry-run
-node -r ts-node/register scripts/recalc_confidence.ts --dry-run --dir public_cases
+node -r ts-node/register scripts/recalc_confidence.ts --dry-run --dir synthetic_cases
 
 # apply changes
-npm run recalc:confidence -- --dir public_cases
+npm run recalc:confidence -- --dir synthetic_cases
 ```
 
 3) End-to-end example: `examples/simple-recalc.ts`
@@ -146,8 +146,8 @@ node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json --e
 
 ```bash
 npm run normalize:percases:extract:dry   # preview additions, writes nothing
-node -r ts-node/register scripts/normalize-percases.ts public_cases --extract-triggers --dry-run
-node -r ts-node/register scripts/normalize-percases.ts public_cases --extract-triggers --apply-signal-ids
+node -r ts-node/register scripts/normalize-percases.ts synthetic_cases --extract-triggers --dry-run
+node -r ts-node/register scripts/normalize-percases.ts synthetic_cases --extract-triggers --apply-signal-ids
 ```
 
   Dry-run preview format: `[dry] WOULD ADD triggers <case_id> scenario <i>:` followed by
@@ -165,11 +165,11 @@ node -r ts-node/register scripts/normalize-percases.ts public_cases --extract-tr
 - Tests: `scripts/__tests__/extract-triggers.test.ts` (rules, tokenization, scoring,
   config validation) and `scripts/__tests__/normalize-percases-extract.test.ts`
   (augmentation, dedup, dry-run, idempotency, signal-ID composition). Tests use temp
-  dirs/fixtures; `public_cases/` is never rewritten by this feature.
+  dirs/fixtures; `synthetic_cases/` is never rewritten by this feature.
 
 5) Helper scripts (small, idempotent)
 
-- `scripts/tools/collect-triggers.js` — collects normalized triggers from `public_cases/` and writes
+- `scripts/tools/collect-triggers.js` — collects normalized triggers from `synthetic_cases/` and writes
   `tmp/collected-triggers.json`.
 - `scripts/tools/audit-categories.js` — simple directory-vs-category audit; writes `tmp/audit-output.json`.
 - `scripts/tools/validate-triggers.ts` — static validation and overlap detection for
@@ -215,12 +215,12 @@ Additional case-level metadata for trial engines:
 - Generated configs and intermediate outputs are written to `config/` and `tmp/`. Add `tmp/` to
   `.gitignore` (already recommended) to avoid checking generated artifacts into Git.
 - One-off migration helpers live in `scripts/tools/`. Relevant npm shortcuts were added:
-  - `npm run migrate:categories` — migrate legacy `category` field into `domain` + human `category` label in `public_cases/`.
-  - `npm run migrate:signals` — preview and apply signal ID compaction and update `public_cases.signal_ids`.
+  - `npm run migrate:categories` — migrate legacy `category` field into `domain` + human `category` label in `synthetic_cases/`.
+  - `npm run migrate:signals` — preview and apply signal ID compaction and update `synthetic_cases.signal_ids`.
 
 9) Automation suggestions
 
-- Consider a CI workflow that runs the generator on changes to `public_cases/`, writes updated
+- Consider a CI workflow that runs the generator on changes to `synthetic_cases/`, writes updated
   `config/trigger-weights.json` to a branch and opens a PR for review.
 
 10) Error handling and exit codes
@@ -237,12 +237,12 @@ Exit codes: `0` success, `1` runtime failure or unreadable data, `2` invalid cas
 Log format and verbosity:
 
 ```text
-[ERROR] cannot read case file file=public_cases/ACCESS/A-CASE-001.json error="Unexpected token"
+[ERROR] cannot read case file file=synthetic_cases/ACCESS/A-CASE-001.json error="Unexpected token"
 ```
 
 - `AURA_LOG_FORMAT=json` prints one JSON object per line (`level`, `message`, plus fields such as `file`, `case_id`, `error`).
 - `AURA_LOG_LEVEL=debug|info|warn|error|silent` controls verbosity (default `info`); stack traces are included at `debug`.
-- `npm run check:errors` is part of CI: it rejects silent `catch` blocks and runs normalize, recalc and validate in `--dry-run` on `public_cases/`, failing on a non-zero exit code, an `[ERROR]` log line or an unhandled rejection.
+- `npm run check:errors` is part of CI: it rejects silent `catch` blocks and runs normalize, recalc and validate in `--dry-run` on `synthetic_cases/`, failing on a non-zero exit code, an `[ERROR]` log line or an unhandled rejection.
 
 11) Tests
 

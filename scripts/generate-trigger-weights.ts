@@ -8,7 +8,7 @@ type CountMap = { [k: string]: number };
  * GenerateTriggerWeights
  *
  * Это основной класс для генерации `config/trigger-weights.json` на основе
- * триггеров, найденных в `public_cases`. Он собирает уникальные триггеры по
+ * триггеров, найденных в `synthetic_cases`. Он собирает уникальные триггеры по
  * каждому кейсу, подсчитывает число кейсов, в которых встречается каждый триггер,
  * вычисляет TF‑IDF внутри экспертных категорий и выдаёт итоговую карту весов.
  *
@@ -198,11 +198,11 @@ export class GenerateTriggerWeights {
   }
 
   /**
-   * Main run: searches for all JSON files in `public_cases` (or in `process.env.CASES_DIR`),
+   * Main run: searches for all JSON files in `synthetic_cases` (or in `process.env.CASES_DIR`),
    * collects trigger statistics, computes weights, and writes the config.
    */
   run() {
-    const casesDir = process.env.CASES_DIR || path.join(this.repoRoot, 'public_cases');
+    const casesDir = process.env.CASES_DIR || path.join(this.repoRoot, 'synthetic_cases');
     const files = this.walkDir(casesDir);
     const counts: CountMap = Object.create(null);
     let totalCases = 0;

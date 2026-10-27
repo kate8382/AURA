@@ -54,14 +54,14 @@ describe('validate-percases script', () => {
     expect(validateCase({ ...typed, cross_check: { questions: [{ ...typed.cross_check.questions[0], evidence_weight: -1 }] } })).toBe(false);
   });
 
-  test('accepts a complete case from public_cases', () => {
-    const casePath = path.join(repoRoot, 'public_cases', 'ACCESS', 'A-CASE-001.json');
+  test('accepts a complete case from synthetic_cases', () => {
+    const casePath = path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'A-CASE-001.json');
     const caseObj = JSON.parse(fs.readFileSync(casePath, 'utf8'));
     expect(validateCase(caseObj)).toBe(true);
   });
 
   test('validates every public case', () => {
-    const out = execFileSync(process.execPath, ['-r', 'ts-node/register', 'scripts/validate-percases.ts', 'public_cases'], {
+    const out = execFileSync(process.execPath, ['-r', 'ts-node/register', 'scripts/validate-percases.ts', 'synthetic_cases'], {
       cwd: repoRoot,
       encoding: 'utf8'
     });
@@ -78,7 +78,7 @@ describe('validate-percases script', () => {
       const result = spawnSync(process.execPath, [
         '-r', 'ts-node/register',
         'scripts/validate-percases.ts',
-        'public_cases',
+        'synthetic_cases',
         '--dir', tempDir
       ], { cwd: repoRoot, encoding: 'utf8' });
 

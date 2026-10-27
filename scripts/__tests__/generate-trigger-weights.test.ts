@@ -6,9 +6,9 @@ import { execSync } from 'child_process';
 import GenerateTriggerWeights, { generateSignalIds } from '../generate-trigger-weights';
 
 describe('generate-trigger-weights script', () => {
-  test('generates config from sample public_cases', async () => {
+  test('generates config from sample synthetic_cases', async () => {
     const tmp = await fsp.mkdtemp(path.join(os.tmpdir(), 'aura-gen-'));
-    const casesDir = path.join(tmp, 'public_cases');
+    const casesDir = path.join(tmp, 'synthetic_cases');
     await fsp.mkdir(path.join(casesDir, 'ACCESS'), { recursive: true });
     await fsp.mkdir(path.join(casesDir, 'FRAUD'), { recursive: true });
 
@@ -62,7 +62,7 @@ describe('GenerateTriggerWeights', () => {
 
   test('run with --apply-signal-ids writes signal_ids into case files', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-test-'));
-    const publicDir = path.join(tmp, 'public_cases', 'ACCESS');
+    const publicDir = path.join(tmp, 'synthetic_cases', 'ACCESS');
     fs.mkdirSync(publicDir, { recursive: true });
     const filePath = path.join(publicDir, 'A-TEST.json');
     const sample = { case_id: 'T-1', scenarios: [{ triggers: ['urgency', 'unknown'] }], category: 'access' };
@@ -109,7 +109,7 @@ describe('GenerateTriggerWeights', () => {
       };
       await fsp.writeFile(path.join(cfgDir, 'trigger-weights.json'), JSON.stringify(canonical, null, 2), 'utf8');
 
-      const casesDir = path.join(tmp, 'public_cases');
+      const casesDir = path.join(tmp, 'synthetic_cases');
       await fsp.mkdir(path.join(casesDir, 'ACCESS'), { recursive: true });
       // create a case that contains actionable payload
       const a = { case_id: 'A-CRIT', scenarios: [{ name: 's', triggers: ['Actionable payload'] }] };

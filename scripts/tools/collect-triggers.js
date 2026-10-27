@@ -19,7 +19,7 @@ function normalize(t) {
 }
 
 function main() {
-  const root = path.resolve(__dirname, '..', '..', 'public_cases');
+  const root = path.resolve(__dirname, '..', '..', 'synthetic_cases');
   const files = walk(root);
   const triggers = new Set();
   const failures = [];

@@ -35,7 +35,7 @@ _Found this project useful or interesting? Drop a ⭐ — plus to your developer
 ├── config/                  # Runtime mappings and generated configs (signal-mapping.json, trigger-weights.json)
 ├── docs/                    # Human-facing documentation (including SIGNAL_IDS.md)
 ├── examples/                # Runnable end-to-end examples & CLI demos
-├── public_cases/            # Curated open-source threat library
+├── synthetic_cases/         # Curated open-source threat library
 │   ├── ACCESS/              # Privilege escalation, unauthorized OSINT, and credential probing
 │   ├── FRAUD/               # Financial bypass, compliance evasion, and social fraud
 │   └── MANIPULATION/        # Social engineering, gaslighting, and psychological pressure
@@ -75,7 +75,7 @@ node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json --e
 
 **2. Validate Cases**
 
-To run the automated validation suite against all JSON cases in the `public_cases/` directory:
+To run the automated validation suite against all JSON cases in the `synthetic_cases/` directory:
 
 ```bash
 npm run validate
@@ -95,15 +95,15 @@ npm run new-case:dry
 To run the custom validator script manually against a specific folder:
 
 ```bash
-# validate public_cases explicitly
-node -r ts-node/register scripts/validate-percases.ts public_cases
+# validate synthetic_cases explicitly
+node -r ts-node/register scripts/validate-percases.ts synthetic_cases
 ```
 
 ## Scripts & Configuration
 
 Short developer reference — full details in [docs/SCRIPTS.md](docs/SCRIPTS.md).
 
-- `npm run gen:triggers` — generate `config/trigger-weights.json` from `public_cases/`.
+- `npm run gen:triggers` — generate `config/trigger-weights.json` from `synthetic_cases/`.
 - `npm run gen:triggers:apply` — generate and apply `signal_ids` into case files (creates `.bak`).
 - `npm run recalc:confidence` — recompute `confidence` fields (see docs for dry-run flags and options).
 - `npm run collect:triggers` — collect normalized triggers into `tmp/collected-triggers.json`.
@@ -140,12 +140,12 @@ Scripts exit with a non-zero code on unexpected errors, including in `--dry-run`
 
 ### Automation
 
-Automating `npm run gen:triggers` is optional but recommended if `public_cases/` changes frequently. Typical options:
+Automating `npm run gen:triggers` is optional but recommended if `synthetic_cases/` changes frequently. Typical options:
 
-- GitHub Actions workflow (schedule or on push to `public_cases/`) to run the generator, commit the updated `config/trigger-weights.json`, and open a PR. This keeps changes reviewable and avoids surprise commits.
+- GitHub Actions workflow (schedule or on push to `synthetic_cases/`) to run the generator, commit the updated `config/trigger-weights.json`, and open a PR. This keeps changes reviewable and avoids surprise commits.
 - CI job that runs `npm run gen:triggers` and `npm run recalc:confidence` in a branch for review.
 
-## Minimal example `public_cases` entry and schema
+## Minimal example `synthetic_cases` entry and schema
 
 See the full schema at `schemas/per-case-schema.json`. Important note about `confidence` fields:
 
@@ -207,11 +207,11 @@ If you are interested in researching these vectors, please open an Issue to shar
 
 ## Integration & Partnerships
 
-If you are building an LLM, guardrail engine, or safety pipeline, you may use `public_cases/` under the CC BY‑NC 4.0 license for non‑commercial evaluation, benchmarking, and research.
+If you are building an LLM, guardrail engine, or safety pipeline, you may use `synthetic_cases/` under the CC BY‑NC 4.0 license for non‑commercial evaluation, benchmarking, and research.
 
 Partnership & Access Options:
 
-- **Public cases (self‑serve):** Download `public_cases/` and run validations locally with `npm run validate` and tests with `npm test`.
+- **Public cases (self‑serve):** Download `synthetic_cases/` and run validations locally with `npm run validate` and tests with `npm test`.
 - **Non‑commercial private testing:** For researchers requiring private evaluation, we offer a sandboxed evaluation pipeline where private cases are run locally without publishing sensitive content.
 - **Commercial licensing & enterprise access:** NDA, commercial licensing, dataset exports, and private API access options are available upon request.
 
