@@ -113,6 +113,9 @@ Short developer reference — full details in [docs/SCRIPTS.md](docs/SCRIPTS.md)
 
 Note: see [docs/SCRIPTS.md](./docs/SCRIPTS.md) for details on cross-check behavior and the `cross_check_audit` field.
 
+**Dataset & licensing**
+- [docs/DATA_HANDLING_POLICY.md](docs/DATA_HANDLING_POLICY.md) — Dataset source audit, data-handling policy, and licensing rules for `real_cases`.
+
 **Signal IDs and mappings**
 - Reference: the signal ID mapping is documented in [docs/SIGNAL_IDS.md](docs/SIGNAL_IDS.md).
 - The canonical mapping file is `config/signal-mapping.json` and the generator/recalculator consults it at runtime. See `docs/SIGNAL_IDS.md` for the recommended workflow: collecting triggers, editing `config/signal-mapping.json`, and regenerating weights.
