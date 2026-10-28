@@ -90,7 +90,7 @@ The rewritten case must not copy wording, specific payloads, or harmful details 
 
 | Storage form | When it is allowed |
 |---|---|
-| **Full Text** | The source license is MIT, Apache-2.0, or BSD. The source is open (no gate). The item has no personal data after redaction. The item is not extreme or dangerous content. |
+| **Full Text** | The source license is MIT, Apache-2.0, or BSD. The source is open (no gate). The item has no personal data after redaction. The item is not extreme, offensive, or dangerous content (see section 2.2). Sources that contain offensive or harmful content, such as hh-rlhf, are Pointer Only even when their license is MIT. |
 | **Excerpt / Pointer Only** | The source is gated. The license is unclear or restrictive (for example, ODC-BY with conditions or a research-only license). The item carries PII or harmful-content risk. While a license is still unconfirmed (status Pending), only a pointer is stored. |
 | **Excluded** | The content is CSAM or CBRN instructions. Redaction cannot be done reliably. |
 
