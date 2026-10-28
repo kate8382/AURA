@@ -29,25 +29,26 @@ Facts were checked against each project's license file or the dataset's metadata
 
 | Source | Declared License | Access Conditions | Primary Content Type | Allowed Storage Form | Attribution Requirement | Status | Priority for AURA |
 |---|---|---|---|---|---|---|---|
-| Lakera gandalf_ignore_instructions (`gandalf-rct`) | Apache-2.0 (metadata: MIT, see note) | Open, no gate | Prompt Injection / Gray Zones | Full Text | Mention Lakera | Approved | High |
+| Lakera gandalf_ignore_instructions (`gandalf-rct`) | Apache-2.0 (metadata: MIT, see note) | Open, no gate | Prompt Injection / Gray Zones | Full Text only after the license is confirmed | Mention Lakera | Conditional (license to confirm) | High |
 | deepset/prompt-injections | Apache-2.0 | Open, no gate | Prompt Injection | Full Text | Mention deepset | Approved | High |
 | JailbreakHub (`jailbreak_llms`, mirror `walledai/JailbreakHub`) | MIT | Open, no gate | Real-world Jailbreaks | Full Text | Credit the authors and the paper | Approved | High |
 | JailbreakBench (`JailbreakBench/jailbreakbench`) | MIT | Open, no gate | Jailbreaks & Benign Boundary Controls | Full Text | Credit JailbreakBench | Approved | High |
 | garak probes (`NVIDIA/garak`) | Apache-2.0 | Open, no gate | Vulnerability scanner probes / extraction attempts | Full Text | Credit garak / NVIDIA | Approved | Medium |
 | LLMail-Inject (Microsoft challenge dataset) | MIT | Open, no gate | Indirect Prompt Injections (email / data) | Full Text | Credit the authors | Approved | Medium |
-| Anthropic hh-rlhf (red-team-attempts) | MIT | Open, no gate | Red-teaming conversations | Full Text, only after PII filtering | Credit Anthropic | Approved (Filtered) | Medium |
 | HackAPrompt (`hackaprompt/hackaprompt-dataset`) | MIT | Gated: a form with contact details is required | Competition submissions (prompt injection) | Excerpt / Pointer Only | Credit HackAPrompt | Conditional | Low |
 | HarmBench (`centerforaisafety/HarmBench`) | MIT for code; data under research terms (to be confirmed) | Open | Extreme adversarial / harmful requests | Excerpt / Pointer Only | Credit HarmBench | Conditional (harmful risk) | Low |
 | WildJailbreak (`allenai/wildjailbreak`) | ODC-BY (Open Data Commons Attribution) | Gated: must accept AI2 Responsible Use Guidelines | Adversarial prompts & gray zones | Full Text only after confirming gated-access terms allow it; otherwise Excerpt / Pointer Only | Credit AllenAI and the attribution terms of ODC-BY | Conditional (gated) | Low |
-| Lakera PINT | Not confirmed (see note) | Not confirmed | Prompt Injections | Pointer Only until the license is confirmed | Mention Lakera | Pending | Low |
-| Tensor Trust (`tensor-trust-data`) | Not confirmed. A BSD-2-Clause claim for the main repository is not confirmed for the data. | Not confirmed | Game-based injections | Pointer Only | Clarify license first | Excluded / Pending | Low |
+| Anthropic hh-rlhf (red-team-attempts) | MIT | Open, no gate | Red-teaming conversations with offensive content | Excerpt / Pointer Only (offensive and harmful content, see section 2.2) | Credit Anthropic | Conditional (offensive content) | Low |
+| Lakera PINT | Not confirmed (see note) | Not confirmed | Prompt Injections | Pointer Only | Mention Lakera | Excluded / Pending | Low |
+| Tensor Trust (`HumanCompatibleAI/tensor-trust-data`) | None found: the public repository has no LICENSE file (GitHub reports no license) | Public repository, no gate | Game-based injections | Pointer Only | Clarify license first | Excluded / Pending | Low |
 
 **Notes on corrections and uncertainty:**
 
-- **Lakera gandalf:** the Hugging Face metadata shows MIT, while the project page states Apache-2.0. Before importing, confirm which license applies to the dataset file and record it.
+- **Lakera gandalf:** the Hugging Face metadata shows MIT, while the project page states Apache-2.0. The row stays Conditional until the license is confirmed from the dataset file.
 - **WildJailbreak:** the Hugging Face metadata shows ODC-BY, not MIT or CC-BY-4.0. It is also gated.
-- **Lakera PINT:** no clear public license was found. It stays Pending until the license is confirmed.
-- **Tensor Trust:** the repository link we checked does not resolve, and no data license was confirmed. The entry stays Excluded / Pending.
+- **Lakera PINT:** no public license was found, so the status is Excluded / Pending until a license is confirmed.
+- **Tensor Trust:** the repository `HumanCompatibleAI/tensor-trust-data` is public, but it has no LICENSE file, and GitHub reports no license. The BSD-2-Clause claim for the main Tensor Trust project was not verified. The entry stays Excluded / Pending.
+- **Anthropic hh-rlhf:** the issue notes that the dataset contains offensive content. Under section 2.2 it is stored as Pointer Only, so it is not Full Text, even after PII filtering.
 - **HarmBench:** the code is MIT. The data has its own research-use terms, so we use pointers only.
 - **garak:** the project moved to the `NVIDIA/garak` repository.
 
@@ -109,6 +110,6 @@ Complete these items before importing any data from the source in question.
 | 1 | Confirm the license (MIT or Apache-2.0) from the dataset file | Lakera gandalf | [ ] |
 | 2 | Confirm the data license terms for research use | HarmBench | [ ] |
 | 3 | Confirm the license | Lakera PINT | [ ] |
-| 4 | Find the correct data repository and its license | Tensor Trust | [ ] |
+| 4 | Confirm a license grant for the data (the repository has no LICENSE file); if none exists, keep the source excluded | Tensor Trust | [ ] |
 | 5 | Confirm whether gated-access terms allow Full Text storage | WildJailbreak | [ ] |
 | 6 | Have a qualified lawyer review this policy before any commercial use or public redistribution | All sources | [ ] |
