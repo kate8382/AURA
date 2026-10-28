@@ -1,0 +1,97 @@
+# Data-Handling Policy and Source Audit for `real_cases`
+
+> **Status:** Draft for issue [#78](https://github.com/kate8382/AURA/issues/78).
+> **Not legal advice.** This document is a practical policy for the AURA project. It explains how we check licenses and handle data. Before any commercial use or any public redistribution of a third-party dataset, a qualified lawyer should review the specific license terms.
+
+This document answers three questions:
+
+1. Which external datasets may we use to build `real_cases/`, and under what conditions?
+2. How do we remove private information and dangerous content?
+3. When do we store the full text of a prompt, and when do we store only a pointer to it?
+
+## Key terms (plain language)
+
+- **License**: the legal permission the author gives to use, copy, change, and share a dataset. Some licenses are permissive (MIT, Apache-2.0, BSD). Others add conditions or limit use.
+- **Attribution**: the requirement to name the original author or project when we use or share their work.
+- **Gated access**: the dataset is only available after you accept terms or fill in a form (for example, your name and email). Gated access does not change the license, but it adds conditions we must follow.
+- **Full Text**: we store the complete prompt text in our repository.
+- **Excerpt / Pointer Only**: we do not store the full text. We store a link to the source, a short description, and a cryptographic hash (a fingerprint) so anyone can check that they have the same item.
+- **PII (personal data)**: any information that identifies a person, such as names with contact details, email addresses, phone numbers, account logins, or home addresses.
+- **Secret**: any credential that grants access to a system, such as an API key, password, or access token.
+- **CSAM**: child sexual abuse material. It is illegal everywhere and is never stored or described in this project.
+- **CBRN**: chemical, biological, radiological, and nuclear weapons information.
+
+## 1. Candidate Source Audit Table
+
+Sources are ordered from most to least suitable. Approved sources with open licenses (MIT or Apache-2.0) that contain real prompts or gray-zone examples come first. Sources with unclear licenses, gated access, or extreme content come last.
+
+Facts were checked against each project's license file or the dataset's metadata page (Hugging Face, GitHub) at the time of writing. Re-check before each import, because licenses can change.
+
+| Source | Declared License | Access Conditions | Primary Content Type | Allowed Storage Form | Attribution Requirement | Status | Priority for AURA |
+|---|---|---|---|---|---|---|---|
+| Lakera gandalf_ignore_instructions (`gandalf-rct`) | Apache-2.0 (metadata: MIT, see note) | Open, no gate | Prompt Injection / Gray Zones | Full Text | Mention Lakera | Approved | High |
+| deepset/prompt-injections | Apache-2.0 | Open, no gate | Prompt Injection | Full Text | Mention deepset | Approved | High |
+| JailbreakHub (`jailbreak_llms`, mirror `walledai/JailbreakHub`) | MIT | Open, no gate | Real-world Jailbreaks | Full Text | Credit the authors and the paper | Approved | High |
+| JailbreakBench (`JailbreakBench/jailbreakbench`) | MIT | Open, no gate | Jailbreaks & Benign Boundary Controls | Full Text | Credit JailbreakBench | Approved | High |
+| Lakera PINT | Not confirmed (see note) | Not confirmed | Prompt Injections | Pointer Only until the license is confirmed | Mention Lakera | Pending | Low |
+| garak probes (`NVIDIA/garak`) | Apache-2.0 | Open, no gate | Vulnerability scanner probes / extraction attempts | Full Text | Credit garak / NVIDIA | Approved | Medium |
+| LLMail-Inject (Microsoft challenge dataset) | MIT | Open, no gate | Indirect Prompt Injections (email / data) | Full Text | Credit the authors | Approved | Medium |
+| Anthropic hh-rlhf (red-team-attempts) | MIT | Open, no gate | Red-teaming conversations | Full Text, only after PII filtering | Credit Anthropic | Approved (Filtered) | Medium |
+| HackAPrompt (`hackaprompt/hackaprompt-dataset`) | MIT | Gated: a form with contact details is required | Competition submissions (prompt injection) | Excerpt / Pointer Only | Credit HackAPrompt | Conditional | Low |
+| HarmBench (`centerforaisafety/HarmBench`) | MIT for code; data under research terms (to be confirmed) | Open | Extreme adversarial / harmful requests | Excerpt / Pointer Only | Credit HarmBench | Conditional (harmful risk) | Low |
+| WildJailbreak (`allenai/wildjailbreak`) | ODC-BY (Open Data Commons Attribution) | Gated: must accept AI2 Responsible Use Guidelines | Adversarial prompts & gray zones | Excerpt / Pointer Only | Credit AllenAI and the attribution terms of ODC-BY | Conditional (gated) | Medium |
+| Tensor Trust (`tensor-trust-data`) | Not confirmed. A BSD-2-Clause claim for the main repository is not confirmed for the data. | Not confirmed | Game-based injections | Pointer Only | Clarify license first | Excluded / Pending | Low |
+
+**Notes on corrections and uncertainty:**
+
+- **Lakera gandalf:** the Hugging Face metadata shows MIT, while the project page states Apache-2.0. Before importing, confirm which license applies to the dataset file and record it.
+- **WildJailbreak:** the Hugging Face metadata shows ODC-BY, not MIT or CC-BY-4.0. It is also gated.
+- **Lakera PINT:** no clear public license was found. It stays Pending until the license is confirmed.
+- **Tensor Trust:** the repository link we checked does not resolve, and no data license was confirmed. The entry stays Excluded / Pending.
+- **HarmBench:** the code is MIT. The data has its own research-use terms, so we use pointers only.
+- **garak:** the project moved to the `NVIDIA/garak` repository.
+
+## 2. Data-Handling Policy
+
+### 2.1 Removing personal data and secrets (PII & Secrets Redaction)
+
+Before any text is stored in `real_cases/`:
+
+- Every API key, token, password, login, and access credential is replaced with `<REDACTED_SECRET>`.
+- Every email address, phone number, name tied to a real person, home address, account name, or other personal data is replaced with `<REDACTED_PII>`.
+- Redaction is applied to the full text, including quoted tool outputs and examples.
+- If redaction cannot be done reliably, the item is stored as Pointer Only or is excluded.
+
+### 2.2 Harmful and illegal content
+
+- **CSAM:** never stored, quoted, or described. Any item that suggests it is removed and reported through the source's own channels. It is not kept in our repository.
+- **CBRN:** instructions for chemical, biological, radiological, or nuclear weapons are not stored. These items are excluded.
+- **Malware:** working malicious code, exploit steps, or instructions for building malware are not stored. Only a description of the attack pattern may be kept, with no executable detail.
+- **Other dangerous instructions** (for example, making weapons or drugs): either excluded, or stored as Pointer Only with a hash.
+- Items that are harmful but needed to test a defense are stored as Pointer Only, never as Full Text.
+
+### 2.3 Retention and governance
+
+- All approved data lives in `real_cases/`. It follows the same schema, validation, and review rules as the rest of the dataset.
+- Each case records its source, license, and attribution in its metadata.
+- A source can be removed at any time if its license changes, if the author asks, or if a problem is found.
+- Each import is reviewed by a maintainer. The review checks the license, redaction, and storage form.
+- Attribution and license information are kept with the dataset, so reuse by others stays lawful.
+
+## 3. Storage Selection Rules (Full Text vs Pointer)
+
+| Storage form | When it is allowed |
+|---|---|
+| **Full Text** | The source license is MIT, Apache-2.0, or BSD. The source is open (no gate). The item has no personal data after redaction. The item is not extreme or dangerous content. |
+| **Excerpt / Pointer Only** | The source is gated. The license is unclear or restrictive (for example, ODC-BY with conditions or a research-only license). The item carries PII or harmful-content risk. |
+| **Excluded** | The license cannot be confirmed. The content is CSAM or CBRN instructions. Redaction cannot be done reliably. |
+
+**Pointer Only format:** a source link, a short neutral description, the license name, and a SHA-256 hash of the original text. The hash lets anyone verify that they have the same item without us storing it.
+
+## 4. Open Items
+
+- Confirm the Lakera gandalf license (MIT or Apache-2.0) from the dataset file.
+- Confirm the HarmBench data license terms.
+- Confirm the Lakera PINT license.
+- Find the correct Tensor Trust data repository and its license.
+- Have a qualified lawyer review this policy before any commercial use or public redistribution.
