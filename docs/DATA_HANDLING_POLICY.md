@@ -1,6 +1,6 @@
 # Data-Handling Policy and Source Audit for `real_cases`
 
-> **Status:** Draft for issue [#78](https://github.com/kate8382/AURA/issues/78).
+> **Status:** Active, for issue [#78](https://github.com/kate8382/AURA/issues/78).
 > **Not legal advice.** This document is a practical policy for the AURA project. It explains how we check licenses and handle data. Before any commercial use or any public redistribution of a third-party dataset, a qualified lawyer should review the specific license terms.
 
 This document answers three questions:
@@ -33,13 +33,13 @@ Facts were checked against each project's license file or the dataset's metadata
 | deepset/prompt-injections | Apache-2.0 | Open, no gate | Prompt Injection | Full Text | Mention deepset | Approved | High |
 | JailbreakHub (`jailbreak_llms`, mirror `walledai/JailbreakHub`) | MIT | Open, no gate | Real-world Jailbreaks | Full Text | Credit the authors and the paper | Approved | High |
 | JailbreakBench (`JailbreakBench/jailbreakbench`) | MIT | Open, no gate | Jailbreaks & Benign Boundary Controls | Full Text | Credit JailbreakBench | Approved | High |
-| Lakera PINT | Not confirmed (see note) | Not confirmed | Prompt Injections | Pointer Only until the license is confirmed | Mention Lakera | Pending | Low |
 | garak probes (`NVIDIA/garak`) | Apache-2.0 | Open, no gate | Vulnerability scanner probes / extraction attempts | Full Text | Credit garak / NVIDIA | Approved | Medium |
 | LLMail-Inject (Microsoft challenge dataset) | MIT | Open, no gate | Indirect Prompt Injections (email / data) | Full Text | Credit the authors | Approved | Medium |
 | Anthropic hh-rlhf (red-team-attempts) | MIT | Open, no gate | Red-teaming conversations | Full Text, only after PII filtering | Credit Anthropic | Approved (Filtered) | Medium |
 | HackAPrompt (`hackaprompt/hackaprompt-dataset`) | MIT | Gated: a form with contact details is required | Competition submissions (prompt injection) | Excerpt / Pointer Only | Credit HackAPrompt | Conditional | Low |
 | HarmBench (`centerforaisafety/HarmBench`) | MIT for code; data under research terms (to be confirmed) | Open | Extreme adversarial / harmful requests | Excerpt / Pointer Only | Credit HarmBench | Conditional (harmful risk) | Low |
-| WildJailbreak (`allenai/wildjailbreak`) | ODC-BY (Open Data Commons Attribution) | Gated: must accept AI2 Responsible Use Guidelines | Adversarial prompts & gray zones | Excerpt / Pointer Only | Credit AllenAI and the attribution terms of ODC-BY | Conditional (gated) | Medium |
+| WildJailbreak (`allenai/wildjailbreak`) | ODC-BY (Open Data Commons Attribution) | Gated: must accept AI2 Responsible Use Guidelines | Adversarial prompts & gray zones | Full Text only after confirming gated-access terms allow it; otherwise Excerpt / Pointer Only | Credit AllenAI and the attribution terms of ODC-BY | Conditional (gated) | Low |
+| Lakera PINT | Not confirmed (see note) | Not confirmed | Prompt Injections | Pointer Only until the license is confirmed | Mention Lakera | Pending | Low |
 | Tensor Trust (`tensor-trust-data`) | Not confirmed. A BSD-2-Clause claim for the main repository is not confirmed for the data. | Not confirmed | Game-based injections | Pointer Only | Clarify license first | Excluded / Pending | Low |
 
 **Notes on corrections and uncertainty:**
@@ -70,6 +70,16 @@ Before any text is stored in `real_cases/`:
 - **Other dangerous instructions** (for example, making weapons or drugs): either excluded, or stored as Pointer Only with a hash.
 - Items that are harmful but needed to test a defense are stored as Pointer Only, never as Full Text.
 
+#### Synthetic Paraphrasing / Sanitized Rewriting
+
+When an interesting attack mechanic or gray-zone case appears in a source with an unclear license, PII, or dangerous content (for example, HarmBench), contributors may:
+
+1. Identify the abstract structure or pattern of the attack (for example, "role-play used to bypass a refusal").
+2. Rewrite that pattern in their own words on a safe, unrelated topic.
+3. Store the result as a synthetic case in `synthetic_cases/`, or as a `Sanitized/Paraphrased variant` linked to the original source.
+
+The rewritten case must not copy wording, specific payloads, or harmful details from the source. It must be possible to understand the pattern without any dangerous instruction.
+
 ### 2.3 Retention and governance
 
 - All approved data lives in `real_cases/`. It follows the same schema, validation, and review rules as the rest of the dataset.
@@ -88,10 +98,17 @@ Before any text is stored in `real_cases/`:
 
 **Pointer Only format:** a source link, a short neutral description, the license name, and a SHA-256 hash of the original text. The hash lets anyone verify that they have the same item without us storing it.
 
-## 4. Open Items
+**Synthetic Paraphrasing / Sanitized Rewriting:** for items that are Pointer Only, a contributor may store a rewritten, safe analogue as described in section 2.2. Such a case is stored in `synthetic_cases/` or marked `Sanitized/Paraphrased variant`, and it links to the pointer entry.
 
-- Confirm the Lakera gandalf license (MIT or Apache-2.0) from the dataset file.
-- Confirm the HarmBench data license terms.
-- Confirm the Lakera PINT license.
-- Find the correct Tensor Trust data repository and its license.
-- Have a qualified lawyer review this policy before any commercial use or public redistribution.
+## 4. Next Steps & License Verification Checklist
+
+Complete these items before importing any data from the source in question.
+
+| # | Task | Source | Done |
+|---|---|---|---|
+| 1 | Confirm the license (MIT or Apache-2.0) from the dataset file | Lakera gandalf | [ ] |
+| 2 | Confirm the data license terms for research use | HarmBench | [ ] |
+| 3 | Confirm the license | Lakera PINT | [ ] |
+| 4 | Find the correct data repository and its license | Tensor Trust | [ ] |
+| 5 | Confirm whether gated-access terms allow Full Text storage | WildJailbreak | [ ] |
+| 6 | Have a qualified lawyer review this policy before any commercial use or public redistribution | All sources | [ ] |
