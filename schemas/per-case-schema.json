@@ -19,6 +19,57 @@
     "category": {
       "type": "string"
     },
+    "case_type": {
+      "type": "string",
+      "enum": ["synthetic", "real"],
+      "description": "Optional marker for the origin of the case. When absent, the case is treated as synthetic for backward compatibility."
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Optional source metadata for real cases. Recorded for audit and attribution; all fields are optional.",
+      "additionalProperties": true,
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Name of the source dataset or project, for example 'Lakera gandalf'."
+        },
+        "source_url": {
+          "type": "string",
+          "description": "URL or web address of the source dataset or project page."
+        },
+        "source_license": {
+          "type": "string",
+          "description": "License identifier of the source, for example 'Apache-2.0', 'MIT', or 'ODC-BY'."
+        },
+        "original_id": {
+          "type": "string",
+          "description": "Identifier of this case in the original source dataset."
+        },
+        "language": {
+          "type": "string",
+          "description": "Language code of the case text, for example 'en' or 'ru'."
+        },
+        "collected_at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Date the case was collected, in ISO-8601 format YYYY-MM-DD."
+        },
+        "redaction_status": {
+          "type": "string",
+          "enum": ["none", "redacted", "sanitized", "pointer_only"],
+          "description": "How the text was treated before storage: 'none' (unchanged), 'redacted' (personal data or secrets replaced), 'sanitized' (harmful details removed or paraphrased), or 'pointer_only' (only a link and hash are stored)."
+        },
+        "attribution": {
+          "type": "string",
+          "description": "Attribution or credit string required by the source license (e.g., 'Credit AllenAI and ODC-BY terms')."
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$",
+          "description": "SHA-256 hash of the original source content, used for pointer_only items."
+        }
+      }
+    },
     "signal_ids": {
       "type": "array",
       "items": {
