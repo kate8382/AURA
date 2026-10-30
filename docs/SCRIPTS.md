@@ -16,7 +16,16 @@ high-level commands and links to this file.
 npm run gen:triggers
 CASES_DIR=synthetic_cases npm run gen:triggers
 npm run gen:triggers:apply   # run generator and apply `signal_ids` into case files (.bak created)
+npm run gen:triggers:real    # include real_cases/ in trigger statistics (--include-real)
+node -r ts-node/register scripts/generate-trigger-weights.ts --dir real_cases   # only real_cases/
 ```
+
+**Directory selection (all case scripts):** `--dir <path>` > `CASES_DIR` env var > `synthetic_cases/` (default).
+Existing calls without `--dir` keep working unchanged.
+
+**Real-case write guard:** `recalc:confidence` and `gen:triggers:apply` refuse to write into any `real_cases/`
+path unless `--allow-real-write` is passed (`--dry-run` is always allowed). Use `npm run recalc:confidence:real`
+for a safe preview and `npm run recalc:confidence:real:apply` to write explicitly.
 
 **Notes:**
 - The generator preserves curated keys and section headers in `config/trigger-weights.json` to avoid accidental deletion.

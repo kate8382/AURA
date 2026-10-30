@@ -5,6 +5,7 @@ import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from '
 import { reorderCaseKeys } from './utils';
 import { generateSignalIds } from './generate-trigger-weights';
 import { logError, logWarn, runCli } from './logger';
+import { assertRealWriteAllowed } from './lib/cases-cli';
 
 type Entry = { [k: string]: any };
 
@@ -307,6 +308,7 @@ export class RecalcConfidence {
 
     const stats = await fs.stat(filePath).catch(() => null);
     if (!stats) throw new Error(`Path not found: ${filePath}`);
+    assertRealWriteAllowed(filePath, process.argv.slice(2));
 
     let totalCount = 0;
     const totalChanges: Array<[string, any, any]> = [];

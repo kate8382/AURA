@@ -27,6 +27,14 @@ jobs:
       - name: Validate cases
         run: npm run validate
 
+      - name: Validate real cases (skipped if empty)
+        run: |
+          if [ -d real_cases ] && [ -n "$(find real_cases -name '*.json' -print -quit)" ]; then
+            npm run validate:real
+          else
+            echo "real_cases/ has no JSON cases yet; skipping real-case validation."
+          fi
+
       - name: Check error handling
         run: npm run check:errors
 

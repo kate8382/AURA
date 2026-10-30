@@ -6,6 +6,7 @@ import { DEFAULT_CONFIDENCE } from './recalc_confidence';
 import { getSharedExtractor, normalizeTriggerIdentity, defaultRepoRoot } from './extract-triggers';
 import { logError, runCli } from './logger';
 import { ValidatePerCases } from './validate-percases';
+import { assertRealWriteAllowed, DEFAULT_CASES_DIR, getDirOption } from './lib/cases-cli';
 
 type AnyObj = { [k: string]: any };
 
@@ -280,10 +281,11 @@ export class NormalizePerCases {
 
   // Run the normalization process on a target directory (or default to synthetic_cases)
   async run(target?: string) {
-    const envDir = process.env.CASES_DIR;
-    const dir = envDir || target || process.argv[2] || 'synthetic_cases';
     const argv = process.argv.slice(2);
-    for (let i = 0; i < argv.length; i++) if (argv[i] === '-d' || argv[i] === '--dir') dir && (argv[i+1]);
+    const positional = argv[0] && !argv[0].startsWith('-') ? argv[0] : undefined;
+    const dirOption = getDirOption(argv);
+    const dir = path.resolve(dirOption || process.env.CASES_DIR || target || positional || DEFAULT_CASES_DIR);
+    assertRealWriteAllowed(dir, argv);
     const dry = process.argv.includes('--dry-run');
     if (dry) this.dry = true;
     if (this.dry) console.log("Dry-run mode: no files will be written.");

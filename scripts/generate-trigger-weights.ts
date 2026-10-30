@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { deriveSignalId } from './utils';
 import { logError, logWarn, runCli } from './logger';
+import { assertRealWriteAllowed, REAL_CASES_DIR, resolveCasesDir } from './lib/cases-cli';
 
 type CountMap = { [k: string]: number };
 /**
@@ -198,12 +199,13 @@ export class GenerateTriggerWeights {
   }
 
   /**
-   * Main run: searches for all JSON files in `synthetic_cases` (or in `process.env.CASES_DIR`),
-   * collects trigger statistics, computes weights, and writes the config.
+   * Main run: searches for all JSON files in `synthetic_cases` (or in the `--dir` / `CASES_DIR` override),
+   * optionally adds `real_cases` with `--include-real`, collects trigger statistics, computes weights, and writes the config.
    */
-  run() {
-    const casesDir = process.env.CASES_DIR || path.join(this.repoRoot, 'synthetic_cases');
-    const files = this.walkDir(casesDir);
+  run(argv: string[] = process.argv.slice(2)) {
+    const dirs = [resolveCasesDir(argv, this.repoRoot)];
+    if (argv.includes('--include-real')) dirs.push(path.resolve(this.repoRoot, REAL_CASES_DIR));
+    const files = [...new Set(dirs)].flatMap((d) => this.walkDir(d));
     const counts: CountMap = Object.create(null);
     let totalCases = 0;
     for (const f of files) {
@@ -392,12 +394,13 @@ export class GenerateTriggerWeights {
       normAlpha: (existingConfig && typeof existingConfig.normAlpha === 'number') ? existingConfig.normAlpha : 0.3,
       weightMethod: 'tfidf-tiered'
     };
+    if (argv.includes('--apply-signal-ids')) dirs.forEach((d) => assertRealWriteAllowed(d, argv));
     const outPath = this.writeConfig(out);
 
     // CLI: optionally apply generated signal_ids back into case files
-    const applySignalIds = process.argv.includes('--apply-signal-ids');
+    const applySignalIds = argv.includes('--apply-signal-ids');
     if (applySignalIds) {
-      const files2 = this.walkDir(casesDir);
+      const files2 = files;
       let changed = 0;
       const self = this;
       for (const f of files2) {
