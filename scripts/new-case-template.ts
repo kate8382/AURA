@@ -181,7 +181,14 @@ if (require.main === module) {
       autoSeq = true;
     }
   }
-  const T = new NewCaseTemplate();
-  assertRealWriteAllowed(path.resolve(outDir), argv);
-  T.writeTemplate(outDir, caseId, dry, sectionLetter, seqNumber, autoSeq).catch(err => { console.error(err); process.exit(1); });
+  const fail = (err: unknown) => {
+    console.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(1);
+  };
+  try {
+    assertRealWriteAllowed(path.resolve(outDir), argv);
+  } catch (err) {
+    fail(err);
+  }
+  new NewCaseTemplate().writeTemplate(outDir, caseId, dry, sectionLetter, seqNumber, autoSeq).catch(fail);
 }

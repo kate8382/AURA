@@ -1,7 +1,15 @@
 import path from 'path';
+import { spawnSync } from 'child_process';
 import { assertRealWriteAllowed, getDirOption, isRealCasesPath, resolveCasesDir } from '../lib/cases-cli';
 
 const base = path.resolve(__dirname, '..', '..');
+
+const runTemplateCli = (args: string[]) =>
+  spawnSync(process.execPath, ['-r', 'ts-node/register', path.join(base, 'scripts', 'new-case-template.ts'), ...args], {
+    cwd: base,
+    encoding: 'utf8',
+    timeout: 60000
+  });
 
 describe('cases-cli: --dir / CASES_DIR resolution', () => {
   test('getDirOption reads --dir and -d', () => {
@@ -53,4 +61,19 @@ describe('cases-cli: real_cases write guard', () => {
   test('never blocks synthetic_cases writes', () => {
     expect(() => assertRealWriteAllowed(synthDir, [])).not.toThrow();
   });
+});
+
+describe('cases-cli: CLI integration (--dir)', () => {
+  test('new-case-template --dir real_cases --dry-run targets real_cases', () => {
+    const res = runTemplateCli(['--dir', 'real_cases', '--dry-run', '-i', 'REAL-CLI-TEST-001']);
+    expect(res.status).toBe(0);
+    expect(res.stdout).toMatch(/\[dry\] would write to .*real_cases/);
+  }, 90000);
+
+  test('real write without --allow-real-write exits 1 with a clean error (no stack trace)', () => {
+    const res = runTemplateCli(['--dir', 'real_cases', '-i', 'REAL-CLI-TEST-002']);
+    expect(res.status).toBe(1);
+    expect(res.stderr).toMatch(/Error: .*--allow-real-write/);
+    expect(res.stderr).not.toMatch(/\n\s+at /);
+  }, 90000);
 });

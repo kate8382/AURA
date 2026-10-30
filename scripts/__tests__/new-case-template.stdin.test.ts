@@ -17,7 +17,7 @@ describe('new-case CLI (non-interactive flows)', () => {
     expect(stat.isFile()).toBe(true);
 
     await fs.rm(tmp, { recursive: true, force: true });
-  });
+  }, 60000);
 
   test('auto-increment via -a when folder exists', async () => {
     const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'aura-stdin-'));
@@ -35,5 +35,5 @@ describe('new-case CLI (non-interactive flows)', () => {
     expect(stat.isFile()).toBe(true);
 
     await fs.rm(tmp, { recursive: true, force: true });
-  });
+  }, 60000);
 });

@@ -114,7 +114,7 @@ Short developer reference — full details in [docs/SCRIPTS.md](docs/SCRIPTS.md)
 - `npm run recalc:confidence` — recompute `confidence` fields (see docs for dry-run flags and options).
 - `npm run validate:real` — validate `real_cases/` (CI runs it only when real JSON cases exist).
 - `npm run recalc:confidence:real` — dry-run recalculation for `real_cases/`; `recalc:confidence:real:apply` writes (requires `--allow-real-write`).
-- `npm run normalize:percases:real:dry` — dry-run normalization of `real_cases/`; `npm run new-case:real` — preview a template for `real_cases/` (writing needs `--dir real_cases --allow-real-write`).
+- `npm run normalize:percases:real` — dry-run normalization of `real_cases/`; `npm run normalize:percases:real:apply` writes (requires `--allow-real-write`). `npm run new-case:real` — preview a template for `real_cases/` (writing needs `--dir real_cases --allow-real-write`).
 - `npm run collect:triggers` — collect normalized triggers into `tmp/collected-triggers.json`.
 - `npm run audit:categories` — run category-vs-directory audit into `tmp/audit-output.json`.
 - `npm run validate:triggers` — static validation and overlap detection for trigger extraction and signal mapping.

@@ -21,6 +21,7 @@ node -r ts-node/register scripts/generate-trigger-weights.ts --dir real_cases   
 ```
 
 **Directory selection (all case scripts):** `--dir <path>` > `CASES_DIR` env var > `synthetic_cases/` (default).
+For `normalize-percases.ts` a positional directory argument is also accepted; the order is `--dir` > `CASES_DIR` > positional > `synthetic_cases/`.
 Existing calls without `--dir` keep working unchanged.
 
 **Real-case write guard:** `recalc:confidence` and `gen:triggers:apply` refuse to write into any `real_cases/`
