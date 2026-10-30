@@ -97,7 +97,12 @@ To run the custom validator script manually against a specific folder:
 ```bash
 # validate synthetic_cases explicitly
 node -r ts-node/register scripts/validate-percases.ts synthetic_cases
+
+# any case script accepts --dir (priority: --dir > CASES_DIR env > synthetic_cases)
+npm run validate:real   # real_cases/
 ```
+
+Real-case writes are blocked unless `--allow-real-write` is passed; see [docs/SCRIPTS.md](docs/SCRIPTS.md).
 
 ## Scripts & Configuration
 
@@ -105,7 +110,11 @@ Short developer reference — full details in [docs/SCRIPTS.md](docs/SCRIPTS.md)
 
 - `npm run gen:triggers` — generate `config/trigger-weights.json` from `synthetic_cases/`.
 - `npm run gen:triggers:apply` — generate and apply `signal_ids` into case files (creates `.bak`).
+- `npm run gen:triggers:real` — generate trigger weights including `real_cases/` (`--include-real`).
 - `npm run recalc:confidence` — recompute `confidence` fields (see docs for dry-run flags and options).
+- `npm run validate:real` — validate `real_cases/` (CI runs it only when real JSON cases exist).
+- `npm run recalc:confidence:real` — dry-run recalculation for `real_cases/`; `recalc:confidence:real:apply` writes (requires `--allow-real-write`).
+- `npm run normalize:percases:real` — dry-run normalization of `real_cases/`; `npm run normalize:percases:real:apply` writes (requires `--allow-real-write`). `npm run new-case:real` — preview a template for `real_cases/` (writing needs `--dir real_cases --allow-real-write`).
 - `npm run collect:triggers` — collect normalized triggers into `tmp/collected-triggers.json`.
 - `npm run audit:categories` — run category-vs-directory audit into `tmp/audit-output.json`.
 - `npm run validate:triggers` — static validation and overlap detection for trigger extraction and signal mapping.

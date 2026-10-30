@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import readline from 'readline';
 import { PROMPT_BASE } from './recalc_confidence';
+import { assertRealWriteAllowed } from './lib/cases-cli';
 
 // NewCaseTemplate - класс для создания шаблона нового кейса с каноническим порядком ключей.
 export class NewCaseTemplate {
@@ -166,7 +167,7 @@ if (require.main === module) {
   let autoSeq = false;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '-o' || a === '--out') outDir = argv[++i];
+    if (a === '-o' || a === '--out' || a === '--dir' || a === '-d') outDir = argv[++i];
     else if (a === '-i' || a === '--id') caseId = argv[++i];
     else if (a === '--dry-run') dry = true;
     else if (a === '-l' || a === '--letter') {
@@ -180,6 +181,14 @@ if (require.main === module) {
       autoSeq = true;
     }
   }
-  const T = new NewCaseTemplate();
-  T.writeTemplate(outDir, caseId, dry, sectionLetter, seqNumber, autoSeq).catch(err => { console.error(err); process.exit(1); });
+  const fail = (err: unknown) => {
+    console.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(1);
+  };
+  try {
+    assertRealWriteAllowed(path.resolve(outDir), argv);
+  } catch (err) {
+    fail(err);
+  }
+  new NewCaseTemplate().writeTemplate(outDir, caseId, dry, sectionLetter, seqNumber, autoSeq).catch(fail);
 }
