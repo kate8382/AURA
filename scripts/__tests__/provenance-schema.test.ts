@@ -76,6 +76,26 @@ describe('provenance schema extension (#79)', () => {
     expect(validate({ ...baseCase, provenance: { collected_at: '2026-10-30T12:00:00Z' } })).toBe(false);
   });
 
+  test('accepts attribution and a valid 64-char content_sha256', () => {
+    const validate = loadValidator();
+    const kase = {
+      ...baseCase,
+      case_type: 'real',
+      provenance: {
+        ...fullProvenance,
+        redaction_status: 'pointer_only',
+        attribution: 'Credit AllenAI and ODC-BY terms',
+        content_sha256: 'a'.repeat(64)
+      }
+    };
+    expect(validate(kase)).toBe(true);
+  });
+
+  test('rejects a content_sha256 that is too short', () => {
+    const validate = loadValidator();
+    expect(validate({ ...baseCase, provenance: { content_sha256: 'abc123' } })).toBe(false);
+  });
+
   test('every existing synthetic case still validates without changes', () => {
     const validate = loadValidator();
     const files = listJsonRecursive(casesDir);

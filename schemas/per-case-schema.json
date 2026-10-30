@@ -35,7 +35,7 @@
         },
         "source_url": {
           "type": "string",
-          "description": "Link to the source dataset or project page (absolute URI, for example https://...)."
+          "description": "URL or web address of the source dataset or project page."
         },
         "source_license": {
           "type": "string",
@@ -58,6 +58,15 @@
           "type": "string",
           "enum": ["none", "redacted", "sanitized", "pointer_only"],
           "description": "How the text was treated before storage: 'none' (unchanged), 'redacted' (personal data or secrets replaced), 'sanitized' (harmful details removed or paraphrased), or 'pointer_only' (only a link and hash are stored)."
+        },
+        "attribution": {
+          "type": "string",
+          "description": "Attribution or credit string required by the source license (e.g., 'Credit AllenAI and ODC-BY terms')."
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$",
+          "description": "SHA-256 hash of the original source content, used for pointer_only items."
         }
       }
     },
