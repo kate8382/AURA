@@ -241,6 +241,8 @@ This project operates under a dual/hybrid licensing model:
   * **Change Date:** Each release automatically transitions to the **Apache License 2.0** on the Change Date specified in `LICENSE` (2029-10-05 for the initial code base in this PR).
   * **Note:** Prior releases that were published under Apache‑2.0 remain licensed under Apache‑2.0; the Change Date applies prospectively to this code base as maintained by the Licensor.
 * **Cases & Data:** [Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](./DATA_LICENSE)
+  * **`synthetic_cases/`:** all data is CC BY-NC 4.0.
+  * **`real_cases/` (hybrid):** our analysis, annotations, and case structure are CC BY-NC 4.0. Prompt text quoted from third-party sources is **not** relicensed. It stays under the original license (for example MIT or Apache-2.0). Sources, licenses, and required attribution are listed in [real_cases/NOTICE.md](real_cases/NOTICE.md). Each real case links to its entry through `provenance.source_id`.
 
 ## Contribution & Governance
 

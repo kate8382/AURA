@@ -86,6 +86,14 @@ The rewritten case must not copy wording, specific payloads, or harmful details 
 - Each import is reviewed by a maintainer. The review checks the license, redaction, and storage form.
 - Attribution and license information are kept with the dataset, so reuse by others stays lawful.
 
+### 2.4 Linking each case to its source (provenance -> NOTICE)
+
+- Every case in `real_cases/` must set `case_type: "real"` and a `provenance` object.
+- Every such case must set `provenance.source_id` to the Source ID of its entry in [real_cases/NOTICE.md](../real_cases/NOTICE.md) (for example `deepset-prompt-injections`). The `source_url` should match the URL listed for that entry.
+- A case may not reference a Source ID that is missing from NOTICE or listed under "Excluded sources".
+- A case whose source is Conditional must use `redaction_status: "pointer_only"` until the license is confirmed.
+- The NOTICE entry, not the case, carries the license text and required citation. Cases copy the `attribution` string when the source requires it.
+
 ## 3. Storage Selection Rules (Full Text vs Pointer)
 
 | Storage form | When it is allowed |
