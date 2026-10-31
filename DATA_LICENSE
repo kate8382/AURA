@@ -1,7 +1,17 @@
-AURA data license (synthetic_cases)
+AURA data license (synthetic_cases and real_cases)
 
-This directory (`synthetic_cases/`) is licensed under Creative Commons
-Attribution-NonCommercial 4.0 International (CC BY-NC 4.0).
+The following parts of this repository are licensed under Creative Commons
+Attribution-NonCommercial 4.0 International (CC BY-NC 4.0):
+
+- `synthetic_cases/`: all case data.
+- `real_cases/`: our analysis, annotations, and case structure (the metadata,
+  classification, signal mapping, and explanations we write).
+
+Third-party text is NOT relicensed. Prompts or other text quoted from external
+sources in `real_cases/` remain under the license of their original authors or
+sources (for example MIT or Apache-2.0). Those licenses apply to the quoted text
+only. Attribution and license terms for every source are listed in
+[real_cases/NOTICE](real_cases/NOTICE.md).
 
 Summary:
 - Allows others to share (copy and redistribute) and adapt (remix, transform, and build upon) the material for non-commercial purposes,

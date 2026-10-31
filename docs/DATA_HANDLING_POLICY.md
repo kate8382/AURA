@@ -38,7 +38,7 @@ Facts were checked against each project's license file or dataset metadata page 
 | HackAPrompt (`hackaprompt/hackaprompt-dataset`) | MIT | Gated: a form with contact details is required | Competition submissions (prompt injection) | Excerpt / Pointer Only | Credit HackAPrompt | Conditional | Low |
 | HarmBench (`centerforaisafety/HarmBench`) | MIT for code; data under research terms (to be confirmed) | Open | Extreme adversarial / harmful requests | Excerpt / Pointer Only | Credit HarmBench | Conditional (harmful risk) | Low |
 | WildJailbreak (`allenai/wildjailbreak`) | ODC-BY (Open Data Commons Attribution) | Gated: must accept AI2 Responsible Use Guidelines | Adversarial prompts & gray zones | Full Text only after confirming gated-access terms allow it; otherwise Excerpt / Pointer Only | Credit AllenAI and the attribution terms of ODC-BY | Conditional (gated) | Low |
-| Anthropic hh-rlhf (red-team-attempts) | MIT | Open, no gate | Red-teaming conversations with offensive content | Excerpt / Pointer Only (offensive and harmful content, see section 2.2) | Credit Anthropic | Conditional (offensive content) | Low |
+| Anthropic hh-rlhf (red-team-attempts) | MIT | Open, no gate | Red-teaming conversations with offensive content | Excerpt / Pointer Only (offensive and harmful content, see section 2.2) | Credit Anthropic | Conditional: License and data status require a separate audit. Deferred to a later stage | Low |
 | Lakera PINT | Not confirmed | Not confirmed | Prompt Injections | Pointer Only | Mention Lakera | Pending | Low |
 | Tensor Trust (`HumanCompatibleAI/tensor-trust-data`) | None found: the public repository has no LICENSE file (GitHub reports no license) | Public repository, no gate | Game-based injections | Pointer Only | Clarify license first | Pending | Low |
 
@@ -85,6 +85,14 @@ The rewritten case must not copy wording, specific payloads, or harmful details 
 - A source can be removed at any time if its license changes, if the author asks, or if a problem is found.
 - Each import is reviewed by a maintainer. The review checks the license, redaction, and storage form.
 - Attribution and license information are kept with the dataset, so reuse by others stays lawful.
+
+### 2.4 Linking each case to its source (provenance -> NOTICE)
+
+- Every case in `real_cases/` must set `case_type: "real"` and a `provenance` object.
+- Every such case must set `provenance.source_id` to the Source ID of its entry in [real_cases/NOTICE.md](../real_cases/NOTICE.md) (for example `deepset-prompt-injections`). The `source_url` should match the URL listed for that entry.
+- A case may not reference a Source ID that is missing from NOTICE or listed under "Excluded sources".
+- A case whose source is Conditional must use `redaction_status: "pointer_only"` until the license is confirmed.
+- The NOTICE entry, not the case, carries the license text and required citation. Cases copy the `attribution` string when the source requires it.
 
 ## 3. Storage Selection Rules (Full Text vs Pointer)
 

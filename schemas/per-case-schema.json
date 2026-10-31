@@ -33,6 +33,11 @@
           "type": "string",
           "description": "Name of the source dataset or project, for example 'Lakera gandalf'."
         },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Source ID of the entry in real_cases/NOTICE.md, for example 'deepset-prompt-injections'. Required for real cases."
+        },
         "source_url": {
           "type": "string",
           "description": "URL or web address of the source dataset or project page."

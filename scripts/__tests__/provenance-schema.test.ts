@@ -63,6 +63,18 @@ describe('provenance schema extension (#79)', () => {
     expect(validate(kase)).toBe(false);
   });
 
+  test('accepts a NOTICE source_id in kebab-case', () => {
+    const validate = loadValidator();
+    const kase = { ...baseCase, case_type: 'real', provenance: { ...fullProvenance, source_id: 'deepset-prompt-injections' } };
+    expect(validate(kase)).toBe(true);
+  });
+
+  test('rejects a source_id that is not kebab-case', () => {
+    const validate = loadValidator();
+    const kase = { ...baseCase, case_type: 'real', provenance: { ...fullProvenance, source_id: 'Deepset Prompt Injections' } };
+    expect(validate(kase)).toBe(false);
+  });
+
   test('rejects wrong types inside provenance', () => {
     const validate = loadValidator();
     expect(validate({ ...baseCase, provenance: { source: 42 } })).toBe(false);
