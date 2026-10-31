@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import Ajv from 'ajv';
-import { loadApprovedSourceIds, NOTICE_PATH } from './lib/notice';
+import { loadNoticeSources, NoticeSources, NOTICE_PATH } from './lib/notice';
 
 // ValidatePerCases - класс-обёртка для валидации per-case JSON файлов против схемы.
 // Методы:
@@ -19,15 +19,22 @@ export class ValidatePerCases {
     this.ajv = new Ajv({ allErrors: true, strict: false });
   }
 
-  // Real cases (case_type "real" or files under real_cases/) must cite an approved Source ID from NOTICE.
-  validateSourceId(obj: any, p: string, approvedSourceIds: Set<string>): string[] {
+  // Real cases (case_type "real" or files under real_cases/) must cite a Source ID from NOTICE.
+  // Conditional sources are allowed only as pointer_only, so no full text is stored for them.
+  validateSourceId(obj: any, p: string, sources: NoticeSources): string[] {
     const isRealPath = path.resolve(p).split(path.sep).includes('real_cases');
     if (!isRealPath && obj?.case_type !== 'real') return [];
     const sourceId = obj?.provenance?.source_id;
     if (typeof sourceId !== 'string' || sourceId.trim() === '') {
       return ['provenance.source_id is required for real cases and must match a Source ID in real_cases/NOTICE.md'];
     }
-    if (!approvedSourceIds.has(sourceId)) {
+    if (sources.conditional.has(sourceId)) {
+      if (obj?.provenance?.redaction_status !== 'pointer_only') {
+        return [`provenance.source_id "${sourceId}" is a Conditional source in real_cases/NOTICE.md and requires provenance.redaction_status "pointer_only"`];
+      }
+      return [];
+    }
+    if (!sources.approved.has(sourceId)) {
       return [`provenance.source_id "${sourceId}" is not an approved Source ID in real_cases/NOTICE.md`];
     }
     return [];
@@ -88,7 +95,7 @@ export class ValidatePerCases {
   }
 
   // Validate a single JSON file against the schema
-  async validateFile(validate: any, p: string, approvedSourceIds: Set<string> = new Set()) {
+  async validateFile(validate: any, p: string, sources: NoticeSources = { approved: new Set(), conditional: new Set() }) {
     try {
       const raw = await fs.readFile(p, 'utf8');
       const obj = JSON.parse(raw);
@@ -100,7 +107,7 @@ export class ValidatePerCases {
       if (metadataErrors.length > 0) {
         return { ok: false, errs: metadataErrors };
       }
-      const sourceErrors = this.validateSourceId(obj, p, approvedSourceIds);
+      const sourceErrors = this.validateSourceId(obj, p, sources);
       if (sourceErrors.length > 0) {
         return { ok: false, errs: sourceErrors };
       }
@@ -140,9 +147,9 @@ export class ValidatePerCases {
     if (process.argv.includes('--dry-run')) console.log('Dry-run mode: validation does not modify files.');
 
     let errors = 0;
-    const approvedSourceIds = await loadApprovedSourceIds(NOTICE_PATH);
+    const noticeSources = await loadNoticeSources(NOTICE_PATH);
     await this.walk(target, async (p) => {
-      const res = await this.validateFile(validate, p, approvedSourceIds);
+      const res = await this.validateFile(validate, p, noticeSources);
       if (!res.ok) {
         errors += 1;
         console.log('\nINVALID:', p);

@@ -22,20 +22,26 @@ attribution and license terms that apply. It is the reference for the
 | Source ID | Name | URL | License | Copyright Holder | Required Citation |
 |---|---|---|---|---|---|
 | `deepset-prompt-injections` | deepset/prompt-injections | https://huggingface.co/datasets/deepset/prompt-injections | Apache-2.0 | deepset GmbH | Credit deepset: "prompt-injections" dataset, deepset GmbH, Apache License 2.0. |
-| `jailbreakhub` | JailbreakHub (`jailbreak_llms`; mirror `walledai/JailbreakHub`) | https://huggingface.co/datasets/walledai/JailbreakHub | MIT | Authors of the JailbreakHub dataset (Shen et al., "Do Anything Now") | Credit the authors and cite: Shen et al., "Do Anything Now: Characterizing and Evaluating In-The-Wild Jailbreak Prompts on Large Language Models" (2023). |
+| `jailbreakhub` | JailbreakHub (`jailbreak_llms`; mirror `walledai/JailbreakHub`) | https://huggingface.co/datasets/walledai/JailbreakHub | MIT | Xinyue Shen, Zeyuan Chen, Michael Backes, Yun Shen, Yang Zhang (authors of "Do Anything Now") | Credit the authors and cite: Shen et al., "Do Anything Now: Characterizing and Evaluating In-The-Wild Jailbreak Prompts on Large Language Models" (2023), arXiv:2308.03825. |
 | `jailbreakbench` | JailbreakBench (`JailbreakBench/jailbreakbench`) | https://github.com/JailbreakBench/jailbreakbench | MIT | JailbreakBench Team (Copyright 2023) | Credit JailbreakBench: "JailbreakBench: An Open Robustness Benchmark for Jailbreaking Large Language Models" (2024). |
-| `lakera-gandalf-ignore-instructions` | Lakera gandalf_ignore_instructions | https://huggingface.co/datasets/Lakera/gandalf_ignore_instructions | Apache-2.0 (project page) / MIT (Hugging Face metadata). **Conditional: to be confirmed** | Lakera AI | Mention Lakera: "gandalf_ignore_instructions", Lakera AI, from the Gandalf prompt-injection game. |
 
 ### Conditions and status
 
 - **`deepset-prompt-injections`:** Approved. Open, no gate. Full Text allowed.
 - **`jailbreakhub`:** Approved. Open, no gate. Full Text allowed for prompts that pass the redaction and harmful-content rules in the policy (offensive items are stored as Pointer Only).
 - **`jailbreakbench`:** Approved. Open, no gate. The MIT license text is verified from the repository `LICENSE` file.
-- **`lakera-gandalf-ignore-instructions`:** **Conditional.** The project page says Apache-2.0 and the Hugging Face metadata says MIT, so the license is not yet settled. Before any import, a maintainer must confirm the license from the dataset file. Until then, store only Pointer Only entries. The source stays in this table so that cases can reference it.
+
+## Conditional Sources (Pointer Only)
+
+| Source ID | Name | URL | License | Copyright Holder | Required Citation |
+|---|---|---|---|---|---|
+| `lakera-gandalf-ignore-instructions` | Lakera gandalf_ignore_instructions | https://huggingface.co/datasets/Lakera/gandalf_ignore_instructions | Apache-2.0 (project page) / MIT (Hugging Face metadata). **To be confirmed** | Lakera AI | Mention Lakera: "gandalf_ignore_instructions", Lakera AI, from the Gandalf prompt-injection game. |
+
+- **`lakera-gandalf-ignore-instructions`:** **Conditional.** The project page says Apache-2.0 and the Hugging Face metadata says MIT, so the license is not yet settled. A case that cites this source must use `redaction_status: "pointer_only"` (only a link and hash are stored, never Full Text). The validator enforces this rule. Before any Full Text import, a maintainer must confirm the license from the dataset file and update this section.
 
 ## Excluded sources
 
-These sources are not used for any case until their license is confirmed or their
+These sources are not used for any case until their license status is confirmed or their
 storage rules are met. A case must not reference them.
 
 | Source ID | Name | Reason |
@@ -45,7 +51,7 @@ storage rules are met. A case must not reference them.
 | `hackaprompt` | HackAPrompt dataset | Gated access. Pointer Only only. |
 | `harmbench` | HarmBench | Data under research terms (to be confirmed). Pointer Only only. |
 | `wildjailbreak` | WildJailbreak (`allenai/wildjailbreak`) | Gated (AI2 terms). Pointer Only unless the gate terms allow Full Text. |
-| `hh-rlhf-red-team` | Anthropic hh-rlhf (red-team-attempts) | Offensive content. Pointer Only only. |
+| `hh-rlhf-red-team` | Anthropic hh-rlhf (red-team-attempts) | License and data status require a separate audit. Deferred to a later stage. |
 
 ## License texts
 
