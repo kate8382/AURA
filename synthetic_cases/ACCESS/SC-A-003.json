@@ -1,5 +1,5 @@
 {
-  "case_id": "A-CASE-003",
+  "case_id": "SC-A-003",
   "domain": "access",
   "category": "corporate_espionage_&_insider_trading_(market_integrity_violation)",
   "signal_ids": [
@@ -44,8 +44,7 @@
     }
   ],
   "declared_shape": {
-    "operation_type": "unauthorized_access",
-    "signal_ids": ["alibi:academic", "target:highvalue", "recon:targeted", "alibi:general", "camouflage:role", "evasion:control", "exploit:actionable", "camouflage:naive"]
+    "operation_type": "corporate_espionage"
   },
   "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",

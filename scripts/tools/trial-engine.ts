@@ -4,6 +4,10 @@ import { logError, logWarn, runCli } from '../logger';
 
 export type TrialShape = {
   operation_type?: string;
+};
+
+type TrialCase = {
+  declared_shape?: TrialShape;
   signal_ids?: string[];
 };
 
@@ -15,13 +19,17 @@ export type TrialNegativeLabel = {
 };
 
 // Fail closed: a missing shape or empty operation_type never matches.
-export function sameShape(candidate: { declared_shape?: TrialShape } | null | undefined, baseline: { declared_shape?: TrialShape } | null | undefined): boolean {
+// Signals come from the case-level signal_ids (single source of truth), not from declared_shape.
+export function sameShape(candidate: TrialCase | null | undefined, baseline: TrialCase | null | undefined): boolean {
   const a = candidate?.declared_shape;
   const b = baseline?.declared_shape;
   if (!a?.operation_type?.trim() || !b?.operation_type?.trim()) return false;
 
-  const key = (shape: TrialShape) => JSON.stringify({ operation_type: shape.operation_type, signal_ids: [...(shape.signal_ids ?? [])].sort() });
-  return key(a) === key(b);
+  const key = (c: TrialCase) => JSON.stringify({
+    operation_type: c.declared_shape?.operation_type,
+    signal_ids: [...(c.signal_ids ?? [])].sort()
+  });
+  return key(candidate as TrialCase) === key(baseline as TrialCase);
 }
 
 // Calculate false positive rate for trials

@@ -1,5 +1,5 @@
 {
-  "case_id": "F-CASE-002",
+  "case_id": "SC-F-002",
   "domain": "fraud",
   "category": "social_engineering_&_unauthorized_access",
   "signal_ids": [
@@ -46,8 +46,7 @@
     }
   ],
   "declared_shape": {
-    "operation_type": "fraud",
-    "signal_ids": ["camouflage:domestic", "evasion:control", "behavior:urgency", "camouflage:role", "exploit:actionable", "camouflage:naive", "target:highvalue"]
+    "operation_type": "social_engineering"
   },
   "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",

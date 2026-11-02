@@ -1,7 +1,7 @@
 {
-  "case_id": "M-CASE-003",
+  "case_id": "SC-M-003",
   "domain": "manipulation",
-  "category": "_(social_engineering_&_platform_integrity_evasion)",
+  "category": "social_engineering_&_platform_integrity_evasion",
   "signal_ids": [
     "alibi:academic",
     "deception:fact",
@@ -44,8 +44,7 @@
     }
   ],
   "declared_shape": {
-    "operation_type": "manipulation",
-    "signal_ids": ["alibi:academic", "deception:fact", "alibi:general", "camouflage:naive", "camouflage:role", "evasion:control", "exploit:actionable", "target:highvalue"]
+    "operation_type": "social_engineering"
   },
   "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",

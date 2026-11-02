@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import Ajv from 'ajv';
 import { loadNoticeSources, NoticeSources, NOTICE_PATH } from './lib/notice';
+import { CASE_ID_PATTERN, isRealCasePath } from './lib/case-id';
 
 // ValidatePerCases - класс-обёртка для валидации per-case JSON файлов против схемы.
 // Методы:
@@ -40,6 +41,18 @@ export class ValidatePerCases {
     return [];
   }
 
+  // case_id prefix must match the case kind: RC- for real cases, SC- for synthetic cases.
+  validateCaseIdPrefix(obj: any, p: string): string[] {
+    const caseId = obj?.case_id;
+    if (typeof caseId !== 'string' || !CASE_ID_PATTERN.test(caseId)) return [];
+    const expected = isRealCasePath(p) || obj?.case_type === 'real' ? 'RC' : 'SC';
+    const actual = caseId.split('-')[0];
+    if (actual !== expected) {
+      return [`case_id "${caseId}" must use the ${expected}- prefix for ${expected === 'RC' ? 'real' : 'synthetic'} cases`];
+    }
+    return [];
+  }
+
   // Validate optional trial metadata without breaking legacy records that do not declare any of it.
   validateOptionalMetadata(obj: any): string[] {
     const errors: string[] = [];
@@ -52,8 +65,8 @@ export class ValidatePerCases {
         if (typeof shape.operation_type !== 'string' || shape.operation_type.trim() === '') {
           errors.push('declared_shape.operation_type must be a non-empty string when declared_shape is present');
         }
-        if (shape.signal_ids !== undefined && (!Array.isArray(shape.signal_ids) || shape.signal_ids.some((v: any) => typeof v !== 'string'))) {
-          errors.push('declared_shape.signal_ids must be a string array when present');
+        if (shape.signal_ids !== undefined) {
+          errors.push('declared_shape.signal_ids is not allowed; use the case-level signal_ids');
         }
       }
     }
@@ -110,6 +123,10 @@ export class ValidatePerCases {
       const sourceErrors = this.validateSourceId(obj, p, sources);
       if (sourceErrors.length > 0) {
         return { ok: false, errs: sourceErrors };
+      }
+      const caseIdErrors = this.validateCaseIdPrefix(obj, p);
+      if (caseIdErrors.length > 0) {
+        return { ok: false, errs: caseIdErrors };
       }
       return { ok: true };
     } catch (e: any) {

@@ -10,7 +10,9 @@
   ],
   "properties": {
     "case_id": {
-      "type": "string"
+      "type": "string",
+      "pattern": "^(SC|RC)-[A-Z]-\\d{3,}$",
+      "description": "Case ID: SC- for synthetic cases or RC- for real cases, then a domain letter and a sequence number, for example SC-A-001 or RC-M-001."
     },
     "domain": {
       "type": "string",
@@ -61,8 +63,17 @@
         },
         "redaction_status": {
           "type": "string",
-          "enum": ["none", "redacted", "sanitized", "pointer_only"],
-          "description": "How the text was treated before storage: 'none' (unchanged), 'redacted' (personal data or secrets replaced), 'sanitized' (harmful details removed or paraphrased), or 'pointer_only' (only a link and hash are stored)."
+          "enum": ["none", "redacted", "sanitized", "pointer_only", "full_text"],
+          "description": "How the text was treated before storage: 'none' (unchanged), 'redacted' (personal data or secrets replaced), 'sanitized' (harmful details removed or paraphrased), 'full_text' (original text stored, allowed by the source license), or 'pointer_only' (only a link and hash are stored)."
+        },
+        "license": {
+          "type": "string",
+          "description": "License identifier of the source, for example 'Apache-2.0' or 'MIT'. Must match the entry in real_cases/NOTICE.md."
+        },
+        "authors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Authors or copyright holders of the source, as required for attribution."
         },
         "attribution": {
           "type": "string",
@@ -84,16 +95,10 @@
     },
     "declared_shape": {
       "type": "object",
-      "description": "Optional, case-level declared shape metadata used by trial engines for safe rule evaluation.",
+      "description": "Optional, case-level declared shape metadata used by trial engines for safe rule evaluation. Signal IDs are taken from the case-level signal_ids.",
       "properties": {
         "operation_type": {
           "type": "string"
-        },
-        "signal_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       },
       "additionalProperties": true
@@ -151,12 +156,6 @@
             "properties": {
               "operation_type": {
                 "type": "string"
-              },
-              "signal_ids": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
               }
             },
             "additionalProperties": true

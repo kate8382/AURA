@@ -11,7 +11,7 @@ describe('examples/simple-recalc smoke test', () => {
     expect(out).toBeTruthy();
     const parsed = JSON.parse(out);
     expect(parsed).toHaveProperty('case_id');
-    expect(parsed.case_id).toBe('EX-EXAMPLE-001');
+    expect(parsed.case_id).toBe('SC-A-900');
   }, 20000);
 
   test('extracts triggers and keeps JSON output clean', () => {

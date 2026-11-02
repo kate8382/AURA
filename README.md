@@ -114,7 +114,8 @@ Short developer reference — full details in [docs/SCRIPTS.md](docs/SCRIPTS.md)
 - `npm run recalc:confidence` — recompute `confidence` fields (see docs for dry-run flags and options).
 - `npm run validate:real` — validate `real_cases/` (CI runs it only when real JSON cases exist).
 - `npm run recalc:confidence:real` — dry-run recalculation for `real_cases/`; `recalc:confidence:real:apply` writes (requires `--allow-real-write`).
-- `npm run normalize:percases:real` — dry-run normalization of `real_cases/`; `npm run normalize:percases:real:apply` writes (requires `--allow-real-write`). `npm run new-case:real` — preview a template for `real_cases/` (writing needs `--dir real_cases --allow-real-write`).
+- `npm run normalize:percases:real` — dry-run normalization of `real_cases/`; `npm run normalize:percases:real:apply` writes (requires `--allow-real-write`). - `npm run new-case:real` — write a template to `real_cases/` (`--type real --allow-real-write`); `npm run new-case:real:dry` — preview only.
+
 - `npm run collect:triggers` — collect normalized triggers into `tmp/collected-triggers.json`.
 - `npm run audit:categories` — run category-vs-directory audit into `tmp/audit-output.json`.
 - `npm run validate:triggers` — static validation and overlap detection for trigger extraction and signal mapping.
@@ -166,13 +167,13 @@ See the full schema at `schemas/per-case-schema.json`. Important note about `con
 - `confidence` is the normalized score in the [0..1] range used by policy and decision logic.
   It is computed from `confidence_raw` using a diminishing-returns transform — see the
   developer documentation for the exact formula and tuning guidance: [docs/SCRIPTS.md](docs/SCRIPTS.md).
-- Optional metadata for trial engines: `declared_shape` can be used to record the expected request shape and relevant signal IDs, while `negative_labels` can explicitly mark `confirmed_negative`, `benign`, or `unknown` cases to keep trial evaluation safe and non-destructive.
+- Optional metadata for trial engines: `declared_shape` can be used to record the expected request shape (`operation_type`); relevant signal IDs come from the case-level `signal_ids`. `negative_labels` can explicitly mark `confirmed_negative`, `benign`, or `unknown` cases to keep trial evaluation safe and non-destructive.
 
 Example minimal valid case (note `confidence_raw` placed at the end for auditability):
 
 ```json
 {
-  "case_id": "EX-CASE-001",
+  "case_id": "SC-A-001",
   "category": "manipulation/example",
   "signal_ids": [
     "camouflage:naive",

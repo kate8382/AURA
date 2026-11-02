@@ -1,5 +1,5 @@
 {
-  "case_id": "F-CASE-001",
+  "case_id": "SC-F-001",
   "domain": "fraud",
   "category": "brand_impersonation",
   "signal_ids": [
@@ -42,8 +42,7 @@
     }
   ],
   "declared_shape": {
-    "operation_type": "fraud",
-    "signal_ids": ["evasion:control", "deception:fact", "exploit:actionable", "camouflage:role", "alibi:general", "camouflage:naive", "target:highvalue"]
+    "operation_type": "brand_impersonation"
   },
   "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",

@@ -1,5 +1,5 @@
 {
-  "case_id": "F-CASE-003",
+  "case_id": "SC-F-003",
   "domain": "fraud",
   "category": "commercial_fraud_&_financial_misrepresentation",
   "signal_ids": [
@@ -42,8 +42,7 @@
     }
   ],
   "declared_shape": {
-    "operation_type": "fraud",
-    "signal_ids": ["camouflage:domestic", "fin:suspicious", "deception:fact", "evasion:control"]
+    "operation_type": "financial_misrepresentation"
   },
   "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",

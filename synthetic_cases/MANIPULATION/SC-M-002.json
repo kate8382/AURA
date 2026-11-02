@@ -1,5 +1,5 @@
 {
-  "case_id": "M-CASE-002",
+  "case_id": "SC-M-002",
   "domain": "manipulation",
   "category": "harassment,_extortion,_and_reputation_damage_assets",
   "signal_ids": [
@@ -46,8 +46,7 @@
     }
   ],
   "declared_shape": {
-    "operation_type": "manipulation",
-    "signal_ids": ["camouflage:role", "deception:fact", "extortion:leverage", "behavior:urgency", "camouflage:domestic", "evasion:control", "camouflage:naive", "target:highvalue", "exploit:actionable"]
+    "operation_type": "extortion"
   },
   "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",

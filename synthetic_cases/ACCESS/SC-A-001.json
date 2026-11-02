@@ -1,5 +1,5 @@
 {
-  "case_id": "A-CASE-001",
+  "case_id": "SC-A-001",
   "domain": "access",
   "category": "unauthorized_access_&_vulnerability_exploitation_(infrastructure_damage)",
   "signal_ids": [
@@ -32,8 +32,7 @@
     }
   ],
   "declared_shape": {
-    "operation_type": "unauthorized_access",
-    "signal_ids": ["camouflage:naive", "target:highvalue", "exploit:actionable", "alibi:general", "camouflage:role", "evasion:control"]
+    "operation_type": "vulnerability_exploitation"
   },
   "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
