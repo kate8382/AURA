@@ -50,6 +50,7 @@ for a safe preview and `npm run recalc:confidence:real:apply` to write explicitl
   and `RC-<domain>-<NNN>` for real cases.
 - `-t, --type synthetic|real` selects the prefix. `-l <letter>` selects the domain letter, `-n <number>` or `-a` (auto-increment) selects the sequence.
 - Example: `node -r ts-node/register scripts/new-case-template.ts -o real_cases -l M -a -t real --allow-real-write`
+- Step-by-step workflow for real cases (template, provenance, normalize, recalc, validate): [REAL_CASES_PIPELINE.md](./REAL_CASES_PIPELINE.md)
 
 2) Recalculator: `scripts/recalc_confidence.ts`
 

@@ -7,6 +7,7 @@ export type TrialShape = {
 };
 
 type TrialCase = {
+  domain?: string;
   declared_shape?: TrialShape;
   signal_ids?: string[];
 };
@@ -18,15 +19,17 @@ export type TrialNegativeLabel = {
   source?: string;
 };
 
-// Fail closed: a missing shape or empty operation_type never matches.
-// Signals come from the case-level signal_ids (single source of truth), not from declared_shape.
+// Fail closed: a missing shape, empty operation_type or missing domain never matches.
+// Shape = top-level domain + case-level signal_ids. operation_type only has to be present
+// (it is a sub-operation and would otherwise split every case into its own group).
 export function sameShape(candidate: TrialCase | null | undefined, baseline: TrialCase | null | undefined): boolean {
   const a = candidate?.declared_shape;
   const b = baseline?.declared_shape;
   if (!a?.operation_type?.trim() || !b?.operation_type?.trim()) return false;
+  if (!candidate?.domain?.trim() || !baseline?.domain?.trim()) return false;
 
   const key = (c: TrialCase) => JSON.stringify({
-    operation_type: c.declared_shape?.operation_type,
+    domain: c.domain,
     signal_ids: [...(c.signal_ids ?? [])].sort()
   });
   return key(candidate as TrialCase) === key(baseline as TrialCase);

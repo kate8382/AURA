@@ -150,6 +150,21 @@
   },
   "regexRules": [
     {
+      "trigger": "direct context reset command",
+      "pattern": "\\b(?:forget|ignore|disregard|erase|reset)\\b.{0,40}\\b(?:all|previous|prior|earlier|above|your)\\b.{0,40}\\b(?:tasks?|instructions?|rules?|history|context)\\b",
+      "description": "Imperative reset of prior tasks, instructions, or context (e.g. 'Forget all previous tasks')."
+    },
+    {
+      "trigger": "system prompt extraction request",
+      "pattern": "\\b(?:show|reveal|print|output|display|dump|give)\\b.{0,40}\\b(?:system\\s+prompts?|prompt\\s+texts?|hidden\\s+instructions|your\\s+instructions)\\b",
+      "description": "Explicit request to show or reveal the system prompt, prompt texts, or hidden instructions."
+    },
+    {
+      "trigger": "sycophancy / enthusiasm hook",
+      "pattern": "\\bwow\\b[^.!?]{0,20}\\b(?:fantastic|great|amazing|wonderful|awesome)\\b",
+      "description": "Opening flattery ('Wow, that's fantastic!') used before a direct request."
+    },
+    {
       "trigger": "false naivety / persona discrepancy",
       "pattern": "\\bi\\s+don'?t\\s+know\\s+anything\\s+about\\b",
       "description": "Naive disavowal ('I don't know anything about X') while naming technical methods."

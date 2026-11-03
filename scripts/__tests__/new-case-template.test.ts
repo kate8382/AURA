@@ -8,7 +8,10 @@ test('createTemplate returns required keys and types', () => {
   expect(tpl).toHaveProperty('case_id', 'TEST-1');
   expect(typeof tpl.category).toBe('string');
   expect(Array.isArray(tpl.scenarios)).toBe(true);
-  expect(typeof tpl.confidence).toBe('number');
+  expect(tpl).not.toHaveProperty('confidence');
+  expect(tpl).not.toHaveProperty('confidence_raw');
+  expect(tpl).not.toHaveProperty('decision');
+  expect(tpl).not.toHaveProperty('decision_reasons');
   expect(tpl.legal_risk).toBeDefined();
   expect(tpl.behavioral_patterns).toBeDefined();
   expect(tpl.cross_check).toBeDefined();

@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
 import readline from 'readline';
-import { PROMPT_BASE } from './recalc_confidence';
 import { assertRealWriteAllowed } from './lib/cases-cli';
 import { CASE_PREFIX, CaseKind } from './lib/case-id';
 
@@ -10,8 +9,10 @@ export class NewCaseTemplate {
   createTemplate(caseId?: string, kind: CaseKind = 'synthetic') {
     const id = caseId || `${CASE_PREFIX[kind]}-X-000`;
     // Поля упорядочены намеренно: case_id, domain, category, provenance (только real), signal_ids,
-    // scenarios, negative_labels, ...; confidence идёт после cross_check.
+    // scenarios, negative_labels, ...
     // declared_shape is omitted: a present one needs a non-empty operation_type from the author.
+    // confidence/decision/decision_reasons/confidence_raw не закладываются в шаблон:
+    // их заполняют normalize-percases.ts и recalc_confidence.ts.
     const tpl: any = { case_id: id, domain: "", category: "" };
     if (kind === 'real') {
       tpl.provenance = {
@@ -41,7 +42,6 @@ export class NewCaseTemplate {
           { name: "3. Direct Absurdity Callout", full_text: [""] }
         ]
       },
-      confidence: PROMPT_BASE,
       deception_threshold: {
         short_summary: "Deception Threshold",
         full_text: [
@@ -51,9 +51,6 @@ export class NewCaseTemplate {
         ]
       }
     });
-    // place audit-only `confidence_raw` at the end of the object so it does not interfere with main schema ordering
-    tpl.confidence_raw = PROMPT_BASE;
-
     return tpl;
   }
 

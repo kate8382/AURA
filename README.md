@@ -115,6 +115,7 @@ Short developer reference — full details in [docs/SCRIPTS.md](docs/SCRIPTS.md)
 - `npm run validate:real` — validate `real_cases/` (CI runs it only when real JSON cases exist).
 - `npm run recalc:confidence:real` — dry-run recalculation for `real_cases/`; `recalc:confidence:real:apply` writes (requires `--allow-real-write`).
 - `npm run normalize:percases:real` — dry-run normalization of `real_cases/`; `npm run normalize:percases:real:apply` writes (requires `--allow-real-write`). - `npm run new-case:real` — write a template to `real_cases/` (`--type real --allow-real-write`); `npm run new-case:real:dry` — preview only.
+- Real-case workflow (template → provenance → normalize → recalc → validate): [docs/REAL_CASES_PIPELINE.md](docs/REAL_CASES_PIPELINE.md).
 
 - `npm run collect:triggers` — collect normalized triggers into `tmp/collected-triggers.json`.
 - `npm run audit:categories` — run category-vs-directory audit into `tmp/audit-output.json`.
