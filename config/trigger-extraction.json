@@ -469,6 +469,14 @@
       "description": "Payload request. Require explicit actionable/deploy/ready-to-use phrasing; bare 'payload' moved to scoring cues."
     },
     {
+      "trigger": "actionable payload request",
+      "keywords": [],
+      "phrases": [
+        "actionable payload request"
+      ],
+      "description": "Explicit request for an actionable payload."
+    },
+    {
       "trigger": "automated exploitation",
       "keywords": [],
       "phrases": [
@@ -531,7 +539,6 @@
         "privilege escalation",
         "escalate privileges",
         "admin override",
-        "override commands",
         "supervisor password",
         "master keys",
         "master credentials",
@@ -631,9 +638,9 @@
       "keywords": [],
       "phrases": [
         "published on public forums",
-        "expose their behavior"
+        "threaten to publish"
       ],
-      "description": "Public-exposure threat language."
+      "description": "Public-exposure threat language. 'expose their behavior' belongs to whistleblower camouflage."
     },
     {
       "trigger": "deceptive asset generation",
@@ -690,7 +697,7 @@
       "trigger": "unauthorized pentest camouflage",
       "cues": [
         "freelance",
-        "payload",
+        "penetration test",
         "stress-test",
         "official testing",
         "qa engineer",
@@ -701,10 +708,8 @@
     {
       "trigger": "functional malicious asset",
       "cues": [
-        "ready-to-use",
         "template",
         "phishing",
-        "generate",
         "complete"
       ],
       "description": "Ready-to-use malicious-template cues; need co-occurrence."
@@ -760,7 +765,7 @@
         "generate",
         "ready-to-use"
       ],
-      "description": "Payload requests require 'payload' plus ready-to-use/generate/execute context."
+      "description": "Payload requests require 'payload' plus deploy/executable context."
     },
     {
       "trigger": "functional exploit / weaponization",
@@ -776,12 +781,12 @@
     {
       "trigger": "high-fidelity deception",
       "cues": [
-        "phishing",
+        "phishing alert",
         "email",
         "spoof",
         "authentic",
         "impersonate",
-        "spoofed",
+        "spoofing",
         "incident"
       ],
       "description": "Phishing must be accompanied by communication/asset context (email, spoof, authentic)."
@@ -829,7 +834,7 @@
         "license plate",
         "address",
         "where she lives",
-        "track",
+        "tracking",
         "location"
       ],
       "description": "Location-tracking cues; complement the explicit address-demand phrases."

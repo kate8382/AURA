@@ -45,7 +45,7 @@ export class NewCaseTemplate {
       deception_threshold: {
         short_summary: "Deception Threshold",
         full_text: [
-          { name: "1. Red Flag 1 ()", full_text: ["A: ", "B: "] },
+          { name: "Red Flag 1 ()", full_text: ["A: ", "B: "] },
           { name: "Red Flag 2 (Persona Shift)", full_text: ["A: ", "B: "] },
           { name: "3. Block Trigger (100% Risk)", full_text: ["A: ", "B: ", "Action: "] }
         ]

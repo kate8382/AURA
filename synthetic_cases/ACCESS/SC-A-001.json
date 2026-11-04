@@ -31,10 +31,12 @@
       ]
     }
   ],
+  "negative_labels": {
+    "status": "unknown"
+  },
   "declared_shape": {
     "operation_type": "vulnerability_exploitation"
   },
-  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Development of Actionable Exploits & Data Integrity Violation",
@@ -75,8 +77,6 @@
       }
     ]
   },
-  "confidence": 0.89,
-  "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -106,8 +106,39 @@
       }
     ]
   },
-  "confidence_raw": 7.39,
+  "confidence": 0.88,
+  "decision": "pending",
+  "confidence_raw": 7.09,
   "decision_reasons": [
     "Awaiting cross-check answers"
+  ],
+  "cross_check_audit": [
+    {
+      "id": "1. Authorization & Compliance Check",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.110Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "2. Process Logic & 'Novice Simplicity' Validation",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.111Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "3. Direct Absurdity Callout",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.111Z",
+      "notes": "requirement missing id/title/type"
+    }
   ]
 }

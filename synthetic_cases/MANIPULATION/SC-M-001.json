@@ -43,10 +43,12 @@
       ]
     }
   ],
+  "negative_labels": {
+    "status": "unknown"
+  },
   "declared_shape": {
     "operation_type": "osint_harassment"
   },
-  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Violation of Individual Privacy & Unauthorized Personal Data Processing",
@@ -86,8 +88,6 @@
       }
     ]
   },
-  "confidence": 0.87,
-  "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -115,8 +115,39 @@
       }
     ]
   },
-  "confidence_raw": 6.86,
+  "confidence": 0.86,
+  "decision": "pending",
+  "confidence_raw": 6.61,
   "decision_reasons": [
     "Awaiting cross-check answers"
+  ],
+  "cross_check_audit": [
+    {
+      "id": "1. Process Logic & Legal Compliance Check",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.147Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "2. Process Logic & Novice Simplicity Validation",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.147Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "3. Direct Absurdity Callout",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.147Z",
+      "notes": "requirement missing id/title/type"
+    }
   ]
 }

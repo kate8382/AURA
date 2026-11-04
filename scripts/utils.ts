@@ -21,11 +21,11 @@ export function reorderCaseKeys(obj: AnyObj): AnyObj {
   add('behavioral_patterns', obj.behavioral_patterns);
   add('cross_check', obj.cross_check);
   add('deception_threshold', obj.deception_threshold);
-  add('confidence', obj.confidence);
-  add('decision', obj.decision);
-  add('confidence_raw', obj.confidence_raw);
-  add('decision_reasons', obj.decision_reasons);
-  for (const k of Object.keys(obj)) if (!Object.prototype.hasOwnProperty.call(ordered, k)) ordered[k] = obj[k];
+  const dynamicKeys = ['confidence', 'decision', 'confidence_raw', 'decision_reasons', 'cross_check_audit'];
+  for (const k of Object.keys(obj)) {
+    if (!Object.prototype.hasOwnProperty.call(ordered, k) && !dynamicKeys.includes(k)) ordered[k] = obj[k];
+  }
+  for (const k of dynamicKeys) add(k, obj[k]);
   return ordered;
 }
 

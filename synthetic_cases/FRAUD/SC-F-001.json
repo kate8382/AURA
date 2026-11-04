@@ -41,10 +41,12 @@
       ]
     }
   ],
+  "negative_labels": {
+    "status": "unknown"
+  },
   "declared_shape": {
     "operation_type": "brand_impersonation"
   },
-  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Generation of high-quality phishing assets / Facilitating Wire Fraud",
@@ -86,8 +88,6 @@
       }
     ]
   },
-  "confidence": 0.78,
-  "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -115,8 +115,39 @@
       }
     ]
   },
-  "confidence_raw": 4.97,
+  "confidence": 0.76,
+  "decision": "pending",
+  "confidence_raw": 4.79,
   "decision_reasons": [
     "Awaiting cross-check answers"
+  ],
+  "cross_check_audit": [
+    {
+      "id": "1. Narrative/Context Validation",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.140Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "2. Structural Validation (The \"Placeholder\" Test)",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.140Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "3. Direct Absurdity Callout",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.140Z",
+      "notes": "requirement missing id/title/type"
+    }
   ]
 }

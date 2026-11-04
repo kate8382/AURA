@@ -5,5 +5,7 @@ dist/
 tmp/
 config/*.bak
 synthetic_cases/**/*.bak
+real_cases/**/*.bak
 .github/ISSUE/
 .github/PR/
+docs/COMMANDS_RU.md

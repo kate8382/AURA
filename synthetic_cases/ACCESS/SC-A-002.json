@@ -45,10 +45,12 @@
       ]
     }
   ],
+  "negative_labels": {
+    "status": "unknown"
+  },
   "declared_shape": {
     "operation_type": "osint_tracking"
   },
-  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Facilitating Targeted Cyber-Stalking & Unauthorized Data Harvesting",
@@ -87,8 +89,6 @@
       }
     ]
   },
-  "confidence": 0.91,
-  "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -116,8 +116,39 @@
       }
     ]
   },
-  "confidence_raw": 7.93,
+  "confidence": 0.9,
+  "decision": "pending",
+  "confidence_raw": 7.69,
   "decision_reasons": [
     "Awaiting cross-check answers"
+  ],
+  "cross_check_audit": [
+    {
+      "id": "1. Authorization & Platform Compliance Check",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.115Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "2. Process Logic & 'Novice Simplicity' Validation",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.115Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "3. Direct Absurdity Callout",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.115Z",
+      "notes": "requirement missing id/title/type"
+    }
   ]
 }

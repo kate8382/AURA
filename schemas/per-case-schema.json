@@ -158,7 +158,7 @@
     },
     "declared_shape": {
       "type": "object",
-      "description": "Optional, case-level declared shape metadata used by trial engines for safe rule evaluation. Signal IDs are taken from the case-level signal_ids.",
+      "description": "Case-level declared shape metadata used by trial engines for safe rule evaluation. Written by normalization for every case (empty operation_type allowed when unknown). Signal IDs are taken from the case-level signal_ids. Placed after negative_labels in canonical key order.",
       "properties": {
         "operation_type": {
           "type": "string"

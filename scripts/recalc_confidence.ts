@@ -253,6 +253,7 @@ export class RecalcConfidence {
     } else if (data.case_id) {
       await updateCase(data as Entry);
       const ordered = reorderCaseKeys(data as Entry);
+      for (const k of Object.keys(data)) delete (data as any)[k];
       Object.assign(data, ordered);
     } else {
       for (const k of Object.keys(data)) {

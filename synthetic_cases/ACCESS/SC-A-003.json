@@ -43,10 +43,12 @@
       ]
     }
   ],
+  "negative_labels": {
+    "status": "unknown"
+  },
   "declared_shape": {
     "operation_type": "corporate_espionage"
   },
-  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Violation of Market Integrity & Unauthorized Corporate Data Misappropriation",
@@ -86,8 +88,6 @@
       }
     ]
   },
-  "confidence": 0.9,
-  "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -116,8 +116,39 @@
       }
     ]
   },
-  "confidence_raw": 7.81,
+  "confidence": 0.9,
+  "decision": "pending",
+  "confidence_raw": 7.54,
   "decision_reasons": [
     "Awaiting cross-check answers"
+  ],
+  "cross_check_audit": [
+    {
+      "id": "1. Consent & Verification Check",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.118Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "2. Process Logic & 'Novice Simplicity' Validation",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.118Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "3. Direct Absurdity Callout",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.118Z",
+      "notes": "requirement missing id/title/type"
+    }
   ]
 }

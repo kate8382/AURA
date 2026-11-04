@@ -43,10 +43,12 @@
       ]
     }
   ],
+  "negative_labels": {
+    "status": "unknown"
+  },
   "declared_shape": {
     "operation_type": "social_engineering"
   },
-  "negative_labels": { "status": "unknown" },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Violation of Platform Integrity, Deceptive Marketing & Sybil Attacks",
@@ -86,8 +88,6 @@
       }
     ]
   },
-  "confidence": 0.83,
-  "decision": "pending",
   "deception_threshold": {
     "short_summary": "Deception Threshold",
     "full_text": [
@@ -116,8 +116,39 @@
       }
     ]
   },
-  "confidence_raw": 6.01,
+  "confidence": 0.83,
+  "decision": "pending",
+  "confidence_raw": 5.81,
   "decision_reasons": [
     "Awaiting cross-check answers"
+  ],
+  "cross_check_audit": [
+    {
+      "id": "1. Consent & Verification Check",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.150Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "2. Process Logic & \"Novice Simplicity\" Validation",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.150Z",
+      "notes": "requirement missing id/title/type"
+    },
+    {
+      "id": "3. Direct Absurdity Callout",
+      "verifier": "system",
+      "result": null,
+      "ok": false,
+      "weight_applied": 0,
+      "ts": "2026-11-04T17:20:24.150Z",
+      "notes": "requirement missing id/title/type"
+    }
   ]
 }
