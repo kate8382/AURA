@@ -84,6 +84,49 @@ describe('loadTrustStore', () => {
     expect(result).toMatchObject({ ok: false, code: 'store_dir_not_found' });
   });
 
+  test('rejects a symlinked trust store directory', async () => {
+    const alice = await ed25519Key('Alice');
+    store.writeKey(keyFileName(alice), alice.publicKey);
+    store.writeManifest([manifestEntry(alice)]);
+
+    const linkPath = `${store.dir}-link`;
+    fs.symlinkSync(store.dir, linkPath, 'dir');
+    try {
+      const result = await loadTrustStore({ dir: linkPath });
+      expect(result).toMatchObject({ ok: false, code: 'store_dir_symlink' });
+      if (result.ok) return;
+      expect(result.detail).toBe('trust store path is a symbolic link');
+    } finally {
+      fs.unlinkSync(linkPath);
+    }
+  });
+
+  test('trust-store details never contain absolute local paths', async () => {
+    const absolutePath = /(^|[\s:(])\//;
+
+    const missingDir = await loadTrustStore({ dir: path.join(store.dir, 'does-not-exist') });
+    expect(missingDir.ok).toBe(false);
+    if (missingDir.ok) return;
+    expect(missingDir.detail).not.toContain(store.dir);
+    expect(missingDir.detail).not.toMatch(absolutePath);
+
+    const missingManifest = await loadTrustStore({ dir: store.dir });
+    expect(missingManifest.ok).toBe(false);
+    if (missingManifest.ok) return;
+    expect(missingManifest.detail).not.toContain(store.dir);
+    expect(missingManifest.detail).not.toMatch(absolutePath);
+
+    const alice = await ed25519Key('Alice');
+    const bob = await ed25519Key('Bob');
+    store.writeKey(keyFileName(alice), bob.publicKey);
+    store.writeManifest([manifestEntry(alice)]);
+    const mismatch = await loadTrustStore({ dir: store.dir });
+    expect(mismatch.ok).toBe(false);
+    if (mismatch.ok) return;
+    expect(mismatch.detail).not.toContain(store.dir);
+    expect(mismatch.detail).not.toMatch(absolutePath);
+  });
+
   test('reports a missing manifest', async () => {
     const result = await loadTrustStore({ dir: store.dir });
     expect(result).toMatchObject({ ok: false, code: 'manifest_missing' });

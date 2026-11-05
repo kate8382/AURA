@@ -244,15 +244,17 @@ export async function loadTrustStore(options: { dir?: string } = {}): Promise<Tr
 
     let dirStats: fs.Stats;
     try {
+      // `lstat` (not `stat`) so a symlinked store directory is visible instead
+      // of being silently followed.
       dirStats = fs.lstatSync(dir);
     } catch {
       // A configured but missing directory is a trust failure, never a default.
-      return fail('store_dir_not_found', `trust store directory does not exist: ${dir}`);
+      return fail('store_dir_not_found', 'trust store directory does not exist');
     }
     if (dirStats.isSymbolicLink()) {
-      return fail('store_dir_symlink', `trust store directory is a symbolic link: ${dir}`);
+      return fail('store_dir_symlink', 'trust store path is a symbolic link');
     }
-    if (!dirStats.isDirectory()) return fail('store_dir_not_found', `trust store path is not a directory: ${dir}`);
+    if (!dirStats.isDirectory()) return fail('store_dir_not_found', 'trust store path is not a directory');
 
     const realDir = fs.realpathSync(dir);
     const manifestPath = path.join(realDir, TRUST_STORE_MANIFEST_NAME);
@@ -264,7 +266,7 @@ export async function loadTrustStore(options: { dir?: string } = {}): Promise<Tr
       manifestFd = fs.openSync(manifestPath, fs.constants.O_RDONLY | manifestNoFollow);
     } catch {
       // Without a manifest there is no defined trust set; fail closed.
-      return fail('manifest_missing', `trust store manifest is missing or cannot be opened safely in ${realDir}`);
+      return fail('manifest_missing', 'trust store manifest is missing or cannot be opened safely');
     }
 
     let manifestText: string;
@@ -328,7 +330,7 @@ export async function loadTrustStore(options: { dir?: string } = {}): Promise<Tr
       directoryEntries = fs.readdirSync(realDir, { withFileTypes: true });
     } catch {
       // An unreadable store directory makes "no extra keys" unprovable.
-      return fail('store_dir_unreadable', `trust store directory cannot be listed: ${realDir}`);
+      return fail('store_dir_unreadable', 'trust store directory cannot be listed');
     }
     for (const dirent of directoryEntries) {
       if (!dirent.name.toLowerCase().endsWith('.asc')) continue;
