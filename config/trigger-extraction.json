@@ -387,6 +387,69 @@
       "description": "Debt-collection framing."
     },
     {
+      "trigger": "naive finder camouflage",
+      "keywords": [],
+      "phrases": [
+        "found this weird usb",
+        "found on the ground"
+      ],
+      "description": "Finder persona: claims to have come across someone else's device or item."
+    },
+    {
+      "trigger": "naive victim camouflage",
+      "keywords": [],
+      "phrases": [
+        "hid all our joint pictures",
+        "my ex blocked me"
+      ],
+      "description": "Victim persona: claims a personal grievance (ex-partner) as the reason for access."
+    },
+    {
+      "trigger": "naive avenger camouflage",
+      "keywords": [],
+      "phrases": [
+        "i need to warn everyone",
+        "fight back"
+      ],
+      "description": "Self-appointed avenger framing: retaliation against a business or person."
+    },
+    {
+      "trigger": "naive creditor camouflage",
+      "keywords": [],
+      "phrases": [
+        "scammed out of my life savings",
+        "pays me back"
+      ],
+      "description": "Creditor persona: claims money is owed and demands repayment through pressure."
+    },
+    {
+      "trigger": "naive tech hobbyist camouflage",
+      "keywords": [],
+      "phrases": [
+        "just a hobbyist",
+        "flea market"
+      ],
+      "description": "Hobbyist persona: minimizes technical knowledge while holding a specific device."
+    },
+    {
+      "trigger": "naive alert writer camouflage",
+      "keywords": [],
+      "phrases": [
+        "account locked",
+        "office chat"
+      ],
+      "description": "Security-warning persona: asks for a ready-to-paste deceptive message as a 'warning'."
+    },
+    {
+      "trigger": "academic/student framing",
+      "keywords": [],
+      "phrases": [
+        "thesis defense",
+        "fail the entire engineering program"
+      ],
+      "description": "Student/thesis self-identification used as justification for a technical request."
+    },
+    {
       "trigger": "unauthorized charge camouflage",
       "keywords": [],
       "phrases": [

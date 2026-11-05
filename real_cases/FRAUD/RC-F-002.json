@@ -104,7 +104,7 @@
   },
   "confidence": 0.84,
   "decision": "pending",
-  "confidence_raw": 6.16,
+  "confidence_raw": 6.09,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
@@ -115,7 +115,7 @@
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:22.505Z",
+      "ts": "2026-11-05T14:25:52.831Z",
       "notes": "requirement missing id/title/type"
     },
     {
@@ -124,7 +124,7 @@
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:22.505Z",
+      "ts": "2026-11-05T14:25:52.831Z",
       "notes": "requirement missing id/title/type"
     },
     {
@@ -133,7 +133,7 @@
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:22.505Z",
+      "ts": "2026-11-05T14:25:52.831Z",
       "notes": "requirement missing id/title/type"
     }
   ]

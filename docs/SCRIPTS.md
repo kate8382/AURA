@@ -187,8 +187,7 @@ node -r ts-node/register scripts/normalize-percases.ts synthetic_cases --extract
 - Known limitations (by design): rule-based surface matching, not semantic understanding;
   English-only. Expect false negatives for persona/camouflage labels that need contextual
   interpretation (e.g. specific `naive * camouflage` roles), for machine-style labels with
-  no surface cues (`bypass_auth`, `financial_request`), and for near-duplicate labels left
-  to curator judgment (`academic/student framing`). Technique mentions inside naive
+  no surface cues (`financial_request`, used only in unit tests). Technique mentions inside naive
   disavowals (e.g. naming `Instaloader` while claiming ignorance) surface technique
   triggers even when curators labeled only the persona. Bare `immediately/immediate` is
   deliberately not an urgency cue (in the corpus it marks dispute/threat wording).

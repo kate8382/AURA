@@ -122,7 +122,6 @@
         "execute:command"
       ],
       "triggers": [
-        "bypass_auth",
         "compliance evasion",
         "hardware restriction",
         "hollywood script bypass / creative framing",
