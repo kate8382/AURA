@@ -385,6 +385,18 @@ export class GenerateTriggerWeights {
       .map(k => ({ trig: k, count: counts[k] || 0, weight: triggerWeights[k] }))
       .sort((a, b) => (b.weight || 0) - (a.weight || 0));
 
+    // Hand-maintained routing/audit settings must survive a weights rewrite:
+    // dropping `crossCheckAdapters` would silently route every pgp-verify
+    // requirement back to the `noop` adapter.
+    const preservedCrossCheckAdapters =
+      existingConfig && typeof existingConfig.crossCheckAdapters === 'object' && existingConfig.crossCheckAdapters !== null
+        ? existingConfig.crossCheckAdapters
+        : undefined;
+    const preservedWriteCrossCheckAudit =
+      existingConfig && typeof existingConfig.writeCrossCheckAudit === 'boolean'
+        ? existingConfig.writeCrossCheckAudit
+        : undefined;
+
     const out = {
       triggerWeights,
       defaultTriggerWeight: this.minWeight,
@@ -392,7 +404,9 @@ export class GenerateTriggerWeights {
       signalIdWeight: this.signalIdWeight,
       maxBoost: this.maxBoost,
       normAlpha: (existingConfig && typeof existingConfig.normAlpha === 'number') ? existingConfig.normAlpha : 0.3,
-      weightMethod: 'tfidf-tiered'
+      weightMethod: 'tfidf-tiered',
+      ...(preservedCrossCheckAdapters !== undefined ? { crossCheckAdapters: preservedCrossCheckAdapters } : {}),
+      ...(preservedWriteCrossCheckAudit !== undefined ? { writeCrossCheckAudit: preservedWriteCrossCheckAudit } : {})
     };
     if (argv.includes('--apply-signal-ids')) dirs.forEach((d) => assertRealWriteAllowed(d, argv));
     const outPath = this.writeConfig(out);
