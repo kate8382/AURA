@@ -126,7 +126,8 @@ function describeUnexpectedError(thrown: unknown): string {
       return `${UNEXPECTED_ERROR_DETAIL} (code=${code})`;
     }
   } catch {
-    // A throwing accessor / Proxy: fall through to the fixed description.
+    // best-effort: a throwing accessor / Proxy must not defeat fail-closed
+    // handling; fall back to the fixed description below.
   }
   return UNEXPECTED_ERROR_DETAIL;
 }
