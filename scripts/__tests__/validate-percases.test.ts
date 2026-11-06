@@ -79,6 +79,26 @@ describe('validate-percases script', () => {
     expect(validator.validateCaseIdPrefix({ case_id: 'RC-M-001', case_type: 'real' }, synthPath)).toEqual([]);
   });
 
+  test('case_id prefix check reports malformed ids instead of passing silently', () => {
+    const validator = new ValidatePerCases();
+    const synthPath = path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json');
+    expect(validator.validateCaseIdPrefix({ case_id: 'A-CASE-001' }, synthPath)).not.toEqual([]);
+    expect(validator.validateCaseIdPrefix({}, synthPath)).not.toEqual([]);
+  });
+
+  test('domain letter must match domain, folder and file name', () => {
+    const validator = new ValidatePerCases();
+    const fraudPath = path.join(repoRoot, 'real_cases', 'FRAUD', 'RC-F-001.json');
+    const ok = { case_id: 'RC-F-001', domain: 'fraud' };
+    expect(validator.validateCaseIdConsistency(ok, fraudPath)).toEqual([]);
+    expect(validator.validateCaseIdConsistency({ case_id: 'RC-F-001' }, fraudPath)).toEqual([]);
+    expect(validator.validateCaseIdConsistency({ case_id: 'RC-A-001', domain: 'access' }, fraudPath)).not.toEqual([]);
+    expect(validator.validateCaseIdConsistency({ case_id: 'RC-F-001', domain: 'access' }, fraudPath)).not.toEqual([]);
+    expect(validator.validateCaseIdConsistency({ case_id: 'RC-F-001', domain: 'fraud' }, path.join(repoRoot, 'real_cases', 'ACCESS', 'RC-F-001.json'))).not.toEqual([]);
+    expect(validator.validateCaseIdConsistency({ case_id: 'RC-F-002', domain: 'fraud' }, fraudPath)).not.toEqual([]);
+    expect(validator.validateCaseIdConsistency({ case_id: 'RC-X-001' }, fraudPath)).not.toEqual([]);
+  });
+
   test('declared_shape carries no signal_ids; signals come from the case-level signal_ids', () => {
     const validator = new ValidatePerCases();
     const ok = { declared_shape: { operation_type: 'read' }, signal_ids: ['camouflage:naive'] };

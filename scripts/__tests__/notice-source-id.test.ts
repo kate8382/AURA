@@ -62,7 +62,9 @@ describe('real_cases NOTICE source_id validation (#81, #113)', () => {
     });
 
     const check = async (dir: string, name: string, obj: any) => {
-      const file = path.join(dir, name);
+      const sub = path.join(dir, name);
+      await fs.mkdir(sub, { recursive: true });
+      const file = path.join(sub, `${obj.case_id}.json`);
       await fs.writeFile(file, JSON.stringify(obj));
       const v = new ValidatePerCases();
       const schema = await v.loadSchema();
