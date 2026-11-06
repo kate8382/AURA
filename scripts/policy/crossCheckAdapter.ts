@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { pgpVerifyAdapter } from './pgp/adapter';
 
 export type CrossCheckRequirement = {
   id: string;
@@ -161,6 +162,11 @@ export class CrossCheckAdapter {
       const verified = caseObj && caseObj.meta && !!caseObj.meta.email_verified;
       return { result: !!verified, ok: !!verified, notes: verified ? 'email verified (meta)' : 'email unverified' };
     });
+
+    // register the offline `pgp-verify` adapter — cryptographically verifies a
+    // detached or cleartext OpenPGP signature against the static local trust
+    // store in config/trusted-keys/. No TOFU, no keyserver, fail-closed.
+    this.registerAdapter('pgp-verify', pgpVerifyAdapter);
 
     // register the offline bounty-scope adapter — verifies a case-claimed bug
     // bounty program + target domain/IP against the curated offline snapshot in

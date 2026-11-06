@@ -73,5 +73,8 @@
   "signalIdWeight": 0.01,
   "maxBoost": 0.1,
   "normAlpha": 0.3,
-  "weightMethod": "tfidf-tiered"
+  "weightMethod": "tfidf-tiered",
+  "crossCheckAdapters": {
+    "cc-pgp-signature": "pgp-verify"
+  }
 }

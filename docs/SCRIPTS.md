@@ -92,6 +92,19 @@ for a safe preview and `npm run recalc:confidence:real:apply` to write explicitl
       (via registered adapters) and returns an audited `cross_check_audit` array plus a
       numeric `total_weight` which is added to `confidence_raw`. See `scripts/policy/crossCheckAdapter.ts` for API and `scripts/__tests__/crosscheck.test.ts` for examples.
 
+    - `pgp-verify` adapter: cryptographically verifies a detached or cleartext OpenPGP
+      signature against the static local trust store in `config/trusted-keys/`
+      (no TOFU, no keyserver, fail-closed). Requirement IDs are routed to it through
+      `crossCheckAdapters` in `config/trigger-weights.json`. Canonical inputs are
+      `signed_message` + `detached_signature`, or `cleartext_message`, plus an optional
+      `expected_signer`. The audit record in `cross_check_audit[].result` carries
+      `key_id`, `fingerprint`, `signing_key_fingerprint`, `signer_identity`,
+      `verification_status`, `reason` and per-signature detail; message text and
+      attacker-controlled strings are never recorded. See
+      [`config/trusted-keys/README.md`](../config/trusted-keys/README.md) for the manifest
+      schema, algorithm policy, limits and the key-addition procedure, and
+      `scripts/policy/pgp/` for the implementation.
+
 
 
 Usage examples:
