@@ -1,8 +1,10 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 
 import { loadTrustStore, resolveTrustStoreDir, TRUST_STORE_DIR_NAME } from '../policy/pgp/trustStore';
 import { MAX_MANIFEST_BYTES } from '../policy/pgp/policy';
+import { findPathLeaks, sensitiveMarkers } from './helpers/audit-path-scan';
 import {
   ed25519Key,
   expiredKey,
@@ -14,6 +16,14 @@ import {
 } from './helpers/pgp-fixtures';
 
 jest.setTimeout(120_000);
+
+/**
+ * Creating a symlink on Windows requires Developer Mode or Administrator
+ * privileges, so those tests are skipped there rather than failing for
+ * environmental reasons. They still run on Linux / macOS / CI.
+ */
+const isWindows = process.platform === 'win32';
+const symlinkTest = isWindows ? test.skip : test;
 
 describe('resolveTrustStoreDir', () => {
   test('finds the repository trust store from the module location', () => {
@@ -33,7 +43,7 @@ describe('resolveTrustStoreDir', () => {
   });
 
   test('returns null when no store is reachable', () => {
-    const temp = fs.mkdtempSync(path.join(require('os').tmpdir(), 'aura-pgp-none-'));
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-pgp-none-'));
     try {
       expect(resolveTrustStoreDir(temp)).toBeNull();
     } finally {
@@ -84,7 +94,7 @@ describe('loadTrustStore', () => {
     expect(result).toMatchObject({ ok: false, code: 'store_dir_not_found' });
   });
 
-  test('rejects a symlinked trust store directory', async () => {
+  symlinkTest('rejects a symlinked trust store directory', async () => {
     const alice = await ed25519Key('Alice');
     store.writeKey(keyFileName(alice), alice.publicKey);
     store.writeManifest([manifestEntry(alice)]);
@@ -102,19 +112,23 @@ describe('loadTrustStore', () => {
   });
 
   test('trust-store details never contain absolute local paths', async () => {
-    const absolutePath = /(^|[\s:(])\//;
+    // Delimiter-sensitive single patterns missed quoted and parenthesised paths
+    // (the sanitiser used to rewrite the quotes), so every representation is
+    // checked: bare, quoted, parenthesised, Windows drive and UNC.
+    //
+    // The marker set is shared with the audit-sanitisation suite so both files
+    // agree on what must never appear (tmpdir, cwd, homedir, realpaths and the
+    // random mkdtemp basename).
 
     const missingDir = await loadTrustStore({ dir: path.join(store.dir, 'does-not-exist') });
     expect(missingDir.ok).toBe(false);
     if (missingDir.ok) return;
-    expect(missingDir.detail).not.toContain(store.dir);
-    expect(missingDir.detail).not.toMatch(absolutePath);
+    expect(findPathLeaks(missingDir.detail, sensitiveMarkers(store.dir))).toEqual([]);
 
     const missingManifest = await loadTrustStore({ dir: store.dir });
     expect(missingManifest.ok).toBe(false);
     if (missingManifest.ok) return;
-    expect(missingManifest.detail).not.toContain(store.dir);
-    expect(missingManifest.detail).not.toMatch(absolutePath);
+    expect(findPathLeaks(missingManifest.detail, sensitiveMarkers(store.dir))).toEqual([]);
 
     const alice = await ed25519Key('Alice');
     const bob = await ed25519Key('Bob');
@@ -123,8 +137,7 @@ describe('loadTrustStore', () => {
     const mismatch = await loadTrustStore({ dir: store.dir });
     expect(mismatch.ok).toBe(false);
     if (mismatch.ok) return;
-    expect(mismatch.detail).not.toContain(store.dir);
-    expect(mismatch.detail).not.toMatch(absolutePath);
+    expect(findPathLeaks(mismatch.detail, sensitiveMarkers(store.dir))).toEqual([]);
   });
 
   test('reports a missing manifest', async () => {
@@ -166,7 +179,7 @@ describe('loadTrustStore', () => {
     expect(result).toMatchObject({ ok: false, code: 'key_file_not_regular' });
   });
 
-  test('rejects a symlinked key file', async () => {
+  symlinkTest('rejects a symlinked key file', async () => {
     const alice = await ed25519Key('Alice');
     const target = path.join(store.dir, 'real-key.asc');
     fs.writeFileSync(target, alice.publicKey);

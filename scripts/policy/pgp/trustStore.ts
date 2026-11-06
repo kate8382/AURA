@@ -21,7 +21,13 @@ import fs from 'fs';
 import path from 'path';
 import * as openpgp from 'openpgp';
 
-import { sanitizeDetail, validateManifest, findDuplicateKeyId, type ManifestEntry } from './manifest';
+import {
+  isSafeDetailToken,
+  sanitizeDetail,
+  validateManifest,
+  findDuplicateKeyId,
+  type ManifestEntry,
+} from './manifest';
 import { MAX_KEY_FILE_BYTES, MAX_MANIFEST_BYTES, PGP_STRICT_CONFIG, checkKeyAlgorithmPolicy } from './policy';
 import type { TrustStoreErrorCode } from './types';
 
@@ -29,6 +35,15 @@ import type { TrustStoreErrorCode } from './types';
 export const TRUST_STORE_DIR_NAME = path.join('config', 'trusted-keys');
 /** File name of the trust-store manifest. */
 export const TRUST_STORE_MANIFEST_NAME = 'manifest.json';
+
+/**
+ * POSIX spelling of the store directory, used for diagnostics.
+ *
+ * `TRUST_STORE_DIR_NAME` is built with `path.join` and therefore renders as
+ * `config\trusted-keys` on Windows; audit details use this stable, platform-
+ * independent form instead.
+ */
+const TRUST_STORE_DIR_DISPLAY = 'config/trusted-keys';
 
 /** A fully validated trust-store entry. */
 export interface TrustStoreEntry extends ManifestEntry {
@@ -83,6 +98,37 @@ export function resolveTrustStoreDir(startDir: string = __dirname): string | nul
 
 function fail(code: TrustStoreErrorCode, detail: string): TrustStoreLoadResult {
   return { ok: false, code, detail: sanitizeDetail(detail) };
+}
+
+/** Stable, environment-independent description for an unexpected throw. */
+export const UNEXPECTED_ERROR_DETAIL = 'unexpected trust-store error';
+
+/** Node.js error codes are short enums (`ENOENT`, `EACCES`, ...). */
+const SAFE_ERROR_CODE_RE = /^[A-Z][A-Z0-9_]{0,31}$/;
+
+/**
+ * Describes an unexpected exception without copying any of its text.
+ *
+ * The message of a filesystem error contains the absolute path of the file
+ * that failed, so it is never propagated. When the thrown value carries a
+ * well-formed Node.js error code, that code is appended - it is a stable
+ * identifier with no path or host information.
+ *
+ * Reading `code` is itself guarded: an object with a throwing getter (or a
+ * Proxy whose `get` trap throws) must not be able to break the fail-closed
+ * contract by making this helper throw.
+ */
+function describeUnexpectedError(thrown: unknown): string {
+  try {
+    const code =
+      typeof thrown === 'object' && thrown !== null ? (thrown as { code?: unknown }).code : undefined;
+    if (typeof code === 'string' && SAFE_ERROR_CODE_RE.test(code)) {
+      return `${UNEXPECTED_ERROR_DETAIL} (code=${code})`;
+    }
+  } catch {
+    // A throwing accessor / Proxy: fall through to the fixed description.
+  }
+  return UNEXPECTED_ERROR_DETAIL;
 }
 
 /**
@@ -239,7 +285,9 @@ export async function loadTrustStore(options: { dir?: string } = {}): Promise<Tr
   try {
     const dir = options.dir ? path.resolve(options.dir) : resolveTrustStoreDir();
     if (dir === null) {
-      return fail('store_dir_not_found', `no ${TRUST_STORE_DIR_NAME} directory found next to this module`);
+      // `TRUST_STORE_DIR_DISPLAY` (not `TRUST_STORE_DIR_NAME`) keeps the audit
+      // detail in a single, platform-independent form.
+      return fail('store_dir_not_found', `no ${TRUST_STORE_DIR_DISPLAY} directory found next to this module`);
     }
 
     let dirStats: fs.Stats;
@@ -335,7 +383,11 @@ export async function loadTrustStore(options: { dir?: string } = {}): Promise<Tr
     for (const dirent of directoryEntries) {
       if (!dirent.name.toLowerCase().endsWith('.asc')) continue;
       if (!referenced.has(dirent.name)) {
-        return fail('unreferenced_key_file', `key file is not referenced by the manifest: ${dirent.name}`);
+        // A directory entry name is attacker-influenced and may itself look like
+        // a path (POSIX allows `C:\\...` and spaces), so only echo it when it is
+        // a plain identifier.
+        const reportedName = isSafeDetailToken(dirent.name) ? dirent.name : 'an unrecognised .asc file';
+        return fail('unreferenced_key_file', `key file is not referenced by the manifest: ${reportedName}`);
       }
     }
 
@@ -345,6 +397,12 @@ export async function loadTrustStore(options: { dir?: string } = {}): Promise<Tr
     };
   } catch (err) {
     // Defensive: any unexpected throw still ends in a fail-closed result.
-    return fail('unexpected_error', err instanceof Error ? err.message : String(err));
+    //
+    // Raw exception text is never used: Node.js filesystem errors embed absolute
+    // paths (`ENOENT: ..., open '/home/<user>/...'`) and are environment
+    // dependent, so only a stable description plus a validated error code is
+    // reported. `describeUnexpectedError` itself is guarded against throwing
+    // accessors, so this final catch cannot be defeated by a hostile `thrown`.
+    return fail('unexpected_error', describeUnexpectedError(err));
   }
 }
