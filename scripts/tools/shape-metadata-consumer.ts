@@ -1,6 +1,5 @@
 export type DeclaredShape = {
   operation_type?: string;
-  signal_ids?: string[];
 };
 
 // helpers for shape metadata and negative labels
@@ -22,13 +21,8 @@ export function getDeclaredShape(value: unknown): DeclaredShape {
   if (!candidate || typeof candidate !== 'object') return {};
 
   const shape = candidate as Record<string, unknown>;
-  const signalIds = Array.isArray(shape.signal_ids)
-    ? shape.signal_ids.filter((item): item is string => typeof item === 'string')
-    : [];
-
   const output: DeclaredShape = {};
   if (typeof shape.operation_type === 'string') output.operation_type = shape.operation_type;
-  if (signalIds.length > 0) output.signal_ids = signalIds;
   return output;
 }
 

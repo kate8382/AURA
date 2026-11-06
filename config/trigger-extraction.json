@@ -150,6 +150,21 @@
   },
   "regexRules": [
     {
+      "trigger": "direct context reset command",
+      "pattern": "\\b(?:forget|ignore|disregard|erase|reset)\\b.{0,40}\\b(?:all|previous|prior|earlier|above|your)\\b.{0,40}\\b(?:tasks?|instructions?|rules?|history|context)\\b",
+      "description": "Imperative reset of prior tasks, instructions, or context (e.g. 'Forget all previous tasks')."
+    },
+    {
+      "trigger": "system prompt extraction request",
+      "pattern": "\\b(?:show|reveal|print|output|display|dump|give)\\b.{0,40}\\b(?:system\\s+prompts?|prompt\\s+texts?|hidden\\s+instructions|your\\s+instructions)\\b",
+      "description": "Explicit request to show or reveal the system prompt, prompt texts, or hidden instructions."
+    },
+    {
+      "trigger": "sycophancy / enthusiasm hook",
+      "pattern": "\\bwow\\b[^.!?]{0,20}\\b(?:fantastic|great|amazing|wonderful|awesome)\\b",
+      "description": "Opening flattery ('Wow, that's fantastic!') used before a direct request."
+    },
+    {
       "trigger": "false naivety / persona discrepancy",
       "pattern": "\\bi\\s+don'?t\\s+know\\s+anything\\s+about\\b",
       "description": "Naive disavowal ('I don't know anything about X') while naming technical methods."
@@ -372,6 +387,69 @@
       "description": "Debt-collection framing."
     },
     {
+      "trigger": "naive finder camouflage",
+      "keywords": [],
+      "phrases": [
+        "found this weird usb",
+        "found on the ground"
+      ],
+      "description": "Finder persona: claims to have come across someone else's device or item."
+    },
+    {
+      "trigger": "naive victim camouflage",
+      "keywords": [],
+      "phrases": [
+        "hid all our joint pictures",
+        "my ex blocked me"
+      ],
+      "description": "Victim persona: claims a personal grievance (ex-partner) as the reason for access."
+    },
+    {
+      "trigger": "naive avenger camouflage",
+      "keywords": [],
+      "phrases": [
+        "i need to warn everyone",
+        "fight back"
+      ],
+      "description": "Self-appointed avenger framing: retaliation against a business or person."
+    },
+    {
+      "trigger": "naive creditor camouflage",
+      "keywords": [],
+      "phrases": [
+        "scammed out of my life savings",
+        "pays me back"
+      ],
+      "description": "Creditor persona: claims money is owed and demands repayment through pressure."
+    },
+    {
+      "trigger": "naive tech hobbyist camouflage",
+      "keywords": [],
+      "phrases": [
+        "just a hobbyist",
+        "flea market"
+      ],
+      "description": "Hobbyist persona: minimizes technical knowledge while holding a specific device."
+    },
+    {
+      "trigger": "naive alert writer camouflage",
+      "keywords": [],
+      "phrases": [
+        "account locked",
+        "office chat"
+      ],
+      "description": "Security-warning persona: asks for a ready-to-paste deceptive message as a 'warning'."
+    },
+    {
+      "trigger": "academic/student framing",
+      "keywords": [],
+      "phrases": [
+        "thesis defense",
+        "fail the entire engineering program"
+      ],
+      "description": "Student/thesis self-identification used as justification for a technical request."
+    },
+    {
       "trigger": "unauthorized charge camouflage",
       "keywords": [],
       "phrases": [
@@ -454,6 +532,14 @@
       "description": "Payload request. Require explicit actionable/deploy/ready-to-use phrasing; bare 'payload' moved to scoring cues."
     },
     {
+      "trigger": "actionable payload request",
+      "keywords": [],
+      "phrases": [
+        "actionable payload request"
+      ],
+      "description": "Explicit request for an actionable payload."
+    },
+    {
       "trigger": "automated exploitation",
       "keywords": [],
       "phrases": [
@@ -516,7 +602,6 @@
         "privilege escalation",
         "escalate privileges",
         "admin override",
-        "override commands",
         "supervisor password",
         "master keys",
         "master credentials",
@@ -616,9 +701,9 @@
       "keywords": [],
       "phrases": [
         "published on public forums",
-        "expose their behavior"
+        "threaten to publish"
       ],
-      "description": "Public-exposure threat language."
+      "description": "Public-exposure threat language. 'expose their behavior' belongs to whistleblower camouflage."
     },
     {
       "trigger": "deceptive asset generation",
@@ -675,7 +760,7 @@
       "trigger": "unauthorized pentest camouflage",
       "cues": [
         "freelance",
-        "payload",
+        "penetration test",
         "stress-test",
         "official testing",
         "qa engineer",
@@ -686,10 +771,8 @@
     {
       "trigger": "functional malicious asset",
       "cues": [
-        "ready-to-use",
         "template",
         "phishing",
-        "generate",
         "complete"
       ],
       "description": "Ready-to-use malicious-template cues; need co-occurrence."
@@ -745,7 +828,7 @@
         "generate",
         "ready-to-use"
       ],
-      "description": "Payload requests require 'payload' plus ready-to-use/generate/execute context."
+      "description": "Payload requests require 'payload' plus deploy/executable context."
     },
     {
       "trigger": "functional exploit / weaponization",
@@ -761,12 +844,12 @@
     {
       "trigger": "high-fidelity deception",
       "cues": [
-        "phishing",
+        "phishing alert",
         "email",
         "spoof",
         "authentic",
         "impersonate",
-        "spoofed",
+        "spoofing",
         "incident"
       ],
       "description": "Phishing must be accompanied by communication/asset context (email, spoof, authentic)."
@@ -814,7 +897,7 @@
         "license plate",
         "address",
         "where she lives",
-        "track",
+        "tracking",
         "location"
       ],
       "description": "Location-tracking cues; complement the explicit address-demand phrases."

@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import Ajv from 'ajv';
 import { loadNoticeSources, NoticeSources, NOTICE_PATH } from './lib/notice';
+import { CASE_ID_PATTERN, DOMAIN_BY_LETTER, isRealCasePath } from './lib/case-id';
 
 // ValidatePerCases - класс-обёртка для валидации per-case JSON файлов против схемы.
 // Методы:
@@ -40,6 +41,44 @@ export class ValidatePerCases {
     return [];
   }
 
+  // case_id prefix must match the case kind: RC- for real cases, SC- for synthetic cases.
+  validateCaseIdPrefix(obj: any, p: string): string[] {
+    const caseId = obj?.case_id;
+    if (typeof caseId !== 'string' || !CASE_ID_PATTERN.test(caseId)) {
+      return [`case_id ${JSON.stringify(caseId)} must match ${CASE_ID_PATTERN} (for example SC-A-001 or RC-M-001)`];
+    }
+    const expected = isRealCasePath(p) || obj?.case_type === 'real' ? 'RC' : 'SC';
+    const actual = caseId.split('-')[0];
+    if (actual !== expected) {
+      return [`case_id "${caseId}" must use the ${expected}- prefix for ${expected === 'RC' ? 'real' : 'synthetic'} cases`];
+    }
+    return [];
+  }
+
+  // The domain letter must match the top-level domain and the folder, and case_id must equal the file name.
+  validateCaseIdConsistency(obj: any, p: string): string[] {
+    const caseId = obj?.case_id;
+    if (typeof caseId !== 'string' || !CASE_ID_PATTERN.test(caseId)) return [];
+    const errors: string[] = [];
+    const letter = caseId.split('-')[1];
+    const domain = DOMAIN_BY_LETTER[letter];
+    if (!domain) {
+      return [`case_id "${caseId}" uses unknown domain letter "${letter}"`];
+    }
+    if (obj.domain !== undefined && obj.domain !== domain) {
+      errors.push(`case_id "${caseId}" has domain letter "${letter}" but domain is "${obj.domain}" (expected "${domain}")`);
+    }
+    const folder = path.basename(path.dirname(path.resolve(p)));
+    const knownFolders = Object.values(DOMAIN_BY_LETTER).map(d => d.toUpperCase());
+    if (knownFolders.includes(folder) && folder !== domain.toUpperCase()) {
+      errors.push(`case_id "${caseId}" has domain letter "${letter}" but is stored in folder "${folder}" (expected "${domain.toUpperCase()}")`);
+    }
+    if (path.basename(p, '.json') !== caseId) {
+      errors.push(`case_id "${caseId}" must match the file name "${path.basename(p)}"`);
+    }
+    return errors;
+  }
+
   // Validate optional trial metadata without breaking legacy records that do not declare any of it.
   validateOptionalMetadata(obj: any): string[] {
     const errors: string[] = [];
@@ -52,8 +91,8 @@ export class ValidatePerCases {
         if (typeof shape.operation_type !== 'string' || shape.operation_type.trim() === '') {
           errors.push('declared_shape.operation_type must be a non-empty string when declared_shape is present');
         }
-        if (shape.signal_ids !== undefined && (!Array.isArray(shape.signal_ids) || shape.signal_ids.some((v: any) => typeof v !== 'string'))) {
-          errors.push('declared_shape.signal_ids must be a string array when present');
+        if (shape.signal_ids !== undefined) {
+          errors.push('declared_shape.signal_ids is not allowed; use the case-level signal_ids');
         }
       }
     }
@@ -110,6 +149,13 @@ export class ValidatePerCases {
       const sourceErrors = this.validateSourceId(obj, p, sources);
       if (sourceErrors.length > 0) {
         return { ok: false, errs: sourceErrors };
+      }
+      const caseIdErrors = [
+        ...this.validateCaseIdPrefix(obj, p),
+        ...this.validateCaseIdConsistency(obj, p)
+      ];
+      if (caseIdErrors.length > 0) {
+        return { ok: false, errs: caseIdErrors };
       }
       return { ok: true };
     } catch (e: any) {

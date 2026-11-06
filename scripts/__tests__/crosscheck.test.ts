@@ -1,6 +1,15 @@
 import CrossCheckAdapter from '../policy/crossCheckAdapter';
 
 describe('CrossCheckAdapter basic', () => {
+  test('question without id/title/type is audited by name, never as <no-id>', async () => {
+    const adapter = CrossCheckAdapter;
+    const out = await adapter.runAdaptersForCase({}, [{ name: '1. Context Reset', full_text: ['A: x'] } as any]);
+    expect(out).toHaveLength(1);
+    expect(out[0].id).toBe('1. Context Reset');
+    expect(out[0].ok).toBe(false);
+    expect(JSON.stringify(out)).not.toContain('<no-id>');
+  });
+
   test('noop adapter returns not-ok and zero weight', async () => {
     const adapter = CrossCheckAdapter;
     const req = { id: 'cc-1', title: 't', type: 'boolean' } as any;

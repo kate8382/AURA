@@ -80,7 +80,7 @@ describe('recalc pipeline integration', () => {
   test('normalize -> generate weights -> recalc yields an updated, schema-valid case', async () => {
     const casesDir = path.join(tmp, 'cases', 'ACCESS');
     fs.mkdirSync(casesDir, { recursive: true });
-    const casePath = path.join(casesDir, 'EX-EXAMPLE-001.json');
+    const casePath = path.join(casesDir, 'SC-A-900.json');
     fs.copyFileSync(path.join(repoRoot, 'examples', 'sample_case.json'), casePath);
     const initialConfidence = readJson(casePath).confidence;
 

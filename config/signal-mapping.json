@@ -5,7 +5,9 @@
     "camouflage:naive": {
       "id": "camouflage:naive",
       "description": "Naive persona framing, including false innocence, victim, or hobbyist disguises",
-      "implied_action": ["access:privilege"],
+      "implied_action": [
+        "access:privilege"
+      ],
       "triggers": [
         "academic & self-taught framing",
         "false naivety / persona discrepancy",
@@ -21,7 +23,9 @@
     "alibi:academic": {
       "id": "alibi:academic",
       "description": "Academic, educational, or student research alibis used as justification",
-      "implied_action": ["disclosure:external"],
+      "implied_action": [
+        "disclosure:external"
+      ],
       "triggers": [
         "academic & research alibi",
         "academic & student alibi",
@@ -31,7 +35,9 @@
     "alibi:general": {
       "id": "alibi:general",
       "description": "Altruistic or ethical justifications for unauthorized activities",
-      "implied_action": ["access:privilege"],
+      "implied_action": [
+        "access:privilege"
+      ],
       "triggers": [
         "altruistic alibi",
         "ethical justification / alibi"
@@ -40,7 +46,9 @@
     "camouflage:role": {
       "id": "camouflage:role",
       "description": "Professional or authorized role impersonation (e.g., IT staff, auditor, pentester)",
-      "implied_action": ["access:privilege"],
+      "implied_action": [
+        "access:privilege"
+      ],
       "triggers": [
         "crisis it persona",
         "forgotten owner camouflage",
@@ -55,7 +63,9 @@
     "camouflage:domestic": {
       "id": "camouflage:domestic",
       "description": "Personal, domestic, or financial distress narratives used as cover",
-      "implied_action": ["disclosure:external"],
+      "implied_action": [
+        "disclosure:external"
+      ],
       "triggers": [
         "domestic camouflage",
         "emotional & financial camouflage",
@@ -65,10 +75,22 @@
         "unauthorized charge camouflage"
       ]
     },
+    "camouflage:direct": {
+      "id": "camouflage:direct",
+      "description": "Flattery or enthusiasm used to lower the model's guard before a direct request",
+      "implied_action": [
+        "access:privilege"
+      ],
+      "triggers": [
+        "sycophancy / enthusiasm hook"
+      ]
+    },
     "behavior:urgency": {
       "id": "behavior:urgency",
       "description": "Artificial urgency, coercion, or high-pressure communication tactics",
-      "implied_action": ["access:privilege"],
+      "implied_action": [
+        "access:privilege"
+      ],
       "triggers": [
         "artificial urgency / pressure",
         "coercion / pressure",
@@ -79,7 +101,10 @@
     "exploit:actionable": {
       "id": "exploit:actionable",
       "description": "Requests for functional exploits, weaponized assets, or executable payloads",
-      "implied_action": ["execute:command", "egress:outbound"],
+      "implied_action": [
+        "execute:command",
+        "egress:outbound"
+      ],
       "triggers": [
         "actionable geolocation payload",
         "actionable hardware exploit",
@@ -92,9 +117,11 @@
     "evasion:control": {
       "id": "evasion:control",
       "description": "Techniques aimed at bypassing security controls, compliance, or access restrictions",
-      "implied_action": ["access:privilege", "execute:command"],
+      "implied_action": [
+        "access:privilege",
+        "execute:command"
+      ],
       "triggers": [
-        "bypass_auth",
         "compliance evasion",
         "hardware restriction",
         "hollywood script bypass / creative framing",
@@ -103,10 +130,32 @@
         "security control evasion"
       ]
     },
+    "instruction:override": {
+      "id": "instruction:override",
+      "description": "Attempts to override, reset, or erase the model's prior instructions or context",
+      "implied_action": [
+        "access:privilege"
+      ],
+      "triggers": [
+        "direct context reset command"
+      ]
+    },
+    "extraction:system_prompt": {
+      "id": "extraction:system_prompt",
+      "description": "Explicit requests to reveal the model's system prompt or hidden instructions",
+      "implied_action": [
+        "disclosure:external"
+      ],
+      "triggers": [
+        "system prompt extraction request"
+      ]
+    },
     "recon:targeted": {
       "id": "recon:targeted",
       "description": "Targeted intelligence gathering, infrastructure fixation, or automated OSINT scraping",
-      "implied_action": ["egress:outbound"],
+      "implied_action": [
+        "egress:outbound"
+      ],
       "triggers": [
         "automated reconnaissance / osint",
         "data scraping / stalking",
@@ -118,7 +167,9 @@
     "extortion:leverage": {
       "id": "extortion:leverage",
       "description": "Extortion tactics using psychological leverage, reputational threats, or coercion assets",
-      "implied_action": ["disclosure:external"],
+      "implied_action": [
+        "disclosure:external"
+      ],
       "triggers": [
         "intimidation asset",
         "psychological leverage",
@@ -128,7 +179,9 @@
     "deception:fact": {
       "id": "deception:fact",
       "description": "Fabrication of material facts, high-fidelity deception, or fake identity generation",
-      "implied_action": ["disclosure:external"],
+      "implied_action": [
+        "disclosure:external"
+      ],
       "triggers": [
         "deceptive asset generation",
         "high-fidelity deception",
@@ -140,7 +193,9 @@
     "target:highvalue": {
       "id": "target:highvalue",
       "description": "Fixation on high-value corporate targets or display of unjustified domain expertise",
-      "implied_action": ["egress:outbound"],
+      "implied_action": [
+        "egress:outbound"
+      ],
       "triggers": [
         "high-value corporate target",
         "high-value target",
@@ -150,7 +205,9 @@
     "fin:suspicious": {
       "id": "fin:suspicious",
       "description": "Suspicious financial requests, direct fraud indicators, or payment manipulation alibis",
-      "implied_action": ["disclosure:external"],
+      "implied_action": [
+        "disclosure:external"
+      ],
       "triggers": [
         "direct fraud intent",
         "financial_request",

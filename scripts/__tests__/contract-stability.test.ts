@@ -59,11 +59,11 @@ describe('contract-stability', () => {
     const validate = ajv.compile(schema);
 
     const withMetadata = {
-      case_id: 'CASE-NEG-001',
+      case_id: 'SC-N-001',
       category: 'access/test',
+      signal_ids: ['camouflage:naive'],
       declared_shape: {
-        operation_type: 'read',
-        signal_ids: ['camouflage:naive']
+        operation_type: 'read'
       },
       negative_labels: {
         status: 'confirmed_negative',
@@ -73,7 +73,7 @@ describe('contract-stability', () => {
     };
 
     const withoutMetadata = {
-      case_id: 'CASE-NORMAL-001',
+      case_id: 'SC-N-002',
       category: 'access/test',
       scenarios: [{ name: 'Example', text: 'This is a normal request.' }]
     };
@@ -94,9 +94,8 @@ describe('contract-stability', () => {
 
   test('shape metadata helpers default safely when metadata is absent', () => {
     expect(getDeclaredShape({})).toEqual({});
-    expect(getDeclaredShape({ declared_shape: { operation_type: 'read', signal_ids: ['camouflage:naive'] } })).toEqual({
-      operation_type: 'read',
-      signal_ids: ['camouflage:naive']
+    expect(getDeclaredShape({ declared_shape: { operation_type: 'read' } })).toEqual({
+      operation_type: 'read'
     });
     expect(getNegativeLabel({})).toEqual({ status: 'unknown' });
     expect(getNegativeLabel({ annotation: 'labelled benign' })).toEqual({ status: 'unknown', annotation: 'labelled benign' });
@@ -112,21 +111,34 @@ describe('contract-stability', () => {
     expect(res1.signalCount).toBe(Object.keys(JSON.parse(fs.readFileSync(mappingPath, 'utf8')).signals).length);
   });
 
-  test('same_shape fails closed when declared shapes differ', () => {
-    const candidate = { declared_shape: { operation_type: 'read', signal_ids: ['camouflage:naive'] } };
-    const baseline = { declared_shape: { operation_type: 'write', signal_ids: ['camouflage:naive'] } };
+  test('same_shape fails closed when declared domains differ', () => {
+    const candidate = { domain: 'access', declared_shape: { operation_type: 'read' }, signal_ids: ['camouflage:naive'] };
+    const baseline = { domain: 'fraud', declared_shape: { operation_type: 'read' }, signal_ids: ['camouflage:naive'] };
     expect(sameShape(candidate, baseline)).toBe(false);
     expect(sameShape(candidate, candidate)).toBe(true);
   });
 
-  test('same_shape fails closed when a declared shape is missing or operation_type is empty', () => {
-    const shaped = { declared_shape: { operation_type: 'read', signal_ids: [] } };
+  test('same_shape ignores the sub-operation and compares domain and case-level signal_ids', () => {
+    const a = { domain: 'access', declared_shape: { operation_type: 'read' }, signal_ids: ['camouflage:naive'] };
+    const subOp = { domain: 'access', declared_shape: { operation_type: 'write' }, signal_ids: ['camouflage:naive'] };
+    const otherSignal = { domain: 'access', declared_shape: { operation_type: 'read' }, signal_ids: ['camouflage:role'] };
+    const reordered = { domain: 'access', declared_shape: { operation_type: 'read' }, signal_ids: ['camouflage:naive', 'camouflage:role'] };
+    const reorderedSame = { domain: 'access', declared_shape: { operation_type: 'read' }, signal_ids: ['camouflage:role', 'camouflage:naive'] };
+    expect(sameShape(a, subOp)).toBe(true);
+    expect(sameShape(a, otherSignal)).toBe(false);
+    expect(sameShape(reordered, reorderedSame)).toBe(true);
+  });
+
+  test('same_shape fails closed when a declared shape or domain is missing or operation_type is empty', () => {
+    const shaped = { domain: 'access', declared_shape: { operation_type: 'read' }, signal_ids: [] };
     expect(sameShape({}, {})).toBe(false);
     expect(sameShape({}, shaped)).toBe(false);
     expect(sameShape(shaped, {})).toBe(false);
-    const empty = { declared_shape: { operation_type: '', signal_ids: [] } };
+    const noDomain = { declared_shape: { operation_type: 'read' }, signal_ids: [] };
+    expect(sameShape(noDomain, noDomain)).toBe(false);
+    const empty = { domain: 'access', declared_shape: { operation_type: '' }, signal_ids: [] };
     expect(sameShape(empty, empty)).toBe(false);
-    expect(sameShape({ declared_shape: { operation_type: '  ' } }, { declared_shape: { operation_type: '  ' } })).toBe(false);
+    expect(sameShape({ domain: 'access', declared_shape: { operation_type: '  ' } }, { domain: 'access', declared_shape: { operation_type: '  ' } })).toBe(false);
   });
 
   test('FPR calculation excludes unknown labels and counts confirmed-negative/benign as negatives', () => {

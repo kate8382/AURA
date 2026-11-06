@@ -3,9 +3,7 @@ type AnyObj = { [k: string]: any };
 /**
  * reorderCaseKeys
  * Центральная утилита для формирования канонического порядка полей в per-case JSON.
- * Порядок:
- *  case_id, category, confidence_raw, scenarios, suggested_action, legal_risk,
-  behavioral_patterns, cross_check, confidence, deception_threshold, ...rest
+ * Порядок совпадает с порядком в schemas/per-case-schema.json; динамические поля идут последними.
  */
 export function reorderCaseKeys(obj: AnyObj): AnyObj {
   const ordered: AnyObj = {};
@@ -13,17 +11,21 @@ export function reorderCaseKeys(obj: AnyObj): AnyObj {
   add('case_id', obj.case_id);
   add('domain', obj.domain);
   add('category', obj.category);
+  add('provenance', obj.provenance);
   add('signal_ids', obj.signal_ids);
   add('scenarios', obj.scenarios);
+  add('negative_labels', obj.negative_labels);
+  add('declared_shape', obj.declared_shape);
   add('suggested_action', obj.suggested_action);
   add('legal_risk', obj.legal_risk);
   add('behavioral_patterns', obj.behavioral_patterns);
   add('cross_check', obj.cross_check);
-  add('confidence', obj.confidence);
-  add('decision', obj.decision);
   add('deception_threshold', obj.deception_threshold);
-  add('confidence_raw', obj.confidence_raw);
-  for (const k of Object.keys(obj)) if (!Object.prototype.hasOwnProperty.call(ordered, k)) ordered[k] = obj[k];
+  const dynamicKeys = ['confidence', 'decision', 'confidence_raw', 'decision_reasons', 'cross_check_audit'];
+  for (const k of Object.keys(obj)) {
+    if (!Object.prototype.hasOwnProperty.call(ordered, k) && !dynamicKeys.includes(k)) ordered[k] = obj[k];
+  }
+  for (const k of dynamicKeys) add(k, obj[k]);
   return ordered;
 }
 

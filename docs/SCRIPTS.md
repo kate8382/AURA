@@ -43,6 +43,15 @@ for a safe preview and `npm run recalc:confidence:real:apply` to write explicitl
 - Use `gen:triggers:apply` only when you want `signal_ids` persisted into the case files for auditing
   or external integration.
 
+1a) Case template generator: `scripts/new-case-template.ts`
+
+- Creates a new case JSON with a canonical key order. IDs follow the scheme in
+  [DATA_HANDLING_POLICY.md §2.5](./DATA_HANDLING_POLICY.md): `SC-<domain>-<NNN>` for synthetic cases (default)
+  and `RC-<domain>-<NNN>` for real cases.
+- `-t, --type synthetic|real` selects the prefix. `-l <letter>` selects the domain letter, `-n <number>` or `-a` (auto-increment) selects the sequence.
+- Example: `node -r ts-node/register scripts/new-case-template.ts -o real_cases -l M -a -t real --allow-real-write`
+- Step-by-step workflow for real cases (template, provenance, normalize, recalc, validate): [REAL_CASES_PIPELINE.md](./REAL_CASES_PIPELINE.md)
+
 2) Recalculator: `scripts/recalc_confidence.ts`
 
 - Purpose: recompute `confidence` fields for cases using `config/trigger-weights.json` and
@@ -178,8 +187,7 @@ node -r ts-node/register scripts/normalize-percases.ts synthetic_cases --extract
 - Known limitations (by design): rule-based surface matching, not semantic understanding;
   English-only. Expect false negatives for persona/camouflage labels that need contextual
   interpretation (e.g. specific `naive * camouflage` roles), for machine-style labels with
-  no surface cues (`bypass_auth`, `financial_request`), and for near-duplicate labels left
-  to curator judgment (`academic/student framing`). Technique mentions inside naive
+  no surface cues (`financial_request`, used only in unit tests). Technique mentions inside naive
   disavowals (e.g. naming `Instaloader` while claiming ignorance) surface technique
   triggers even when curators labeled only the persona. Bare `immediately/immediate` is
   deliberately not an urgency cue (in the corpus it marks dispute/threat wording).
@@ -225,7 +233,7 @@ npm run validate:triggers
 - CI integration: `npm run check:errors` and the main test suite verify that the signal catalog hash is up-to-date with `signal-mapping.json`.
 
 Additional case-level metadata for trial engines:
-- `declared_shape` is an optional object with `operation_type` and `signal_ids` used to declare the expected request shape for candidate rule experiments.
+- `declared_shape` is an optional object with `operation_type` used to declare the expected request shape for candidate rule experiments. Signals are taken from the case-level `signal_ids` and must not be duplicated inside `declared_shape` (the validator rejects it).
 - `negative_labels` is an optional object carrying `status` values such as `confirmed_negative`, `benign`, or `unknown` to distinguish known safe cases from cases that should remain unclassified.
 - These fields are intentionally optional and are safe to omit in current case files without breaking the schema or existing workflows.
 - `same_shape` is fail-closed: it returns false when either case lacks `declared_shape` or its `operation_type` is empty.
@@ -260,7 +268,7 @@ Exit codes: `0` success, `1` runtime failure or unreadable data, `2` invalid cas
 Log format and verbosity:
 
 ```text
-[ERROR] cannot read case file file=synthetic_cases/ACCESS/A-CASE-001.json error="Unexpected token"
+[ERROR] cannot read case file file=synthetic_cases/ACCESS/SC-A-001.json error="Unexpected token"
 ```
 
 - `AURA_LOG_FORMAT=json` prints one JSON object per line (`level`, `message`, plus fields such as `file`, `case_id`, `error`).

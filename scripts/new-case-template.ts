@@ -1,25 +1,36 @@
 import fs from 'fs/promises';
 import path from 'path';
 import readline from 'readline';
-import { PROMPT_BASE } from './recalc_confidence';
 import { assertRealWriteAllowed } from './lib/cases-cli';
+import { CASE_PREFIX, CaseKind } from './lib/case-id';
 
 // NewCaseTemplate - класс для создания шаблона нового кейса с каноническим порядком ключей.
 export class NewCaseTemplate {
-  createTemplate(caseId?: string) {
-    const id = caseId || `X-CASE-000`;
-    // Поля упорядочены намеренно: confidence_raw до scenarios; confidence идёт после cross_check
+  createTemplate(caseId?: string, kind: CaseKind = 'synthetic') {
+    const id = caseId || `${CASE_PREFIX[kind]}-X-000`;
+    // Поля упорядочены намеренно: case_id, domain, category, provenance (только real), signal_ids,
+    // scenarios, negative_labels, ...
     // declared_shape is omitted: a present one needs a non-empty operation_type from the author.
-    const tpl: any = {
-      case_id: id,
-      category: "",
+    // confidence/decision/decision_reasons/confidence_raw не закладываются в шаблон:
+    // их заполняют normalize-percases.ts и recalc_confidence.ts.
+    const tpl: any = { case_id: id, domain: "", category: "" };
+    if (kind === 'real') {
+      tpl.provenance = {
+        source_id: "",
+        source_url: "",
+        license: "",
+        authors: [],
+        redaction_status: "full_text"
+      };
+    }
+    Object.assign(tpl, {
       signal_ids: [],
-      negative_labels: { status: "unknown" },
       scenarios: [
         { name: "", text: "", triggers: [] },
         { name: "", text: "", triggers: [] },
         { name: "", text: "", triggers: [] }
       ],
+      negative_labels: { status: "unknown" },
       suggested_action: "cross_check",
       legal_risk: { short_summary: "", full_text: [] },
       behavioral_patterns: { short_summary: "Behavioral Patterns (Signals)", full_text: [""] },
@@ -31,24 +42,21 @@ export class NewCaseTemplate {
           { name: "3. Direct Absurdity Callout", full_text: [""] }
         ]
       },
-      confidence: PROMPT_BASE,
       deception_threshold: {
         short_summary: "Deception Threshold",
         full_text: [
-          { name: "1. Red Flag 1 ()", full_text: ["A: ", "B: "] },
+          { name: "Red Flag 1 ()", full_text: ["A: ", "B: "] },
           { name: "Red Flag 2 (Persona Shift)", full_text: ["A: ", "B: "] },
           { name: "3. Block Trigger (100% Risk)", full_text: ["A: ", "B: ", "Action: "] }
         ]
       }
-    } as any;
-    // place audit-only `confidence_raw` at the end of the object so it does not interfere with main schema ordering
-    tpl.confidence_raw = PROMPT_BASE;
-
+    });
     return tpl;
   }
 
-  async writeTemplate(outDir = process.env.CASES_DIR || 'synthetic_cases', caseId?: string, dryRun = false, sectionLetter?: string, seqNumber?: number, autoSeq = false) {
-    const tpl = this.createTemplate(caseId);
+  async writeTemplate(outDir = process.env.CASES_DIR || 'synthetic_cases', caseId?: string, dryRun = false, sectionLetter?: string, seqNumber?: number, autoSeq = false, kind: CaseKind = 'synthetic') {
+    const tpl = this.createTemplate(caseId, kind);
+    const prefix = CASE_PREFIX[kind];
     const fileNameBase = `${tpl.case_id}.json`;
     // If outDir exists and contains subdirectories, allow mapping by initial letter
     let finalOutDir = outDir;
@@ -127,7 +135,7 @@ export class NewCaseTemplate {
           const files = await fs.readdir(finalOutDir);
           let max = 0;
           for (const f of files) {
-            const m = f.match(new RegExp(`^${L}-CASE-(\\d+)\\.json$`));
+            const m = f.match(new RegExp(`^${prefix}-${L}-(\\d+)\\.json$`));
             if (m) {
               const n = parseInt(m[1], 10);
               if (!Number.isNaN(n) && n > max) max = n;
@@ -140,9 +148,9 @@ export class NewCaseTemplate {
       }
       if (typeof seq === 'number') {
         const numStr = String(seq).padStart(3, '0');
-        tpl.case_id = `${L}-CASE-${numStr}`;
+        tpl.case_id = `${prefix}-${L}-${numStr}`;
       } else {
-        tpl.case_id = tpl.case_id.replace(/^./, L);
+        tpl.case_id = tpl.case_id.replace('-X-', `-${L}-`);
       }
     }
     const outPath = path.resolve(process.cwd(), finalOutDir, `${tpl.case_id}.json`);
@@ -165,10 +173,16 @@ if (require.main === module) {
   let sectionLetter: string | undefined;
   let seqNumber: number | undefined;
   let autoSeq = false;
+  let kind: CaseKind = 'synthetic';
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '-o' || a === '--out' || a === '--dir' || a === '-d') outDir = argv[++i];
     else if (a === '-i' || a === '--id') caseId = argv[++i];
+    else if (a === '-t' || a === '--type') {
+      const v = argv[++i];
+      if (v !== 'synthetic' && v !== 'real') throw new Error(`--type must be 'synthetic' or 'real', got '${v}'`);
+      kind = v;
+    }
     else if (a === '--dry-run') dry = true;
     else if (a === '-l' || a === '--letter') {
       // allow passing section initial letter from CLI
@@ -190,5 +204,5 @@ if (require.main === module) {
   } catch (err) {
     fail(err);
   }
-  new NewCaseTemplate().writeTemplate(outDir, caseId, dry, sectionLetter, seqNumber, autoSeq).catch(fail);
+  new NewCaseTemplate().writeTemplate(outDir, caseId, dry, sectionLetter, seqNumber, autoSeq, kind).catch(fail);
 }
