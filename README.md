@@ -2,7 +2,7 @@
 
 **AURA** (AI User Risk Assessment) is an open-source library of structured behavioral matrices, heuristics, and validation tooling designed to detect manipulation, deception, and grey-zone threats in human–AI interactions.
 
-Unlike static safety guardrails, **AURA** focuses on the psychological and tactical vectors of social engineering, helping developers build resilient, context-aware AI agents.
+**AURA** is not only a static training base. It works as a dynamic heuristic filter and runtime auditor (a Safety & Efficiency Gateway) for AI agents. Its matrices and validators check incoming prompts against known manipulation patterns before they reach an LLM. Scoring is deterministic and does not call an LLM, so suspicious requests can be blocked at the input without sending context through an expensive LLM-based filter. This is intended to save tokens and reduce latency. The repository does not yet include benchmarks that measure these savings.
 
 <p align="center">
   <img src="assets/banner_1.png" alt="AURA Banner" width="100%"/>
@@ -23,6 +23,15 @@ _Found this project useful or interesting? Drop a ⭐ — plus to your developer
 - **Granular Threat Categorization** — Structured cases divided into three core domains: `MANIPULATION`, `FRAUD`, or `ACCESS`, in two origins: synthetic (`SC-`) and real (`RC-`, with per-case provenance).
 
 - **Heuristic Risk Scoring** — Dynamic confidence recalculation based on behavioral triggers, alibis, and cross-checks.
+
+- **Attack Anatomy** — AURA analyzes the psychological and tactical structure of a request, not only its keywords. A request is modeled as:
+
+ **$$\text{Prompt} = \text{Persona} + \text{Target} + \text{Evasion Method} + \text{Alibi}$$**
+
+  - **Persona** — the role the requester claims (e.g., researcher, admin, hobbyist).
+  - **Target** — the asset or action being sought (data, system, person, or restricted content).
+  - **Evasion Method** — the technique used to bypass controls (e.g., role-play, instruction override, fragmentation).
+  - **Alibi** — the justification that makes the request look legitimate (e.g., "for training", "for a novel").
 
 - **Strict Schema Validation** — AJV-backed JSON schema and Jest tests to ensure every behavioral case is syntactically correct and ready for AI training or integration.
 
@@ -64,6 +73,16 @@ _Found this project useful or interesting? Drop a ⭐ — plus to your developer
 - `RC-<domain>-NNN` (for example `RC-M-001`) — real cases in `real_cases/`, each with a `provenance` block.
 
 How the two differ and how to add a real case: [docs/REAL_CASES_PIPELINE.md](docs/REAL_CASES_PIPELINE.md); sources and licenses: [real_cases/NOTICE.md](real_cases/NOTICE.md).
+
+### Domains
+
+Each case belongs to exactly one domain. The domain letter in `case_id`, the `domain` field, and the folder must match (checked by `validateCaseIdConsistency`).
+
+- **`MANIPULATION`** (`M`) — social engineering, psychological pressure, and manipulation of context or intent (e.g., harassment, defamation, instruction override).
+- **`FRAUD`** (`F`) — umbrella domain for bypassing material or physical controls: document forgery, financial fraud, identity forgery, and instructions for dangerous or prohibited materials and substances.
+- **`ACCESS`** (`A`) — direct attacks on the technical side of an LLM system or the systems behind it: jailbreaks, system prompt extraction, unauthorized code execution, and data leakage.
+
+**Multi-pattern cases.** A prompt often combines traits of several domains. Place the case by its **primary vector**: the domain that matches the final goal the requester wants (the Primary Objective). Tactics from other domains are a means to that goal and do not change the folder. For example, if social engineering (`MANIPULATION`) is used to obtain restricted instructions (`FRAUD`), the case goes to `FRAUD`. Record the other patterns in `signal_ids` and `cross_check`. The validator checks only that the folder, letter, and `domain` agree; the choice of domain is a contributor decision.
 
 ## Quick Start & Testing
 
