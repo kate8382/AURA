@@ -1,50 +1,53 @@
 # Contributing to AURA
 
-Thank you for your interest in **AURA**. To ensure consistent quality, intellectual property control, and a focused product roadmap, **AURA is currently developed and maintained solely by the original author Ecaterina Sevciuc (@kate8382)**.
-
-At this time we do **not** accept external code contributions, Pull Requests (PRs), or direct database additions. The maintainer will review external feedback and decide whether to incorporate it.
+Thank you for your interest in **AURA**. This guide explains how to propose work, claim tasks, and open pull requests.
 
 ---
 
-## How you can help (without PRs)
+## 1. Claiming issues
 
-Even though we do not accept direct code or data PRs, community feedback is valuable. Please use Issues for the following:
+Before you start work or write code, comment on the relevant Issue (for example, "I'd like to work on this"). A maintainer will assign the Issue to you. This prevents duplicated work and conflicting PRs.
 
-### 1) Bug reports & reproducible issues
-- Open an Issue titled `bug: <short description>` with steps to reproduce, expected vs actual behaviour, and any relevant logs or minimal examples.
+## 2. Workflow
 
-### 2) Feature or scenario suggestions
-- Open an Issue titled `idea: <short title>` or use the `idea` label. Provide a concise scenario description, suggested triggers, and why it is important.
-- If the suggestion is accepted, the maintainer may implement, validate, and commit the case; contributors who provided the idea will be credited in release notes on request.
+- Each task is done in a **separate branch** created from an up-to-date `main`.
+- Before opening a PR, run locally:
+  - `npm run validate`
+  - `npm run validate:real` (if you changed `real_cases/`)
+  - `npx tsc --noEmit`
+  - `npm test`
+- Use the PR template ([PULL_REQUEST_TEMPLATE.md](./.github/PULL_REQUEST_TEMPLATE.md)). Link the Issue with `Closes #<number>` or `Fixes #<number>`.
+- **All PRs require at least 1 maintainer approval before merge.**
 
-### 3) Integration feedback & evaluation reports
-- If you integrate `synthetic_cases/` into pipelines, share aggregated evaluation metrics (false positives/negatives), environment details, and example inputs (anonymized). This helps improve heuristics.
+## 3. Creating Issues
+
+Use the templates in [.github/ISSUE_TEMPLATE/](./.github/ISSUE_TEMPLATE/) and prefix titles as follows:
+
+- `bug:` for bugs, using [bug_report.md](./.github/ISSUE_TEMPLATE/bug_report.md)
+- `idea:` for new cases, tools, or ideas, using [feature_request.md](./.github/ISSUE_TEMPLATE/feature_request.md)
+- `chore:` or `enhancement:` for architectural improvements
+- `security:` for vulnerabilities. **Do not open a public Issue.** See [security.md](./.github/ISSUE_TEMPLATE/security.md)
+
+## 4. Case contributions
+
+- Synthetic cases live in `synthetic_cases/` with the `SC-` prefix.
+- Real cases live in `real_cases/` with the `RC-` prefix. Each needs complete `provenance` (source, license, redaction status). Create them with `npm run new-case:real`.
+- Do not include real personal data or PII in Issues, PRs, or case files.
+
+## 5. Security
+
+Do not report vulnerabilities in public Issues. Follow [security.md](./.github/ISSUE_TEMPLATE/security.md).
+
+## 6. Licensing
+
+- **Code & tooling:** Business Source License 1.1 (BSL 1.1). See [LICENSE](./LICENSE). Commercial production use requires a separate commercial license.
+- **Public cases (`synthetic_cases/`):** CC BY-NC 4.0. See [DATA_LICENSE](./DATA_LICENSE).
+- By contributing, you agree that your contributions are released under these licenses.
+
+## 7. Commercial and private requests
+
+For commercial licensing, expanded datasets, or private repository access, contact [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com) or [Ecaterina Sevciuc on LinkedIn](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/).
 
 ---
 
-## Private / Commercial Requests
-
-- **Public dataset:** `synthetic_cases/` is available under CC BY‑NC 4.0 for non‑commercial use. Do not expect direct support or PR merges for public cases.
-- **Commercial licensing:** For commercial access to expanded datasets, private branches, or API access, contact: [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com) or via LinkedIn: [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/). Commercial arrangements may include NDA, dataset export, or private repository access.
-- **Non‑commercial private testing option:** If you are a non‑commercial developer or researcher and want private‑case testing, we offer a collaborative evaluation: you may provide a sandboxed agent endpoint or temporary access credentials; the maintainer will run private cases locally (no private data will be published) and return evaluation results or trained model artifacts as agreed. Contact via the email above to arrange terms.
-
-## Security & data handling
-
-- Do not submit real personal data or sensitive records in Issues or attachments. Public cases should never contain PII.
-- Private datasets (`private_cases/`) are managed by the maintainer; if you supply any sample data for private testing it must be anonymized and provided under an agreed contract.
-
-## Testing & expectations
-
-- The repository includes validation tooling and tests. Before suggesting schema changes, run local checks: `npx tsc --noEmit`, `npm run validate` (or `npm run validate:percases`), and `npm test`.
-- Tests are located in `scripts/__tests__/`.
-
-## Licensing reminder
-
-- **Code & Tooling:** Business Source License 1.1 (BSL 1.1) — see [LICENSE](./LICENSE). The Licensor permits non‑commercial use (research, education, testing, and evaluation) under the terms of the BSL. Commercial production use or providing the Software as a commercial hosted service requires a separate commercial license; contact the maintainer for details. The Licensed Work will be relicensed under Apache‑2.0 on the Change Date specified in `LICENSE` (2029-10-05).
-- **Public cases (`synthetic_cases/`):** CC BY‑NC 4.0 — see [DATA_LICENSE](./DATA_LICENSE).
-
-If a suggestion is implemented by the maintainer, contributed ideas will be credited in release notes upon request.
-
----
-
-*If you have an idea that doesn't fit as a bug or PR, open an Issue and label it `idea` — the maintainer will review it.*
+*Questions? Open an Issue with the `idea:` prefix.*

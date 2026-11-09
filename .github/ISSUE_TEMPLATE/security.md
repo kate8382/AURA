@@ -6,17 +6,17 @@ labels: security
 assignees: ''
 ---
 
-If you believe you've discovered a security vulnerability in AURA (validators, schemas, or tooling), do NOT include exploit details or sample sensitive data in a public Issue.
+If you believe you've discovered a security vulnerability in AURA (validators, schemas, or tooling), do NOT open a public Issue and do NOT include exploit details, sample sensitive data, or personal data (PII) in any public Issue, PR, or comment.
 
-Please report vulnerabilities privately to the maintainer:
+Report vulnerabilities privately to the maintainer:
 
 - Email: [e.sevciuc82@gmail.com](mailto:e.sevciuc82@gmail.com)
 - LinkedIn: [Ecaterina Sevciuc](https://www.linkedin.com/in/ecaterina-sevciuc-497017364/)
 
-Provide the following in your private disclosure message:
+Include in your private disclosure:
 - Short summary of the issue
 - Affected component (file, script, schema)
-- Steps to reproduce (anonymized) or a private attachment if necessary
+- Steps to reproduce (anonymized), or a private attachment if necessary
 - Impact assessment and suggested mitigations
 
 The maintainer will acknowledge receipt within 72 hours and coordinate remediation and disclosure timelines.
