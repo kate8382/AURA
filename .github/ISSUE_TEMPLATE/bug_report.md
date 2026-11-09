@@ -9,22 +9,30 @@ assignees: ''
 **Describe the bug**
 A clear and concise description of what the bug is.
 
+**Command run**
+<!-- e.g. `npm run validate:real`, `npm run recalc:confidence` -->
+
 **To Reproduce**
-Steps to reproduce the behavior:
 1. Go to '...'
-2. Run `node -r ts-node/register scripts/validate-percases.ts synthetic_cases`
+2. Run `npm run ...`
 3. Observe the error
 
 **Expected behavior**
 What you expected to happen.
 
-**Screenshots / logs**
-If applicable, add screenshots or console logs.
+**Actual behavior**
+What actually happened.
 
-**Environment (please complete the following information):**
-- OS: (e.g. Windows 10, macOS 12)
-- Node.js version: (e.g. 18.x)
-- AURA commit/ref: (if known)
+**Logs**
+Run with JSON logging and paste the relevant output (remove any sensitive data):
+```
+AURA_LOG_FORMAT=json <command>
+```
+
+**Environment**
+- OS: (e.g. Windows 11, macOS 14, Ubuntu 24.04)
+- Node.js version: (output of `node -v`)
+- AURA commit/ref: (output of `git rev-parse --short HEAD`)
 
 **Additional context**
-Add any other context about the problem here.
+Anything else that helps reproduce the problem.

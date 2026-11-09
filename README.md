@@ -2,7 +2,9 @@
 
 **AURA** (AI User Risk Assessment) is an open-source library of structured behavioral matrices, heuristics, and validation tooling designed to detect manipulation, deception, and grey-zone threats in human–AI interactions.
 
-**AURA** is not only a static training base. It works as a dynamic heuristic filter and runtime auditor (a Safety & Efficiency Gateway) for AI agents. Its matrices and validators check incoming prompts against known manipulation patterns before they reach an LLM. Scoring is deterministic and does not call an LLM, so suspicious requests can be blocked at the input without sending context through an expensive LLM-based filter. This is intended to save tokens and reduce latency. The repository does not yet include benchmarks that measure these savings.
+**AURA** provides behavioral datasets (`synthetic_cases/` and `real_cases/`), signal mappings, and deterministic scoring scripts that run locally on case data. Because the scoring is deterministic and does not rely on an external LLM call, detectors built on these matrices can evaluate requests locally without incurring additional LLM inference costs or latency.
+
+The repository currently focuses on dataset structure, heuristics, and offline evaluation tooling (not a live proxy gateway).
 
 <p align="center">
   <img src="assets/banner_1.png" alt="AURA Banner" width="100%"/>
