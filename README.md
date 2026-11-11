@@ -126,7 +126,7 @@ Normalization, case creation, and the `--dry-run` / `--allow-real-write` rules: 
 
 ## Scripts & Configuration
 
-Full command reference, flags, exit codes: [docs/SCRIPTS.md](docs/SCRIPTS.md). Russian command list: [docs/COMMANDS_RU.md](docs/COMMANDS_RU.md).
+Full command reference, flags, exit codes: [docs/SCRIPTS.md](docs/SCRIPTS.md).
 
 - Real-case workflow (template → provenance → normalize → recalc → validate): [docs/REAL_CASES_PIPELINE.md](docs/REAL_CASES_PIPELINE.md).
 - Signal IDs and trigger mapping (`config/signal-mapping.json`): [docs/SIGNAL_IDS.md](docs/SIGNAL_IDS.md).
