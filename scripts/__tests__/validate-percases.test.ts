@@ -11,6 +11,46 @@ const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'schemas', 'per-ca
 const validateCase = new Ajv({ allErrors: true, strict: false }).compile(schema);
 
 describe('validate-percases script', () => {
+  test('accepts benign case IDs in benign_cases/ with the B domain letter', () => {
+    const validator = new ValidatePerCases();
+    const synthetic = path.join(repoRoot, 'benign_cases', 'synthetic', 'SC-B-001.json');
+    const real = path.join(repoRoot, 'benign_cases', 'real', 'RC-B-001.json');
+
+    expect(validator.validateCaseIdConsistency({ case_id: 'SC-B-001', domain: 'benign' }, synthetic)).toEqual([]);
+    expect(validator.validateCaseIdPrefix({ case_id: 'RC-B-001', case_type: 'real' }, real)).toEqual([]);
+  });
+
+  test('generated benign template passes the schema and benign rules after recalc', () => {
+    const validator = new ValidatePerCases();
+    const p = path.join(repoRoot, 'benign_cases', 'synthetic', 'SC-B-001.json');
+    const tpl = new NewCaseTemplate().createTemplate(undefined, 'synthetic', true);
+
+    expect(tpl.case_id).toBe('SC-B-000');
+    expect(validateCase(tpl)).toBe(true);
+    // The template has no decision yet; recalc:confidence writes decision "allow" for benign cases.
+    expect(validator.validateBenignCase(tpl, p)).toHaveLength(1);
+    expect(validator.validateBenignCase({ ...tpl, decision: 'allow', confidence: 0 }, p)).toEqual([]);
+  });
+
+  test('rejects benign cases with a non-allow decision, triggers or cross-check questions', () => {
+    const validator = new ValidatePerCases();
+    const p = path.join(repoRoot, 'benign_cases', 'synthetic', 'SC-B-001.json');
+    const tpl = new NewCaseTemplate().createTemplate('SC-B-001', 'synthetic', true);
+    const ok = { ...tpl, decision: 'allow', confidence: 0 };
+
+    expect(validator.validateBenignCase({ ...ok, decision: 'pending' }, p)).toHaveLength(1);
+    expect(validator.validateBenignCase({ ...ok, scenarios: [{ name: 'x', text: 'y', triggers: ['z'] }] }, p)).toHaveLength(1);
+    expect(validator.validateBenignCase({ ...ok, cross_check: { questions: [{ name: 'q' }] } }, p)).toHaveLength(1);
+  });
+
+  test('rejects cross_check as the action for a benign case', () => {
+    const validator = new ValidatePerCases();
+    const p = path.join(repoRoot, 'benign_cases', 'synthetic', 'SC-B-001.json');
+    const tpl = new NewCaseTemplate().createTemplate('SC-B-001', 'synthetic', true);
+
+    expect(validator.validateBenignCase({ ...tpl, decision: 'allow', suggested_action: 'cross_check' }, p)).toHaveLength(1);
+  });
+
   test('accepts a minimal case and the generated new-case template', () => {
     const minimal = {
       case_id: 'SC-M-001',

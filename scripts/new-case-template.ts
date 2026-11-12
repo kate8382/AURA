@@ -1,12 +1,40 @@
 import fs from 'fs/promises';
 import path from 'path';
 import readline from 'readline';
-import { assertRealWriteAllowed } from './lib/cases-cli';
+import { assertRealWriteAllowed, BENIGN_CASES_DIR } from './lib/cases-cli';
 import { CASE_PREFIX, CaseKind } from './lib/case-id';
 
 // NewCaseTemplate - класс для создания шаблона нового кейса с каноническим порядком ключей.
 export class NewCaseTemplate {
-  createTemplate(caseId?: string, kind: CaseKind = 'synthetic') {
+  // Benign (safe) cases skip the attack-style cross-check: suggested_action "allow", response_constraint "none",
+  // empty questions. The validator enforces the same rules for files under benign_cases/.
+  private createBenignTemplate(id: string, kind: CaseKind) {
+    const tpl: any = { case_id: id, domain: 'benign', case_type: kind, category: "" };
+    if (kind === 'real') tpl.provenance = this.provenanceBlock();
+    return Object.assign(tpl, {
+      signal_ids: [],
+      scenarios: [{ name: "", text: "", triggers: [] }],
+      negative_labels: { status: "benign" },
+      suggested_action: "allow",
+      response_constraint: "none",
+      legal_risk: { short_summary: "", full_text: [] },
+      behavioral_patterns: { short_summary: "Behavioral Patterns (Signals)", full_text: [""] },
+      cross_check: { short_summary: "Not required for benign cases", questions: [] }
+    });
+  }
+
+  private provenanceBlock() {
+    return {
+      source_id: "",
+      source_url: "",
+      license: "",
+      authors: [],
+      redaction_status: "full_text"
+    };
+  }
+
+  createTemplate(caseId?: string, kind: CaseKind = 'synthetic', benign = false) {
+    if (benign) return this.createBenignTemplate(caseId || `${CASE_PREFIX[kind]}-B-000`, kind);
     const id = caseId || `${CASE_PREFIX[kind]}-X-000`;
     // Поля упорядочены намеренно: case_id, domain, category, provenance (только real), signal_ids,
     // scenarios, negative_labels, ...
@@ -14,15 +42,7 @@ export class NewCaseTemplate {
     // confidence/decision/decision_reasons/confidence_raw не закладываются в шаблон:
     // их заполняют normalize-percases.ts и recalc_confidence.ts.
     const tpl: any = { case_id: id, domain: "", category: "" };
-    if (kind === 'real') {
-      tpl.provenance = {
-        source_id: "",
-        source_url: "",
-        license: "",
-        authors: [],
-        redaction_status: "full_text"
-      };
-    }
+    if (kind === 'real') tpl.provenance = this.provenanceBlock();
     Object.assign(tpl, {
       signal_ids: [],
       scenarios: [
@@ -54,14 +74,15 @@ export class NewCaseTemplate {
     return tpl;
   }
 
-  async writeTemplate(outDir = process.env.CASES_DIR || 'synthetic_cases', caseId?: string, dryRun = false, sectionLetter?: string, seqNumber?: number, autoSeq = false, kind: CaseKind = 'synthetic') {
-    const tpl = this.createTemplate(caseId, kind);
+  async writeTemplate(outDir = process.env.CASES_DIR || 'synthetic_cases', caseId?: string, dryRun = false, sectionLetter?: string, seqNumber?: number, autoSeq = false, kind: CaseKind = 'synthetic', benign = false) {
+    const tpl = this.createTemplate(caseId, kind, benign);
     const prefix = CASE_PREFIX[kind];
     const fileNameBase = `${tpl.case_id}.json`;
-    // If outDir exists and contains subdirectories, allow mapping by initial letter
+    // If outDir exists and contains subdirectories, allow mapping by initial letter.
+    // Benign folders (benign_cases/synthetic|real) are fixed, so the letter mapping is skipped.
     let finalOutDir = outDir;
-    let letter = sectionLetter;
-    try {
+    let letter = benign ? 'B' : sectionLetter;
+    if (!benign) try {
       const stats = await fs.stat(outDir);
       if (stats.isDirectory()) {
         const entries = await fs.readdir(outDir, { withFileTypes: true });
@@ -167,17 +188,19 @@ export class NewCaseTemplate {
 
 if (require.main === module) {
   const argv = process.argv.slice(2);
-  let outDir = process.env.CASES_DIR || 'synthetic_cases';
+  let kind: CaseKind = 'synthetic';
+  let benign = false;
+  let outDir: string | undefined;
   let caseId: string | undefined;
   let dry = false;
   let sectionLetter: string | undefined;
   let seqNumber: number | undefined;
   let autoSeq = false;
-  let kind: CaseKind = 'synthetic';
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '-o' || a === '--out' || a === '--dir' || a === '-d') outDir = argv[++i];
     else if (a === '-i' || a === '--id') caseId = argv[++i];
+    else if (a === '--benign') benign = true;
     else if (a === '-t' || a === '--type') {
       const v = argv[++i];
       if (v !== 'synthetic' && v !== 'real') throw new Error(`--type must be 'synthetic' or 'real', got '${v}'`);
@@ -200,9 +223,10 @@ if (require.main === module) {
     process.exit(1);
   };
   try {
+    outDir ??= benign ? path.join(BENIGN_CASES_DIR, kind) : (process.env.CASES_DIR || 'synthetic_cases');
     assertRealWriteAllowed(path.resolve(outDir), argv);
   } catch (err) {
     fail(err);
   }
-  new NewCaseTemplate().writeTemplate(outDir, caseId, dry, sectionLetter, seqNumber, autoSeq, kind).catch(fail);
+  new NewCaseTemplate().writeTemplate(outDir, caseId, dry, sectionLetter, seqNumber, autoSeq, kind, benign).catch(fail);
 }

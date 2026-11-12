@@ -1,4 +1,4 @@
-# Case Pipeline (step by step): SC- and RC- cases
+# Case Pipeline (step by step): SC-, RC- and benign cases
 
 This guide covers the full path for a case in `synthetic_cases/` (`SC-`) or `real_cases/` (`RC-`):
 generate a template, fill the fields, add triggers, map triggers to signal IDs, assign weights,
@@ -15,6 +15,41 @@ Run all commands from the repository root. On Windows, use Git Bash or PowerShel
 - Synthetic cases: `SC-<domain>-<NNN>`, for example `SC-M-001`, stored in `synthetic_cases/<LETTER>/`.
 - Real cases: `RC-<domain>-<NNN>`, for example `RC-M-001`, stored in `real_cases/<LETTER>/`.
 - `<domain>` is a single letter (`A`, `F`, `M`, ...). The top-level `domain` field holds the full name (`manipulation`).
+- Benign (safe) cases: `SC-B-<NNN>` or `RC-B-<NNN>`, where `B` is the `benign` domain letter. The
+  `BC-` prefix is not allowed by `schemas/per-case-schema.json` (`^(SC|RC)-[A-Z]-\d{3,}$`).
+
+## 1a. Benign cases (`benign_cases/`)
+
+Safe cases live in a separate root folder, so attack metrics never mix them with attack data:
+
+```
+benign_cases/
+  synthetic/   SC-B-001.json, SC-B-002.json, ...
+  real/        RC-B-001.json, RC-B-002.json, ...
+```
+
+- `synthetic/`: generated or hand-written examples. `provenance` is not required.
+- `real/`: cases based on real user input. `provenance` is required and the `source_id` must exist in
+  [real_cases/NOTICE.md](../real_cases/NOTICE.md), as for `real_cases/`. The validator treats any file under
+  `benign_cases/real/` as real, so `provenance` is checked even if `case_type` is not set.
+- Benign cases have empty `scenarios[].triggers` and `cross_check.questions: []`. They never use the hard
+  cross-check: `suggested_action` is `allow`, `response_constraint` is `none` (always present), and
+  `decision` is `allow` after `recalc:confidence`. Any trigger or question adds weight, and a question
+  makes the decision `pending` until it is answered, which breaks `allow`.
+- Separation of levels: the AURA verdict (`allow`) is the gate. Clarifying or mentoring questions (for example
+  asking about the user's experience level and offering a concept or ready code) are the job of the LLM wrapper
+  after it receives `allow`. They are not stored in the case.
+- Multi-turn (Crescendo) rule: an `allow` verdict applies only to the current turn. The integrating wrapper
+  must run AURA again on every new user message, with the dialogue history, so that a gradual move from harmless
+  questions to dangerous ones is caught. A case file describes one turn; a session is not one case.
+- Integrator requirement: AURA is a stateless gateway that evaluates each turn separately. Protection against
+  Crescendo (multi-turn escalation) is the responsibility of the integrating application. On every turn it must
+  send the current message together with the dialogue history or a window of the most recent messages, not an
+  isolated reply. The scripts cannot enforce this.
+- `npm run validate` and `npm run validate:real` read only `synthetic_cases/` and `real_cases/`.
+  `npm run validate:benign` reads only `benign_cases/`. Attack metrics (FPR/TPR) must be computed on
+  the attack folders, not on `benign_cases/`.
+- Write guard: `benign_cases/real/` requires `--allow-real-write`, the same as `real_cases/`.
 
 ## 2. Generate a template
 
@@ -26,11 +61,22 @@ npm run new-case:real -- -l M -n 1       # writes real_cases/M/RC-M-001.json
 npm run new-case:real -- -l M -a         # auto-increment the next number
 ```
 
-Writes into `real_cases/` require `--allow-real-write`; the npm script already passes it.
+Writes into `real_cases/` and `benign_cases/real/` require `--allow-real-write`; the npm scripts already pass it.
 The template contains `case_id`, `domain`, `category`, `provenance`, `signal_ids`, `scenarios`
 (placeholders), `negative_labels`, `suggested_action`, `legal_risk`, `behavioral_patterns`,
 `cross_check`, `deception_threshold`. It does **not** contain `confidence`, `confidence_raw`,
 `decision` or `decision_reasons`: those are written only by the scripts in step 5.
+
+Benign (safe) cases use the `--benign` flag. The template sets `domain: "benign"`, `case_type`,
+`negative_labels.status: "benign"`, `suggested_action: "allow"`, `response_constraint: "none"`,
+`cross_check.questions: []`, and writes to `benign_cases/synthetic/` or `benign_cases/real/`:
+
+```bash
+npm run new-case:benign:dry             # preview SC-B-xxx in benign_cases/synthetic/
+npm run new-case:benign                 # writes benign_cases/synthetic/SC-B-<next>.json
+npm run new-case:benign:real:dry        # preview RC-B-xxx in benign_cases/real/
+npm run new-case:benign:real            # writes benign_cases/real/RC-B-<next>.json (needs provenance)
+```
 
 ## 3. Fill the fields
 
@@ -144,6 +190,7 @@ npm run recalc:confidence:real:apply            # writes confidence, confidence_
 ```bash
 npm run validate             # synthetic_cases/: schema, case_id prefix
 npm run validate:real        # real_cases/: schema, case_id prefix, provenance.source_id against NOTICE, Gandalf pointer_only rule
+npm run validate:benign      # benign_cases/: schema, B domain letter, benign status, suggested_action allow, response_constraint none, decision allow, empty triggers and cross_check.questions
 npm run validate:triggers    # trigger labels against config/signal-mapping.json
 npx tsc --noEmit             # type check
 npm test                     # unit and integration tests
@@ -168,4 +215,4 @@ Validation rules for real cases:
 - [ ] `declared_shape.operation_type` (if present) is a sub-operation, not the domain.
 - [ ] Dynamic fields (`confidence`, `decision`, ...) come from the scripts, not from hand edits.
 - [ ] Dry-run output of extract, normalize and recalc was reviewed before applying.
-- [ ] `npm run validate`, `npm run validate:real`, `npm run validate:triggers`, `npx tsc --noEmit` and `npm test` pass.
+- [ ] `npm run validate`, `npm run validate:real`, `npm run validate:benign`, `npm run validate:triggers`, `npx tsc --noEmit` and `npm test` pass.

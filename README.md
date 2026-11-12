@@ -60,6 +60,9 @@ _Found this project useful or interesting? Drop a ⭐ — plus to your developer
 │   ├── FRAUD/
 │   ├── MANIPULATION/
 │   └── NOTICE.md            # Dataset sources, licenses and attribution
+├── benign_cases/            # SC-B- / RC-B- safe cases (no hard cross-check)
+│   ├── synthetic/           # No provenance required
+│   └── real/                # Provenance required (same rules as real_cases/)
 ├── schemas/                 # JSON Schemas for cases and config
 └── scripts/                 # Validation, normalization, confidence recalculation
     ├── lib/                 # Shared helpers: case IDs, CLI parsing, NOTICE.md reader
@@ -120,7 +123,10 @@ node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json --e
 ```bash
 npm run validate        # synthetic_cases/
 npm run validate:real   # real_cases/
+npm run validate:benign # benign_cases/ (safe cases, no hard cross-check)
 ```
+
+**Integrator note (multi-turn):** AURA is a stateless gateway that evaluates each turn separately. Protection against Crescendo (gradual multi-turn escalation) is the responsibility of the integrating application: on every turn it must send the current message together with the dialogue history or a window of the most recent messages, not an isolated reply. See [docs/REAL_CASES_PIPELINE.md](docs/REAL_CASES_PIPELINE.md).
 
 Normalization, case creation, and the `--dry-run` / `--allow-real-write` rules: [docs/SCRIPTS.md](docs/SCRIPTS.md).
 
@@ -152,7 +158,7 @@ For external consumers (e.g., downstream gates or analysis tools), AURA publishe
 
 ## CI & Automation
 
-- `.github/workflows/ci.yml`: runs `npm run validate`, `npm run validate:real` (only when JSON cases exist in `real_cases/`), `npm run check:errors`, and `npm test`.
+- `.github/workflows/ci.yml`: runs `npm run validate`, `npm run validate:real` and `npm run validate:benign` (each only when JSON cases exist in its folder), `npm run check:errors`, and `npm test`.
 - `.github/workflows/regenerate-trigger-weights.yml`: regenerates `config/trigger-weights.json` on a weekly schedule or by manual dispatch and opens a PR with the result.
 - `.github/workflows/traffic-history*.yml`: traffic history collection and report generation.
 

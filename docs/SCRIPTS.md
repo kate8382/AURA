@@ -28,6 +28,13 @@ Existing calls without `--dir` keep working unchanged.
 path unless `--allow-real-write` is passed (`--dry-run` is always allowed). Use `npm run recalc:confidence:real`
 for a safe preview and `npm run recalc:confidence:real:apply` to write explicitly.
 
+**Benign cases:** `benign_cases/synthetic/` and `benign_cases/real/` hold safe cases (`SC-B-` / `RC-B-`). Create them
+with `npm run new-case:benign` (or `new-case:benign:real`, which needs `--allow-real-write` and provenance) and
+validate them with `npm run validate:benign`. Normalize them with `npm run normalize:percases:benign:dry`, or `normalize:percases:benign:real:dry` / `:apply` for `benign_cases/real/`. The new-case template sets `suggested_action: "allow"`,
+`response_constraint: "none"` and empty `cross_check.questions`. `benign_cases/real/` is covered by the same write guard as `real_cases/`.
+
+Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_cases/synthetic` (preview with `--dry-run`), and for `benign_cases/real/` use `--dir benign_cases/real --allow-real-write`. This writes `confidence`, `confidence_raw` and `decision`. `validate:benign` requires `decision: "allow"`, empty `scenarios[].triggers` and `cross_check.questions: []`, because any trigger or question moves the decision away from `allow`.
+
 **Notes:**
 - The generator preserves curated keys and section headers in `config/trigger-weights.json` to avoid accidental deletion.
  - Weighting algorithm: Tier-based TF‑IDF (method `tfidf-tiered`). For each trigger we compute a hybrid raw score (IDF-style downweighting combined with a soft TF boost), normalize raw values per-category, and map normalized values into the category span (Category_Min..Category_Max).

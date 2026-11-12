@@ -2,6 +2,7 @@ import path from 'path';
 
 export const DEFAULT_CASES_DIR = 'synthetic_cases';
 export const REAL_CASES_DIR = 'real_cases';
+export const BENIGN_CASES_DIR = 'benign_cases';
 
 /** Returns the value of `--dir` / `-d`, or undefined when the option is absent. */
 export function getDirOption(argv: string[]): string | undefined {
@@ -25,12 +26,20 @@ export function isRealCasesPath(p: string): boolean {
   return path.resolve(p).split(path.sep).includes(REAL_CASES_DIR);
 }
 
+/** Real data folders: real_cases/ and benign_cases/real/ (benign_cases/synthetic/ is not real data). */
+export function isProtectedRealPath(p: string): boolean {
+  if (isRealCasesPath(p)) return true;
+  const parts = path.resolve(p).split(path.sep);
+  const i = parts.indexOf(BENIGN_CASES_DIR);
+  return i !== -1 && parts[i + 1] === 'real';
+}
+
 /**
- * Blocks writes into real_cases/ unless `--allow-real-write` is passed.
+ * Blocks writes into real_cases/ and benign_cases/real/ unless `--allow-real-write` is passed.
  * Dry runs never write, so they are always allowed.
  */
 export function assertRealWriteAllowed(target: string, argv: string[]): void {
-  if (!isRealCasesPath(target)) return;
+  if (!isProtectedRealPath(target)) return;
   if (argv.includes('--dry-run') || argv.includes('--allow-real-write')) return;
   throw new Error(
     `Refusing to write into ${REAL_CASES_DIR}/ without --allow-real-write (target: ${target}). Use --dry-run to preview.`

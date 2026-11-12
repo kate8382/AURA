@@ -14,7 +14,8 @@ export const CASE_ID_PATTERN = /^(SC|RC)-[A-Z]-\d{3,}$/;
 export const DOMAIN_BY_LETTER: Record<string, string> = {
   A: 'access',
   F: 'fraud',
-  M: 'manipulation'
+  M: 'manipulation',
+  B: 'benign'
 };
 
 export function isRealCasePath(p: string): boolean {

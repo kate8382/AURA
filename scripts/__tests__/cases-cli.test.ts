@@ -61,6 +61,13 @@ describe('cases-cli: real_cases write guard', () => {
   test('never blocks synthetic_cases writes', () => {
     expect(() => assertRealWriteAllowed(synthDir, [])).not.toThrow();
   });
+
+  test('guards benign_cases/real but not benign_cases/synthetic', () => {
+    const benignReal = path.resolve(base, 'benign_cases', 'real');
+    const benignSynth = path.resolve(base, 'benign_cases', 'synthetic');
+    expect(() => assertRealWriteAllowed(benignReal, [])).toThrow(/--allow-real-write/);
+    expect(() => assertRealWriteAllowed(benignSynth, [])).not.toThrow();
+  });
 });
 
 describe('cases-cli: CLI integration (--dir)', () => {

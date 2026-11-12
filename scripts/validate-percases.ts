@@ -3,6 +3,7 @@ import path from 'path';
 import Ajv from 'ajv';
 import { loadNoticeSources, NoticeSources, NOTICE_PATH } from './lib/notice';
 import { CASE_ID_PATTERN, DOMAIN_BY_LETTER, isRealCasePath } from './lib/case-id';
+import { BENIGN_CASES_DIR } from './lib/cases-cli';
 
 // ValidatePerCases - класс-обёртка для валидации per-case JSON файлов против схемы.
 // Методы:
@@ -23,7 +24,8 @@ export class ValidatePerCases {
   // Real cases (case_type "real" or files under real_cases/) must cite a Source ID from NOTICE.
   // Conditional sources are allowed only as pointer_only, so no full text is stored for them.
   validateSourceId(obj: any, p: string, sources: NoticeSources): string[] {
-    const isRealPath = path.resolve(p).split(path.sep).includes('real_cases');
+    const segments = path.resolve(p).split(path.sep);
+    const isRealPath = segments.includes('real_cases') || (segments.includes(BENIGN_CASES_DIR) && segments.includes('real'));
     if (!isRealPath && obj?.case_type !== 'real') return [];
     const sourceId = obj?.provenance?.source_id;
     if (typeof sourceId !== 'string' || sourceId.trim() === '') {
@@ -75,6 +77,34 @@ export class ValidatePerCases {
     }
     if (path.basename(p, '.json') !== caseId) {
       errors.push(`case_id "${caseId}" must match the file name "${path.basename(p)}"`);
+    }
+    return errors;
+  }
+
+  // Benign cases under benign_cases/: a safe-case label, no hard cross-check, and no restriction on the answer.
+  validateBenignCase(obj: any, p: string): string[] {
+    if (!path.resolve(p).split(path.sep).includes(BENIGN_CASES_DIR)) return [];
+    const errors: string[] = [];
+    const status = obj?.negative_labels?.status;
+    if (status !== 'benign' && status !== 'confirmed_negative') {
+      errors.push('benign_cases files must set negative_labels.status to "benign" or "confirmed_negative"');
+    }
+    if (obj?.suggested_action !== 'allow') {
+      errors.push('benign_cases files must set suggested_action to "allow" (cross_check is not used for benign cases)');
+    }
+    if (obj?.response_constraint !== 'none') {
+      errors.push('benign_cases files must set response_constraint to "none"');
+    }
+    if (obj?.decision !== 'allow') {
+      errors.push('benign_cases files must have decision "allow" (run recalc:confidence on benign_cases first)');
+    }
+    const scenarios = Array.isArray(obj?.scenarios) ? obj.scenarios : [];
+    if (scenarios.some((s: any) => !Array.isArray(s?.triggers) || s.triggers.length > 0)) {
+      errors.push('benign_cases files must have empty scenarios[].triggers');
+    }
+    const questions = obj?.cross_check?.questions;
+    if (!Array.isArray(questions) || questions.length > 0) {
+      errors.push('benign_cases files must have cross_check.questions = [] (any question moves the decision to pending)');
     }
     return errors;
   }
@@ -152,7 +182,8 @@ export class ValidatePerCases {
       }
       const caseIdErrors = [
         ...this.validateCaseIdPrefix(obj, p),
-        ...this.validateCaseIdConsistency(obj, p)
+        ...this.validateCaseIdConsistency(obj, p),
+        ...this.validateBenignCase(obj, p)
       ];
       if (caseIdErrors.length > 0) {
         return { ok: false, errs: caseIdErrors };
