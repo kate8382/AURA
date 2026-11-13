@@ -130,6 +130,39 @@ describe('GenerateTriggerWeights', () => {
     }
   });
 
+  test('excludes benign and confirmed_negative cases from attack trigger weights', async () => {
+    const tmp = await fsp.mkdtemp(path.join(os.tmpdir(), 'aura-neg-'));
+    try {
+      const cfgDir = path.join(tmp, 'config');
+      await fsp.mkdir(cfgDir, { recursive: true });
+      await fsp.writeFile(path.join(cfgDir, 'trigger-weights.json'), JSON.stringify({ triggerWeights: { 'actionable payload': 0.5 } }), 'utf8');
+
+      const casesDir = path.join(tmp, 'synthetic_cases', 'ACCESS');
+      await fsp.mkdir(casesDir, { recursive: true });
+      const attack = { case_id: 'A-ATK', scenarios: [{ name: 's', triggers: ['actionable payload'] }] };
+      const negative = { case_id: 'A-NEG', negative_labels: { status: 'confirmed_negative' }, scenarios: [{ name: 's', triggers: ['weak context'] }] };
+      await fsp.writeFile(path.join(casesDir, 'A-ATK.json'), JSON.stringify(attack), 'utf8');
+      await fsp.writeFile(path.join(casesDir, 'A-NEG.json'), JSON.stringify(negative), 'utf8');
+
+      const benignDir = path.join(tmp, 'benign_cases', 'clarify');
+      await fsp.mkdir(benignDir, { recursive: true });
+      await fsp.writeFile(path.join(benignDir, 'SC-B-002.json'), JSON.stringify({ case_id: 'SC-B-002', scenarios: [{ name: 's', triggers: ['weak context'] }] }), 'utf8');
+
+      const g = new GenerateTriggerWeights(tmp);
+      const origArgv = process.argv.slice();
+      try {
+        process.argv.push('--dir', tmp);
+        const out = JSON.parse(await fsp.readFile(g.run().outPath, 'utf8'));
+        expect(out.triggerWeights).not.toHaveProperty('weak context');
+        expect(out.triggerWeights).toHaveProperty('actionable payload');
+      } finally {
+        process.argv = origArgv;
+      }
+    } finally {
+      try { await fsp.rm(tmp, { recursive: true, force: true }); } catch (e) {}
+    }
+  });
+
   test('regression: preserve categories and correct ranges for known triggers', async () => {
     const cfgPath = path.resolve('config', 'trigger-weights.json');
     const raw = await fsp.readFile(cfgPath, 'utf8');

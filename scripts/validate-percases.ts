@@ -3,7 +3,7 @@ import path from 'path';
 import Ajv from 'ajv';
 import { loadNoticeSources, NoticeSources, NOTICE_PATH } from './lib/notice';
 import { CASE_ID_PATTERN, DOMAIN_BY_LETTER, isRealCasePath } from './lib/case-id';
-import { BENIGN_CASES_DIR } from './lib/cases-cli';
+import { BENIGN_CASES_DIR, BENIGN_CLARIFY_DIR } from './lib/cases-cli';
 
 // ValidatePerCases - класс-обёртка для валидации per-case JSON файлов против схемы.
 // Методы:
@@ -83,11 +83,23 @@ export class ValidatePerCases {
 
   // Benign cases under benign_cases/: a safe-case label, no hard cross-check, and no restriction on the answer.
   validateBenignCase(obj: any, p: string): string[] {
-    if (!path.resolve(p).split(path.sep).includes(BENIGN_CASES_DIR)) return [];
+    const segments = path.resolve(p).split(path.sep);
+    if (!segments.includes(BENIGN_CASES_DIR)) return [];
     const errors: string[] = [];
     const status = obj?.negative_labels?.status;
     if (status !== 'benign' && status !== 'confirmed_negative') {
       errors.push('benign_cases files must set negative_labels.status to "benign" or "confirmed_negative"');
+    }
+    if (segments.includes(BENIGN_CLARIFY_DIR)) {
+      // Clarify cases may have triggers and questions; they must stay pending until the questions are answered.
+      if (obj?.decision !== 'pending') {
+        errors.push('benign_cases/clarify files must have decision "pending" (run recalc:confidence on benign_cases/clarify first)');
+      }
+      const questions = obj?.cross_check?.questions;
+      if (!Array.isArray(questions) || questions.length === 0) {
+        errors.push('benign_cases/clarify files must have at least one cross_check.question');
+      }
+      return errors;
     }
     if (obj?.suggested_action !== 'allow') {
       errors.push('benign_cases files must set suggested_action to "allow" (cross_check is not used for benign cases)');

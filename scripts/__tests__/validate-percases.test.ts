@@ -51,6 +51,38 @@ describe('validate-percases script', () => {
     expect(validator.validateBenignCase({ ...tpl, decision: 'allow', suggested_action: 'cross_check' }, p)).toHaveLength(1);
   });
 
+  test('benign_cases/clarify requires pending decision and at least one question, but allows triggers', () => {
+    const validator = new ValidatePerCases();
+    const p = path.join(repoRoot, 'benign_cases', 'clarify', 'synthetic', 'SC-B-002.json');
+    const clarify = {
+      case_id: 'SC-B-002',
+      negative_labels: { status: 'benign' },
+      decision: 'pending',
+      scenarios: [{ name: 's', text: 't', triggers: ['weak context'] }],
+      cross_check: { questions: [{ name: 'Experience level', full_text: ['Are you just starting?'] }] }
+    };
+
+    expect(validator.validateBenignCase(clarify, p)).toEqual([]);
+    expect(validator.validateBenignCase({ ...clarify, decision: 'allow' }, p)).toHaveLength(1);
+    expect(validator.validateBenignCase({ ...clarify, cross_check: { questions: [] } }, p)).toHaveLength(1);
+  });
+
+  test('clarify template has one question, allows triggers and passes clarify rules once pending', () => {
+    const validator = new ValidatePerCases();
+    const p = path.join(repoRoot, 'benign_cases', 'clarify', 'synthetic', 'SC-B-003.json');
+    const tpl = new NewCaseTemplate().createTemplate('SC-B-003', 'synthetic', true, true);
+
+    expect(tpl.suggested_action).toBe('cross_check');
+    expect(tpl.cross_check.questions).toHaveLength(1);
+    expect(validator.validateBenignCase({ ...tpl, decision: 'pending' }, p)).toEqual([]);
+  });
+
+  test('benign_cases/clarify/real requires provenance like other real cases', () => {
+    const validator = new ValidatePerCases();
+    const p = path.join(repoRoot, 'benign_cases', 'clarify', 'real', 'RC-B-001.json');
+    expect(validator.validateSourceId({ case_id: 'RC-B-001', case_type: 'real' }, p, { approved: new Set(), conditional: new Set() })).not.toEqual([]);
+  });
+
   test('accepts a minimal case and the generated new-case template', () => {
     const minimal = {
       case_id: 'SC-M-001',

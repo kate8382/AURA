@@ -2,9 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import { deriveSignalId } from './utils';
 import { logError, logWarn, runCli } from './logger';
-import { assertRealWriteAllowed, REAL_CASES_DIR, resolveCasesDir } from './lib/cases-cli';
+import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_DIR, resolveCasesDir } from './lib/cases-cli';
 
 type CountMap = { [k: string]: number };
+/** Negative-label statuses that never contribute to attack trigger weights. */
+const EXCLUDED_NEGATIVE_STATUSES = ['benign', 'confirmed_negative'];
 /**
  * GenerateTriggerWeights
  *
@@ -205,11 +207,14 @@ export class GenerateTriggerWeights {
   run(argv: string[] = process.argv.slice(2)) {
     const dirs = [resolveCasesDir(argv, this.repoRoot)];
     if (argv.includes('--include-real')) dirs.push(path.resolve(this.repoRoot, REAL_CASES_DIR));
-    const files = [...new Set(dirs)].flatMap((d) => this.walkDir(d));
+    const files = [...new Set(dirs)].flatMap((d) => this.walkDir(d))
+      // Safe cases (benign_cases/, including clarify/) must never raise attack weights.
+      .filter((f) => !path.resolve(f).split(path.sep).includes(BENIGN_CASES_DIR));
     const counts: CountMap = Object.create(null);
     let totalCases = 0;
     for (const f of files) {
-      const cases = this.extractCasesFromFile(f);
+      const cases = this.extractCasesFromFile(f)
+        .filter((c: any) => !EXCLUDED_NEGATIVE_STATUSES.includes(c?.negative_labels?.status));
       totalCases += cases.length;
       for (const c of cases) {
         const uniq = new Set<string>();

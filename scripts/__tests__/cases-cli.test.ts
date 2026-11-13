@@ -62,11 +62,15 @@ describe('cases-cli: real_cases write guard', () => {
     expect(() => assertRealWriteAllowed(synthDir, [])).not.toThrow();
   });
 
-  test('guards benign_cases/real but not benign_cases/synthetic', () => {
+  test('guards benign_cases/real and benign_cases/clarify/real but not synthetic folders', () => {
     const benignReal = path.resolve(base, 'benign_cases', 'real');
+    const clarifyReal = path.resolve(base, 'benign_cases', 'clarify', 'real');
     const benignSynth = path.resolve(base, 'benign_cases', 'synthetic');
+    const clarifySynth = path.resolve(base, 'benign_cases', 'clarify', 'synthetic');
     expect(() => assertRealWriteAllowed(benignReal, [])).toThrow(/--allow-real-write/);
+    expect(() => assertRealWriteAllowed(clarifyReal, [])).toThrow(/--allow-real-write/);
     expect(() => assertRealWriteAllowed(benignSynth, [])).not.toThrow();
+    expect(() => assertRealWriteAllowed(clarifySynth, [])).not.toThrow();
   });
 });
 

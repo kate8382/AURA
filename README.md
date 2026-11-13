@@ -62,7 +62,10 @@ _Found this project useful or interesting? Drop a ⭐ — plus to your developer
 │   └── NOTICE.md            # Dataset sources, licenses and attribution
 ├── benign_cases/            # SC-B- / RC-B- safe cases (no hard cross-check)
 │   ├── synthetic/           # No provenance required
-│   └── real/                # Provenance required (same rules as real_cases/)
+│   ├── real/                # Provenance required (same rules as real_cases/)
+│   └── clarify/             # Safe cases with clarifying questions (pending, excluded from weights)
+│       ├── synthetic/
+│       └── real/            # Provenance required
 ├── schemas/                 # JSON Schemas for cases and config
 └── scripts/                 # Validation, normalization, confidence recalculation
     ├── lib/                 # Shared helpers: case IDs, CLI parsing, NOTICE.md reader

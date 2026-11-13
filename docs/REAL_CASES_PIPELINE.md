@@ -24,15 +24,23 @@ Safe cases live in a separate root folder, so attack metrics never mix them with
 
 ```
 benign_cases/
-  synthetic/   SC-B-001.json, SC-B-002.json, ...
-  real/        RC-B-001.json, RC-B-002.json, ...
+  synthetic/          SC-B-001.json, SC-B-002.json, ...
+  real/               RC-B-001.json, RC-B-002.json, ...
+  clarify/
+    synthetic/        SC-B-xxx.json (clarifying questions, no provenance)
+    real/             RC-B-xxx.json (clarifying questions, provenance required)
 ```
 
 - `synthetic/`: generated or hand-written examples. `provenance` is not required.
 - `real/`: cases based on real user input. `provenance` is required and the `source_id` must exist in
   [real_cases/NOTICE.md](../real_cases/NOTICE.md), as for `real_cases/`. The validator treats any file under
-  `benign_cases/real/` as real, so `provenance` is checked even if `case_type` is not set.
-- Benign cases have empty `scenarios[].triggers` and `cross_check.questions: []`. They never use the hard
+  `benign_cases/real/` and `benign_cases/clarify/real/` as real, so `provenance` is checked even if `case_type` is not set.
+- `clarify/synthetic/` and `clarify/real/`: safe cases that need clarifying questions to understand the user's intent (for example, a student's
+  experience level). They may have weak context triggers and `cross_check.questions`, and they stay `pending`
+  until the questions are answered. Pending here is a wait for an answer, not a block. Validation requires
+  `decision: "pending"` and at least one question. These cases are excluded from attack trigger weights.
+- Benign cases in `synthetic/` and `real/` have empty `scenarios[].triggers` and `cross_check.questions: []`.
+  They never use the hard
   cross-check: `suggested_action` is `allow`, `response_constraint` is `none` (always present), and
   `decision` is `allow` after `recalc:confidence`. Any trigger or question adds weight, and a question
   makes the decision `pending` until it is answered, which breaks `allow`.
@@ -76,7 +84,11 @@ npm run new-case:benign:dry             # preview SC-B-xxx in benign_cases/synth
 npm run new-case:benign                 # writes benign_cases/synthetic/SC-B-<next>.json
 npm run new-case:benign:real:dry        # preview RC-B-xxx in benign_cases/real/
 npm run new-case:benign:real            # writes benign_cases/real/RC-B-<next>.json (needs provenance)
+npm run new-case:clarify:dry            # preview SC-B-xxx in benign_cases/clarify/synthetic/ (one placeholder question)
+npm run new-case:clarify:real:dry       # preview RC-B-xxx in benign_cases/clarify/real/ (needs provenance on write)
 ```
+
+Clarify cases use the `--clarify` flag. Their template has `suggested_action: "cross_check"` and one question, and they are written to `benign_cases/clarify/<kind>/`.
 
 ## 3. Fill the fields
 

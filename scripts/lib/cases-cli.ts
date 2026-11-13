@@ -3,6 +3,8 @@ import path from 'path';
 export const DEFAULT_CASES_DIR = 'synthetic_cases';
 export const REAL_CASES_DIR = 'real_cases';
 export const BENIGN_CASES_DIR = 'benign_cases';
+/** Safe cases that need clarifying questions; they stay `pending` and are excluded from attack weights. */
+export const BENIGN_CLARIFY_DIR = 'clarify';
 
 /** Returns the value of `--dir` / `-d`, or undefined when the option is absent. */
 export function getDirOption(argv: string[]): string | undefined {
@@ -26,12 +28,13 @@ export function isRealCasesPath(p: string): boolean {
   return path.resolve(p).split(path.sep).includes(REAL_CASES_DIR);
 }
 
-/** Real data folders: real_cases/ and benign_cases/real/ (benign_cases/synthetic/ is not real data). */
+/** Real data folders: real_cases/, benign_cases/real/ and benign_cases/clarify/real/. */
 export function isProtectedRealPath(p: string): boolean {
   if (isRealCasesPath(p)) return true;
   const parts = path.resolve(p).split(path.sep);
   const i = parts.indexOf(BENIGN_CASES_DIR);
-  return i !== -1 && parts[i + 1] === 'real';
+  if (i === -1) return false;
+  return parts[i + 1] === 'real' || (parts[i + 1] === BENIGN_CLARIFY_DIR && parts[i + 2] === 'real');
 }
 
 /**
