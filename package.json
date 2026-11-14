@@ -71,6 +71,8 @@
     "normalize:percases:clarify:dry": "node -r ts-node/register scripts/normalize-percases.ts benign_cases/clarify --dry-run",
     "normalize:percases:clarify:real:dry": "node -r ts-node/register scripts/normalize-percases.ts --dir benign_cases/clarify/real --dry-run",
     "normalize:percases:clarify:real:apply": "node -r ts-node/register scripts/normalize-percases.ts --dir benign_cases/clarify/real --allow-real-write",
+    "normalize:percases:clarify:extract:dry": "node -r ts-node/register scripts/normalize-percases.ts benign_cases/clarify --dry-run --extract-triggers",
+    "normalize:percases:clarify:real:extract": "node -r ts-node/register scripts/normalize-percases.ts --dir benign_cases/clarify/real --allow-real-write --extract-triggers --apply-signal-ids",
     "validate:percases": "node -r ts-node/register scripts/validate-percases.ts synthetic_cases",
     "validate:real": "node -r ts-node/register scripts/validate-percases.ts real_cases",
     "validate:benign": "node -r ts-node/register scripts/validate-percases.ts benign_cases",

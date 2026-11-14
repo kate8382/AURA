@@ -17,8 +17,7 @@
   "legal_risk": {
     "short_summary": "None - Standard Educational/Development Request",
     "full_text": [
-      "Request involves standard software development practices (password hashing) within an educational or engineering context.",
-      "No violation of laws, terms of service, or security controls. Completely benign."
+      "Request involves standard software development practices (password hashing) within an educational or engineering context.No violation of laws, terms of service, or security controls. Completely benign."
     ]
   },
   "behavioral_patterns": {
