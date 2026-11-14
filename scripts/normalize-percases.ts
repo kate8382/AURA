@@ -7,8 +7,22 @@ import { getSharedExtractor, normalizeTriggerIdentity, defaultRepoRoot } from '.
 import { logError, runCli } from './logger';
 import { ValidatePerCases } from './validate-percases';
 import { assertRealWriteAllowed, DEFAULT_CASES_DIR, getDirOption } from './lib/cases-cli';
+import {
+  BulkConcurrencyOptions,
+  createWriteLimiter,
+  parseConcurrencyOptions,
+  runWithConcurrency,
+  walkJsonFilesAsync,
+  writeFileWithBackup,
+  WriteLimiter,
+} from './lib/bulk-io';
 
 type AnyObj = { [k: string]: any };
+
+export interface ProcessFileOptions {
+  backup?: boolean;
+  writeLimiter?: WriteLimiter;
+}
 
 /** NormalizePerCases - класс для нормализации per-case файлов: распаковывает обёртки (MANIPULATION/FRAUD/ACCESS) и приводит к каноническому порядку ключей. */
 export class NormalizePerCases {
@@ -16,7 +30,24 @@ export class NormalizePerCases {
   // Files that failed; run() reports them and fails after processing everything.
   failures: string[] = [];
   private metadataValidator = new ValidatePerCases();
+  private cachedMapper: GenerateTriggerWeights | null = null;
+  private cachedMapperPromise: Promise<GenerateTriggerWeights> | null = null;
   constructor(dry = false) { this.dry = dry; }
+
+  /** Lazily loads and caches a single `GenerateTriggerWeights` signal mapper across all files/cases. */
+  private async getSignalMapper(): Promise<GenerateTriggerWeights> {
+    if (this.cachedMapper) return this.cachedMapper;
+    if (!this.cachedMapperPromise) {
+      this.cachedMapperPromise = (async () => {
+        const repoRoot = defaultRepoRoot();
+        const gw = new GenerateTriggerWeights(repoRoot || process.cwd());
+        await gw.loadSignalMappingAsync();
+        this.cachedMapper = gw;
+        return gw;
+      })();
+    }
+    return this.cachedMapperPromise;
+  }
 
   // Logs invalid optional metadata and marks the file failed; values are never rewritten.
   private rejectInvalidMetadata(obj: AnyObj, filePath: string): boolean {
@@ -27,14 +58,27 @@ export class NormalizePerCases {
     return true;
   }
 
-  // Recursively walk a directory and process each JSON file
-  async walkDir(dir: string) {
-    const entries = await fs.readdir(dir, { withFileTypes: true });
-    for (const ent of entries) {
-      const full = path.join(dir, ent.name);
-      if (ent.isDirectory()) await this.walkDir(full);
-      else if (ent.isFile() && ent.name.endsWith('.json')) await this.processFile(full);
+  /**
+   * Walks `dir` asynchronously using `fs/promises` and processes all `.json` files
+   * with bounded concurrency and optional rate-limited writes / per-file backups.
+   */
+  async walkDir(dir: string, options: Partial<BulkConcurrencyOptions> = {}) {
+    // 1. Pre-warm shared resources once before spawning workers
+    if (process.argv.includes('--extract-triggers')) {
+      getSharedExtractor();
     }
+    if (process.argv.includes('--apply-signal-ids')) {
+      await this.getSignalMapper();
+    }
+
+    // 2. Discover JSON files iteratively and process with bounded concurrency
+    const concurrency = options.concurrency ?? 1;
+    const writeLimiter = createWriteLimiter(options.writeDelayMs ?? 0);
+    const backup = options.backup ?? concurrency > 1;
+    const files = await walkJsonFilesAsync(dir);
+    await runWithConcurrency(files, concurrency, (filePath) =>
+      this.processFile(filePath, { backup, writeLimiter })
+    );
   }
 
   // Canonical ordering is provided by `reorderCaseKeys` from scripts/utils.ts
@@ -86,7 +130,71 @@ export class NormalizePerCases {
     });
   }
 
-  async processFile(filePath: string) {
+  /**
+   * Normalizes a single case object: renames `behavioral_pattern`, validates optional metadata,
+   * sets defaults, optionally extracts triggers and derives `signal_ids`, and returns the ordered object.
+   * Returns `null` if metadata validation or signal-id generation fails (and records the failure).
+   */
+  private async prepareNormalizedCase(rawObj: AnyObj, metadata: AnyObj, filePath: string): Promise<AnyObj | null> {
+    // 1. Rename singular `behavioral_pattern` to `behavioral_patterns` while preserving key order
+    let obj = rawObj;
+    if ('behavioral_pattern' in obj && !('behavioral_patterns' in obj)) {
+      const tmp: AnyObj = {};
+      for (const key of Object.keys(obj)) {
+        if (key === 'behavioral_pattern') tmp['behavioral_patterns'] = obj[key];
+        else tmp[key] = obj[key];
+      }
+      obj = tmp;
+    }
+
+    // 2. Validate optional metadata and populate default confidence / decision fields
+    if (this.rejectInvalidMetadata(obj, filePath)) return null;
+    if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
+    if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
+    if (typeof obj.decision === 'undefined') obj.decision = 'pending';
+
+    // 3. Opt-in trigger extraction (must run before signal-ID derivation)
+    this.maybeExtractTriggers(obj, filePath);
+
+    // 4. Optionally (re)generate signal_ids using the cached signal mapper
+    if (process.argv.includes('--apply-signal-ids')) {
+      try {
+        const gw = await this.getSignalMapper();
+        const sset = new Set<string>();
+        if (Array.isArray(obj.scenarios)) {
+          for (const s of obj.scenarios) {
+            if (!s || !Array.isArray(s.triggers)) continue;
+            for (const t of s.triggers) {
+              const n = gw.normalizeTrigger(t);
+              if (!n) continue;
+              const sid = gw.signalMap[n];
+              if (sid) sset.add(sid);
+              else sset.add(deriveSignalId(n));
+            }
+          }
+        }
+        const arr = Array.from(sset);
+        if (arr.length) obj.signal_ids = arr;
+        else if (Array.isArray(obj.signal_ids) && obj.signal_ids.length > 0) {
+          if (this.dry) console.log(`[dry] WOULD CLEAR signal_ids for ${obj.case_id || filePath}`);
+          else obj.signal_ids = [];
+        }
+      } catch (err) {
+        logError('cannot generate signal_ids', { file: filePath, case_id: obj.case_id, error: err });
+        this.failures.push(filePath);
+        return null;
+      }
+    }
+
+    // 5. Reorder keys and append `confidence_raw` at the end for auditability
+    const ordered = reorderCaseKeys(obj);
+    const merged = { ...metadata, ...ordered };
+    if (typeof ordered.confidence_raw !== 'undefined') merged.confidence_raw = ordered.confidence_raw;
+    else if (typeof obj.confidence_raw !== 'undefined') merged.confidence_raw = obj.confidence_raw;
+    return merged;
+  }
+
+  async processFile(filePath: string, options: ProcessFileOptions = {}) {
     const raw = await fs.readFile(filePath, 'utf8');
     let data: AnyObj;
     try {
@@ -124,156 +232,41 @@ export class NormalizePerCases {
       if (k in data) metadata[k] = (data as AnyObj)[k];
     }
 
+    const writeOpts = {
+      backup: options.backup ?? false,
+      writeLimiter: options.writeLimiter,
+    };
+
     if (caseObjs.length > 1) {
       const dir = path.dirname(filePath);
       const base = path.basename(filePath, '.json');
       let fileFailed = false;
       for (let i = 0; i < caseObjs.length; i++) {
-        let obj = caseObjs[i];
-        if ('behavioral_pattern' in obj && !('behavioral_patterns' in obj)) {
-          const tmp: AnyObj = {};
-          for (const key of Object.keys(obj)) {
-            if (key === 'behavioral_pattern') tmp['behavioral_patterns'] = obj[key];
-            else tmp[key] = obj[key];
-          }
-          obj = tmp;
+        const merged = await this.prepareNormalizedCase(caseObjs[i], metadata, filePath);
+        if (!merged) {
+          fileFailed = true;
+          continue;
         }
-        if (this.rejectInvalidMetadata(obj, filePath)) { fileFailed = true; continue; }
-        // If confidence_raw missing but confidence present, keep it; otherwise initialize
-        if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
-        // Ensure confidence default after cross_check if missing
-        if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
-        // Ensure decision field exists; default to 'pending' when normalizing
-        if (typeof obj.decision === 'undefined') obj.decision = 'pending';
-
-        // Opt-in trigger extraction (must run before signal-ID derivation so
-        // newly extracted triggers participate in it).
-        this.maybeExtractTriggers(obj, filePath);
-
-        // Optionally (re)generate signal_ids for the case when requested.
-        // IMPORTANT: when --apply-signal-ids is present we recompute based on
-        // current `scenarios[].triggers` — this overwrites existing `signal_ids`
-        // to avoid drift between triggers and signal_ids.
-        if (process.argv.includes('--apply-signal-ids')) {
-          try {
-            // Use the same repoRoot resolution as the extractor so both
-            // tools load config from the same directory regardless of CWD.
-            const repoRoot = defaultRepoRoot();
-            const gw = new GenerateTriggerWeights(repoRoot || process.cwd());
-            gw.loadSignalMapping();
-            const sset = new Set<string>();
-            if (Array.isArray(obj.scenarios)) {
-              for (const s of obj.scenarios) {
-                if (!s || !Array.isArray(s.triggers)) continue;
-                for (const t of s.triggers) {
-                  const n = gw.normalizeTrigger(t);
-                  if (!n) continue;
-                  const sid = (gw as any).signalMap[n];
-                  if (sid) sset.add(sid);
-                  else sset.add(deriveSignalId(n));
-                }
-              }
-            }
-            const arr = Array.from(sset);
-            if (arr.length) obj.signal_ids = arr;
-            else {
-              // empty result: clear existing signal_ids to avoid stale mappings
-              if (Array.isArray(obj.signal_ids) && obj.signal_ids.length > 0) {
-                if (this.dry) console.log(`[dry] WOULD CLEAR signal_ids for ${obj.case_id || filePath}`);
-                else {
-                  obj.signal_ids = [];
-                }
-              }
-            }
-          } catch (err) {
-            logError('cannot generate signal_ids', { file: filePath, case_id: obj.case_id, error: err });
-            this.failures.push(filePath);
-            fileFailed = true;
-            continue;
-          }
-        }
-
-        const ordered = reorderCaseKeys(obj);
-        const merged = { ...metadata, ...ordered };
-        // Ensure `confidence_raw` appears at the end of the serialized object for auditability
-        if (typeof ordered.confidence_raw !== 'undefined') merged.confidence_raw = ordered.confidence_raw;
-        else if (typeof obj.confidence_raw !== 'undefined') merged.confidence_raw = obj.confidence_raw;
-        const newName = `${base}-${i+1}.json`;
+        const newName = `${base}-${i + 1}.json`;
         const outPath = path.join(dir, newName);
-        if (this.dry) console.log("[dry] WOULD WRITE", outPath);
+        if (this.dry) console.log('[dry] WOULD WRITE', outPath);
         else {
-          await fs.writeFile(outPath, JSON.stringify(merged, null, 2), 'utf8');
-          console.log("WROTE", outPath);
+          await writeFileWithBackup(outPath, JSON.stringify(merged, null, 2), writeOpts);
+          console.log('WROTE', outPath);
         }
       }
       if (fileFailed) return; // keep the original so no case is lost
       if (this.dry) console.log('[dry] WOULD REMOVE original', filePath);
       else {
         await fs.unlink(filePath);
-        console.log("REMOVED original", filePath);
+        console.log('REMOVED original', filePath);
       }
     } else {
-      let obj = caseObjs[0];
-      if ('behavioral_pattern' in obj && !('behavioral_patterns' in obj)) {
-        const orderedTmp: AnyObj = {};
-        for (const key of Object.keys(obj)) {
-          if (key === 'behavioral_pattern') orderedTmp['behavioral_patterns'] = obj[key];
-          else orderedTmp[key] = obj[key];
-        }
-        obj = orderedTmp;
-      }
-      if (typeof obj.confidence_raw === 'undefined' && typeof obj.confidence === 'number') obj.confidence_raw = obj.confidence;
-      if (typeof obj.confidence === 'undefined') obj.confidence = DEFAULT_CONFIDENCE;
-      if (this.rejectInvalidMetadata(obj, filePath)) return;
-      // Ensure decision field exists; default to 'pending' when normalizing
-      if (typeof obj.decision === 'undefined') obj.decision = 'pending';
-
-      // Opt-in trigger extraction (must run before signal-ID derivation so
-      // newly extracted triggers participate in it).
-      this.maybeExtractTriggers(obj, filePath);
-
-      // Optionally (re)generate signal_ids for the case when requested.
-      if (process.argv.includes('--apply-signal-ids')) {
-          try {
-            // Generate signal IDs for the triggers in the scenarios.
-          const repoRoot = defaultRepoRoot();
-          const gw = new GenerateTriggerWeights(repoRoot || process.cwd());
-          gw.loadSignalMapping();
-          const sset = new Set<string>();
-          if (Array.isArray(obj.scenarios)) {
-            for (const s of obj.scenarios) {
-              if (!s || !Array.isArray(s.triggers)) continue;
-              for (const t of s.triggers) {
-                const n = gw.normalizeTrigger(t);
-                if (!n) continue;
-                const sid = (gw as any).signalMap[n];
-                if (sid) sset.add(sid);
-                else sset.add(deriveSignalId(n));
-              }
-            }
-          }
-          const arr = Array.from(sset);
-          if (arr.length) obj.signal_ids = arr;
-          else {
-            if (Array.isArray(obj.signal_ids) && obj.signal_ids.length > 0) {
-              if (this.dry) console.log(`[dry] WOULD CLEAR signal_ids for ${obj.case_id || filePath}`);
-              else obj.signal_ids = [];
-            }
-          }
-        } catch (err) {
-          logError('cannot generate signal_ids', { file: filePath, case_id: obj.case_id, error: err });
-          this.failures.push(filePath);
-          return;
-        }
-      }
-      const ordered = reorderCaseKeys(obj);
-      const merged = { ...metadata, ...ordered };
-      // Ensure `confidence_raw` appears at the end of the serialized object for auditability
-      if (typeof ordered.confidence_raw !== 'undefined') merged.confidence_raw = ordered.confidence_raw;
-      else if (typeof obj.confidence_raw !== 'undefined') merged.confidence_raw = obj.confidence_raw;
-      if (this.dry) console.log("[dry] WOULD NORMALIZE", filePath);
+      const merged = await this.prepareNormalizedCase(caseObjs[0], metadata, filePath);
+      if (!merged) return;
+      if (this.dry) console.log('[dry] WOULD NORMALIZE', filePath);
       else {
-        await fs.writeFile(filePath, JSON.stringify(merged, null, 2), 'utf8');
+        await writeFileWithBackup(filePath, JSON.stringify(merged, null, 2), writeOpts);
         console.log('NORMALIZED', filePath);
       }
     }
@@ -288,8 +281,9 @@ export class NormalizePerCases {
     assertRealWriteAllowed(dir, argv);
     const dry = process.argv.includes('--dry-run');
     if (dry) this.dry = true;
-    if (this.dry) console.log("Dry-run mode: no files will be written.");
-    await this.walkDir(dir);
+    const concurrencyOpts = parseConcurrencyOptions(argv);
+    if (this.dry) console.log('Dry-run mode: no files will be written.');
+    await this.walkDir(dir, concurrencyOpts);
     if (this.failures.length > 0) {
       throw new Error(`${this.failures.length} file(s) failed: ${this.failures.join(', ')}`);
     }

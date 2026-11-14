@@ -37,7 +37,7 @@ describe('generate-trigger-weights preserves adapter routing', () => {
     fs.rmSync(repoRoot, { recursive: true, force: true });
   });
 
-  test('keeps crossCheckAdapters and writeCrossCheckAudit after a rewrite', () => {
+  test('keeps crossCheckAdapters and writeCrossCheckAudit after a rewrite', async () => {
     const configPath = path.join(repoRoot, 'config', 'trigger-weights.json');
     const routing = { 'cc-pgp-signature': 'pgp-verify', 'cc-ip': 'ip-geolocate' };
     fs.writeFileSync(
@@ -58,7 +58,7 @@ describe('generate-trigger-weights preserves adapter routing', () => {
       )
     );
 
-    new GenerateTriggerWeights(repoRoot).run([]);
+    await new GenerateTriggerWeights(repoRoot).run([]);
 
     const regenerated = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     expect(regenerated.crossCheckAdapters).toEqual(routing);
@@ -67,14 +67,14 @@ describe('generate-trigger-weights preserves adapter routing', () => {
     expect(regenerated.weightMethod).toBe('tfidf-tiered');
   });
 
-  test('does not invent routing keys when the existing config has none', () => {
+  test('does not invent routing keys when the existing config has none', async () => {
     const configPath = path.join(repoRoot, 'config', 'trigger-weights.json');
     fs.writeFileSync(
       configPath,
       JSON.stringify({ triggerWeights: { 'urgency / pressure': 0.02 }, crossCheckWeight: 0.005 }, null, 2)
     );
 
-    new GenerateTriggerWeights(repoRoot).run([]);
+    await new GenerateTriggerWeights(repoRoot).run([]);
 
     const regenerated = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     expect(regenerated.crossCheckAdapters).toBeUndefined();

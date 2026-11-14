@@ -78,7 +78,7 @@ describe('error handling policy', () => {
     expect(res.stderr).toContain('[ERROR] cannot clean case file');
   }, 30000);
 
-  test('generate-trigger-weights refuses to write when a case file is unreadable', () => {
+  test('generate-trigger-weights refuses to write when a case file is unreadable', async () => {
     const repo = path.join(tmp, 'repo');
     const cases = path.join(tmp, 'cases');
     fs.mkdirSync(path.join(repo, 'config'), { recursive: true });
@@ -86,11 +86,11 @@ describe('error handling policy', () => {
     fs.writeFileSync(path.join(cases, 'good.json'), JSON.stringify(goodCase), 'utf8');
     fs.writeFileSync(path.join(cases, 'broken.json'), '{ not json', 'utf8');
     process.env.CASES_DIR = cases;
-    expect(() => new GenerateTriggerWeights(repo).run()).toThrow(/could not be read/);
+    await expect(new GenerateTriggerWeights(repo).run()).rejects.toThrow(/could not be read/);
     expect(fs.existsSync(path.join(repo, 'config', 'trigger-weights.json'))).toBe(false);
   });
 
-  test('generate-trigger-weights refuses to regenerate when the existing config is unreadable', () => {
+  test('generate-trigger-weights refuses to regenerate when the existing config is unreadable', async () => {
     const repo = path.join(tmp, 'repo');
     const cases = path.join(tmp, 'cases');
     const cfg = path.join(repo, 'config', 'trigger-weights.json');
@@ -99,7 +99,7 @@ describe('error handling policy', () => {
     fs.writeFileSync(cfg, '{ broken', 'utf8');
     fs.writeFileSync(path.join(cases, 'good.json'), JSON.stringify(goodCase), 'utf8');
     process.env.CASES_DIR = cases;
-    expect(() => new GenerateTriggerWeights(repo).run()).toThrow(/cannot read existing config/);
+    await expect(new GenerateTriggerWeights(repo).run()).rejects.toThrow(/cannot read existing config/);
     expect(fs.readFileSync(cfg, 'utf8')).toBe('{ broken');
   });
 
