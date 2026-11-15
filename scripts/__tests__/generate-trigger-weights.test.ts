@@ -130,7 +130,7 @@ describe('GenerateTriggerWeights', () => {
     }
   });
 
-  test('excludes benign and confirmed_negative cases from attack trigger weights', async () => {
+  test('excludes benign cases from attack trigger weights but keeps confirmed_negative in attack folders', async () => {
     const tmp = await fsp.mkdtemp(path.join(os.tmpdir(), 'aura-neg-'));
     try {
       const cfgDir = path.join(tmp, 'config');
@@ -146,14 +146,15 @@ describe('GenerateTriggerWeights', () => {
 
       const benignDir = path.join(tmp, 'benign_cases', 'clarify');
       await fsp.mkdir(benignDir, { recursive: true });
-      await fsp.writeFile(path.join(benignDir, 'SC-B-002.json'), JSON.stringify({ case_id: 'SC-B-002', scenarios: [{ name: 's', triggers: ['weak context'] }] }), 'utf8');
+      await fsp.writeFile(path.join(benignDir, 'SC-B-002.json'), JSON.stringify({ case_id: 'SC-B-002', scenarios: [{ name: 's', triggers: ['benign only context'] }] }), 'utf8');
 
       const g = new GenerateTriggerWeights(tmp);
       const origArgv = process.argv.slice();
       try {
         process.argv.push('--dir', tmp);
         const out = JSON.parse(await fsp.readFile(g.run().outPath, 'utf8'));
-        expect(out.triggerWeights).not.toHaveProperty('weak context');
+        expect(out.triggerWeights).not.toHaveProperty('benign only context');
+        expect(out.triggerWeights).toHaveProperty('weak context');
         expect(out.triggerWeights).toHaveProperty('actionable payload');
       } finally {
         process.argv = origArgv;

@@ -91,6 +91,24 @@ test('writeTemplate with real kind writes RC- ids and auto-numbers by that prefi
   await fs.rm(tmp, { recursive: true, force: true });
 });
 
+test('benign auto numbering is shared across clean and clarify folders', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
+  const cleanDir = path.join(tmp, 'benign_cases', 'synthetic');
+  const clarifyDir = path.join(tmp, 'benign_cases', 'clarify', 'synthetic');
+  await fs.mkdir(cleanDir, { recursive: true });
+  await fs.mkdir(clarifyDir, { recursive: true });
+  await fs.writeFile(path.join(cleanDir, 'SC-B-001.json'), '{}');
+  await fs.writeFile(path.join(clarifyDir, 'SC-B-002.json'), '{}');
+
+  const T = new NewCaseTemplate();
+  await T.writeTemplate(clarifyDir, undefined, false, 'B', undefined, true, 'synthetic', true, true);
+
+  const stat = await fs.stat(path.join(clarifyDir, 'SC-B-003.json'));
+  expect(stat.isFile()).toBe(true);
+
+  await fs.rm(tmp, { recursive: true, force: true });
+});
+
 test('auto numbering picks next sequence and creates folder if missing', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
   const outDir = path.join(tmp, 'synthetic_cases');

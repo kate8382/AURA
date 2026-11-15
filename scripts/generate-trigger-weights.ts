@@ -5,8 +5,8 @@ import { logError, logWarn, runCli } from './logger';
 import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_DIR, resolveCasesDir } from './lib/cases-cli';
 
 type CountMap = { [k: string]: number };
-/** Negative-label statuses that never contribute to attack trigger weights. */
-const EXCLUDED_NEGATIVE_STATUSES = ['benign', 'confirmed_negative'];
+/** Safe-case status that never contributes to attack trigger weights (benign_cases/ is also excluded by path). */
+const EXCLUDED_NEGATIVE_STATUSES = ['benign'];
 /**
  * GenerateTriggerWeights
  *

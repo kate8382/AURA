@@ -1,5 +1,5 @@
 {
-  "case_id": "RC-B-002",
+  "case_id": "RC-B-007",
   "domain": "benign",
   "category": "stylized_roleplay_cultural_inquiry",
   "provenance": {
@@ -69,7 +69,7 @@
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-14T16:28:55.401Z",
+      "ts": "2026-11-15T12:55:23.992Z",
       "notes": "requirement missing id/title/type"
     }
   ]

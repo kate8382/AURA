@@ -25,7 +25,8 @@ export class ValidatePerCases {
   // Conditional sources are allowed only as pointer_only, so no full text is stored for them.
   validateSourceId(obj: any, p: string, sources: NoticeSources): string[] {
     const segments = path.resolve(p).split(path.sep);
-    const isRealPath = segments.includes('real_cases') || (segments.includes(BENIGN_CASES_DIR) && segments.includes('real'));
+    const benignIdx = segments.lastIndexOf(BENIGN_CASES_DIR);
+    const isRealPath = segments.includes('real_cases') || (benignIdx >= 0 && (segments[benignIdx + 1] === 'real' || (segments[benignIdx + 1] === BENIGN_CLARIFY_DIR && segments[benignIdx + 2] === 'real')));
     if (!isRealPath && obj?.case_type !== 'real') return [];
     const sourceId = obj?.provenance?.source_id;
     if (typeof sourceId !== 'string' || sourceId.trim() === '') {

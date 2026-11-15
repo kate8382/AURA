@@ -1,5 +1,5 @@
 {
-  "case_id": "RC-B-001",
+  "case_id": "RC-B-006",
   "domain": "benign",
   "category": "political_discourse_with_urgency_framing",
   "provenance": {
@@ -67,7 +67,7 @@
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-14T16:28:55.397Z",
+      "ts": "2026-11-15T12:55:23.989Z",
       "notes": "requirement missing id/title/type"
     }
   ]

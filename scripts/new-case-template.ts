@@ -48,6 +48,22 @@ export class NewCaseTemplate {
     };
   }
 
+  // Root of the benign tree that contains outDir, or outDir itself when it is outside benign_cases/.
+  private benignRoot(outDir: string): string {
+    const segments = path.resolve(outDir).split(path.sep);
+    const idx = segments.lastIndexOf(BENIGN_CASES_DIR);
+    return idx >= 0 ? segments.slice(0, idx + 1).join(path.sep) : path.resolve(outDir);
+  }
+
+  private async listFilesRecursive(dir: string): Promise<string[]> {
+    const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => []);
+    const nested = await Promise.all(entries.map(e => {
+      const full = path.join(dir, e.name);
+      return e.isDirectory() ? this.listFilesRecursive(full) : [full];
+    }));
+    return nested.flat();
+  }
+
   createTemplate(caseId?: string, kind: CaseKind = 'synthetic', benign = false, clarify = false) {
     if (benign) return this.createBenignTemplate(caseId || `${CASE_PREFIX[kind]}-B-000`, kind, clarify);
     const id = caseId || `${CASE_PREFIX[kind]}-X-000`;
@@ -89,8 +105,8 @@ export class NewCaseTemplate {
     return tpl;
   }
 
-  async writeTemplate(outDir = process.env.CASES_DIR || 'synthetic_cases', caseId?: string, dryRun = false, sectionLetter?: string, seqNumber?: number,   autoSeq = false, kind: CaseKind = 'synthetic', benign = false, clarify = false) {
-      const tpl = this.createTemplate(caseId, kind, benign, clarify);
+  async writeTemplate(outDir = process.env.CASES_DIR || 'synthetic_cases', caseId?: string, dryRun = false, sectionLetter?: string, seqNumber?: number, autoSeq = false, kind: CaseKind = 'synthetic', benign = false, clarify = false) {
+    const tpl = this.createTemplate(caseId, kind, benign, clarify);
     const prefix = CASE_PREFIX[kind];
     const fileNameBase = `${tpl.case_id}.json`;
     // If outDir exists and contains subdirectories, allow mapping by initial letter.
@@ -167,21 +183,20 @@ export class NewCaseTemplate {
       }
 
       if (autoSeq) {
-        try {
-          const files = await fs.readdir(finalOutDir);
-          let max = 0;
-          for (const f of files) {
-            const m = f.match(new RegExp(`^${prefix}-${L}-(\\d+)\\.json$`));
-            if (m) {
-              const n = parseInt(m[1], 10);
-              if (!Number.isNaN(n) && n > max) max = n;
-            }
+        // Benign IDs share one sequence across benign_cases/ (clean and clarify), so they never collide.
+        const scanDir = benign ? this.benignRoot(finalOutDir) : finalOutDir;
+        const files = benign ? await this.listFilesRecursive(scanDir) : await fs.readdir(finalOutDir).catch(() => []);
+        let max = 0;
+        for (const f of files.map(name => path.basename(name))) {
+          const m = f.match(new RegExp(`^${prefix}-${L}-(\\d+)\\.json$`));
+          if (m) {
+            const n = parseInt(m[1], 10);
+            if (!Number.isNaN(n) && n > max) max = n;
           }
-          seq = max + 1;
-        } catch (err) {
-          seq = 1; // start from 1 -> 001
         }
+        seq = max + 1;
       }
+
       if (typeof seq === 'number') {
         const numStr = String(seq).padStart(3, '0');
         tpl.case_id = `${prefix}-${L}-${numStr}`;

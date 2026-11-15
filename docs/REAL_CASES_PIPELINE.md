@@ -24,8 +24,10 @@ Safe cases live in a separate root folder, so attack metrics never mix them with
 
 ```
 benign_cases/
-  synthetic/          SC-B-001.json, SC-B-002.json, ...
-  real/               RC-B-001.json, RC-B-002.json, ...
+  synthetic/          SC-B-001.json (clean)
+  real/               RC-B-001.json, ..., RC-B-005.json (clean)
+  clarify/synthetic/  SC-B-002.json, ... (IDs continue the same sequence)
+  clarify/real/       RC-B-006.json, ... (IDs continue the same sequence)
   clarify/
     synthetic/        SC-B-xxx.json (clarifying questions, no provenance)
     real/             RC-B-xxx.json (clarifying questions, provenance required)
