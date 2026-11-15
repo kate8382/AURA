@@ -13,7 +13,13 @@ import {
   WriteLimiter,
 } from './lib/bulk-io';
 
-const signalMapCache = new Map<string, Record<string, string>>();
+interface CachedSignalMap {
+  mtimeMs: number;
+  size: number;
+  map: Record<string, string>;
+}
+
+const signalMapCache = new Map<string, CachedSignalMap>();
 const sharedGeneratorCache = new Map<string, GenerateTriggerWeights>();
 
 /** Clears the cached signal-mapping and shared generator instances (for tests). */
@@ -81,8 +87,8 @@ export class GenerateTriggerWeights {
   // Files that could not be processed; run() aborts before writing when this is non-empty.
   fileErrors: string[] = [];
 
-  /** Populates `this.signalMap` from parsed `signal-mapping.json` data and caches it by `repoRoot`. */
-  private populateSignalMap(parsed: any): void {
+  /** Populates `this.signalMap` from parsed `signal-mapping.json` data and caches it by `repoRoot` + file stat. */
+  private populateSignalMap(parsed: any, stat: { mtimeMs: number; size: number }): void {
     const mapped: Record<string, string> = {};
     const signals = (parsed && parsed.signals) ? parsed.signals : {};
     for (const sid of Object.keys(signals)) {
@@ -95,66 +101,83 @@ export class GenerateTriggerWeights {
       }
     }
     this.signalMap = { ...mapped };
-    signalMapCache.set(path.resolve(this.repoRoot), mapped);
+    signalMapCache.set(path.resolve(this.repoRoot), {
+      mtimeMs: stat.mtimeMs,
+      size: stat.size,
+      map: mapped,
+    });
     this.signalMapLoaded = true;
   }
 
-  /** Synchronously loads and caches `config/signal-mapping.json` for this `repoRoot`. */
+  /** Synchronously loads and caches `config/signal-mapping.json` for this `repoRoot`, invalidating on file change. */
   loadSignalMapping() {
-    if (this.signalMapLoaded && Object.keys(this.signalMap).length > 0) return;
     const cacheKey = path.resolve(this.repoRoot);
+    const mapPath = path.join(this.repoRoot, 'config', 'signal-mapping.json');
+    let stat: fsSync.Stats;
+    try {
+      stat = fsSync.statSync(mapPath);
+    } catch (err: any) {
+      if (err && err.code === 'ENOENT') {
+        signalMapCache.delete(cacheKey);
+        if (!this.signalMapLoaded) {
+          logWarn('signal mapping not found, signal ids will not be mapped', { file: mapPath });
+          this.signalMapLoaded = true;
+        }
+        return;
+      }
+      throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
+    }
+
     const cached = signalMapCache.get(cacheKey);
-    if (cached) {
-      this.signalMap = { ...cached };
+    if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) {
+      this.signalMap = { ...cached.map };
       this.signalMapLoaded = true;
       return;
     }
 
-    const mapPath = path.join(this.repoRoot, 'config', 'signal-mapping.json');
-    if (!fsSync.existsSync(mapPath)) {
-      logWarn('signal mapping not found, signal ids will not be mapped', { file: mapPath });
-      this.signalMapLoaded = true;
-      return;
-    }
     let parsed: any;
     try {
       parsed = JSON.parse(fsSync.readFileSync(mapPath, 'utf8'));
     } catch (err) {
       throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
     }
-    this.populateSignalMap(parsed);
+    this.populateSignalMap(parsed, stat);
   }
 
-  /** Asynchronously loads and caches `config/signal-mapping.json` using `fs/promises`. */
+  /** Asynchronously loads and caches `config/signal-mapping.json` using `fs/promises`, invalidating on file change. */
   async loadSignalMappingAsync(): Promise<void> {
-    if (this.signalMapLoaded && Object.keys(this.signalMap).length > 0) return;
     const cacheKey = path.resolve(this.repoRoot);
-    const cached = signalMapCache.get(cacheKey);
-    if (cached) {
-      this.signalMap = { ...cached };
-      this.signalMapLoaded = true;
-      return;
-    }
-
     const mapPath = path.join(this.repoRoot, 'config', 'signal-mapping.json');
-    let raw: string;
+    let stat: fsSync.Stats;
     try {
-      raw = await fs.readFile(mapPath, 'utf8');
+      stat = await fs.stat(mapPath);
     } catch (err: any) {
       if (err && err.code === 'ENOENT') {
-        logWarn('signal mapping not found, signal ids will not be mapped', { file: mapPath });
-        this.signalMapLoaded = true;
+        signalMapCache.delete(cacheKey);
+        if (!this.signalMapLoaded) {
+          logWarn('signal mapping not found, signal ids will not be mapped', { file: mapPath });
+          this.signalMapLoaded = true;
+        }
         return;
       }
       throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
     }
+
+    const cached = signalMapCache.get(cacheKey);
+    if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) {
+      this.signalMap = { ...cached.map };
+      this.signalMapLoaded = true;
+      return;
+    }
+
     let parsed: any;
     try {
+      const raw = await fs.readFile(mapPath, 'utf8');
       parsed = JSON.parse(raw);
     } catch (err) {
       throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
     }
-    this.populateSignalMap(parsed);
+    this.populateSignalMap(parsed, stat);
   }
 
   /** detectCategory
@@ -532,7 +555,7 @@ export class GenerateTriggerWeights {
           const after = JSON.stringify(parsed);
           if (after !== before) {
             await writeFileWithBackup(f, JSON.stringify(parsed, null, 2), {
-              backup: true,
+              backup: concurrencyOpts.backup,
               writeLimiter,
             });
             return 1;

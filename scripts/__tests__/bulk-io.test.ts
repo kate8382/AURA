@@ -32,13 +32,16 @@ describe('bulk-io utilities and parallel-worker smoke tests', () => {
 
     const parallel = parseConcurrencyOptions(['--parallel'], {});
     expect(parallel.concurrency).toBeGreaterThanOrEqual(2);
-    expect(parallel.backup).toBe(true);
+    expect(parallel.backup).toBe(false);
+
+    const parallelWithBackup = parseConcurrencyOptions(['--parallel', '--backup'], {});
+    expect(parallelWithBackup.backup).toBe(true);
 
     const clamped = parseConcurrencyOptions(['--concurrency', '999', '--write-delay-ms', '5'], {});
     expect(clamped).toEqual({
       concurrency: MAX_CONCURRENCY,
       writeDelayMs: 5,
-      backup: true,
+      backup: false,
     });
 
     expect(() => parseConcurrencyOptions(['--concurrency', 'abc'], {})).toThrow(/positive integer/);
@@ -75,6 +78,22 @@ describe('bulk-io utilities and parallel-worker smoke tests', () => {
 
     expect(peakActive).toBeLessThanOrEqual(2);
     expect(results).toEqual([20, 40, 60, 80, 100, 120]);
+  });
+
+  test('runWithConcurrency fails fast and stops pulling remaining items on error', async () => {
+    const started: number[] = [];
+    const items = [1, 2, 3, 4, 5, 6, 7, 8];
+
+    await expect(
+      runWithConcurrency(items, 2, async (item) => {
+        started.push(item);
+        if (item === 2) throw new Error('boom');
+        await new Promise((resolve) => setTimeout(resolve, 15));
+        return item;
+      })
+    ).rejects.toThrow('boom');
+
+    expect(started.length).toBeLessThan(items.length);
   });
 
   test('writeFileWithBackup creates .bak and respects createWriteLimiter', async () => {
@@ -125,13 +144,22 @@ describe('bulk-io utilities and parallel-worker smoke tests', () => {
     const cfgPar = JSON.parse(fs.readFileSync(resPar.outPath, 'utf8'));
     expect(cfgPar).toEqual(cfgSeq);
 
-    // Verify per-file backups and signal_ids were written in parallel mode
+    // Backups are strictly opt-in: concurrency=4 without --backup should not create per-case .bak files
     const sampleCase = JSON.parse(fs.readFileSync(path.join(repoPar, 'synthetic_cases', 'c-0.json'), 'utf8'));
     expect(sampleCase.signal_ids).toEqual(['sig-urgency']);
+    expect(fs.existsSync(path.join(repoPar, 'synthetic_cases', 'c-0.json.bak'))).toBe(false);
+
+    // Explicit --backup creates per-case .bak files when rewriting
+    fs.writeFileSync(
+      path.join(repoPar, 'synthetic_cases', 'c-0.json'),
+      JSON.stringify({ case_id: 'c-0', scenarios: [{ triggers: ['urgency / pressure'] }] }),
+      'utf8'
+    );
+    await new GenerateTriggerWeights(repoPar).run(['--concurrency', '4', '--apply-signal-ids', '--backup']);
     expect(fs.existsSync(path.join(repoPar, 'synthetic_cases', 'c-0.json.bak'))).toBe(true);
   });
 
-  test('loadSignalMappingAsync caches mapping across instances for the same repoRoot', async () => {
+  test('loadSignalMappingAsync caches unchanged files and invalidates when modified on disk', async () => {
     const repo = path.join(tmpRoot, 'repo-cache');
     const mapPath = path.join(repo, 'config', 'signal-mapping.json');
     fs.mkdirSync(path.dirname(mapPath), { recursive: true });
@@ -141,10 +169,16 @@ describe('bulk-io utilities and parallel-worker smoke tests', () => {
     await g1.loadSignalMappingAsync();
     expect(g1.signalMap['alpha']).toBe('sig-a');
 
-    // Remove the file on disk; second instance should still hit the cache without error
-    fs.unlinkSync(mapPath);
+    // Unchanged file hits cache
     const g2 = new GenerateTriggerWeights(repo);
     await g2.loadSignalMappingAsync();
     expect(g2.signalMap['alpha']).toBe('sig-a');
+
+    // Modify file on disk -> cache invalidates and picks up new mapping
+    fs.writeFileSync(mapPath, JSON.stringify({ signals: { 'sig-b': ['beta'] } }), 'utf8');
+    const g3 = new GenerateTriggerWeights(repo);
+    await g3.loadSignalMappingAsync();
+    expect(g3.signalMap['beta']).toBe('sig-b');
+    expect(g3.signalMap['alpha']).toBeUndefined();
   });
 });

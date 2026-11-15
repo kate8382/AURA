@@ -63,8 +63,8 @@ export function parseConcurrencyOptions(
     writeDelayMs = Math.min(60_000, Number(rawDelay));
   }
 
-  // 4. Enable per-file backups automatically in parallel mode or when `--backup` is passed
-  const backup = argv.includes('--backup') || clampedConcurrency > 1;
+  // 4. Per-file backups are strictly opt-in via `--backup`
+  const backup = argv.includes('--backup');
   return { concurrency: clampedConcurrency, writeDelayMs, backup };
 }
 
@@ -91,13 +91,14 @@ export async function walkJsonFilesAsync(
     throw err;
   }
 
-  // 2. Iterative breadth-first traversal bounded by maxDirs
+  // 2. Iterative breadth-first traversal bounded by maxDirs (index pointer avoids O(n^2) shift)
   const queue: string[] = [rootDir];
   const jsonFiles: string[] = [];
+  let head = 0;
   let visitedDirs = 0;
 
-  while (queue.length > 0 && visitedDirs < maxDirs) {
-    const currentDir = queue.shift()!;
+  while (head < queue.length && visitedDirs < maxDirs) {
+    const currentDir = queue[head++];
     visitedDirs++;
 
     const entries = await fs.readdir(currentDir, { withFileTypes: true });
@@ -111,7 +112,7 @@ export async function walkJsonFilesAsync(
     }
   }
 
-  if (queue.length > 0) {
+  if (head < queue.length) {
     throw new Error(`walkJsonFilesAsync exceeded directory limit (${maxDirs}) at ${rootDir}`);
   }
 
@@ -138,12 +139,19 @@ export async function runWithConcurrency<T, R>(
   const workerCount = Math.min(boundedConcurrency, items.length);
   const results = new Array<R>(items.length);
   let nextIndex = 0;
+  let aborted = false;
 
   async function runWorker(): Promise<void> {
-    while (nextIndex < items.length) {
+    while (!aborted && nextIndex < items.length) {
       const currentIndex = nextIndex;
       nextIndex++;
-      results[currentIndex] = await worker(items[currentIndex], currentIndex);
+      try {
+        results[currentIndex] = await worker(items[currentIndex], currentIndex);
+      } catch (err) {
+        // Fail-fast: signal other workers to stop pulling new items from the queue
+        aborted = true;
+        throw err;
+      }
     }
   }
 

@@ -74,7 +74,7 @@ export class NormalizePerCases {
     // 2. Discover JSON files iteratively and process with bounded concurrency
     const concurrency = options.concurrency ?? 1;
     const writeLimiter = createWriteLimiter(options.writeDelayMs ?? 0);
-    const backup = options.backup ?? concurrency > 1;
+    const backup = options.backup ?? false;
     const files = await walkJsonFilesAsync(dir);
     await runWithConcurrency(files, concurrency, (filePath) =>
       this.processFile(filePath, { backup, writeLimiter })

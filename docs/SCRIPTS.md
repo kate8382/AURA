@@ -28,6 +28,12 @@ Existing calls without `--dir` keep working unchanged.
 path unless `--allow-real-write` is passed (`--dry-run` is always allowed). Use `npm run recalc:confidence:real`
 for a safe preview and `npm run recalc:confidence:real:apply` to write explicitly.
 
+**Concurrency & bulk I/O options (`generate-trigger-weights.ts`, `normalize-percases.ts`):**
+- `--parallel`: enables bounded parallel file processing (defaults to `min(8, max(2, os.cpus().length))` workers).
+- `--concurrency <n>` / `--workers <n>`: sets an explicit worker count (clamped to `1..32`; also configurable via `AURA_CONCURRENCY=<n>`).
+- `--write-delay-ms <n>`: rate-limits file writes by spacing writes at least `<n>` ms apart (clamped to `0..60000`).
+- `--backup`: opt-in flag to create `<file>.bak` backups before overwriting per-case files.
+
 **Notes:**
 - The generator preserves curated keys and section headers in `config/trigger-weights.json` to avoid accidental deletion.
  - Weighting algorithm: Tier-based TF‑IDF (method `tfidf-tiered`). For each trigger we compute a hybrid raw score (IDF-style downweighting combined with a soft TF boost), normalize raw values per-category, and map normalized values into the category span (Category_Min..Category_Max).
