@@ -1,8 +1,32 @@
-import fs from 'fs';
+import fsSync from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { deriveSignalId } from './utils';
 import { logError, logWarn, runCli } from './logger';
 import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_DIR, resolveCasesDir } from './lib/cases-cli';
+import {
+  createWriteLimiter,
+  parseConcurrencyOptions,
+  runWithConcurrency,
+  walkJsonFilesAsync,
+  writeFileWithBackup,
+  WriteLimiter,
+} from './lib/bulk-io';
+
+interface CachedSignalMap {
+  mtimeMs: number;
+  size: number;
+  map: Record<string, string>;
+}
+
+const signalMapCache = new Map<string, CachedSignalMap>();
+const sharedGeneratorCache = new Map<string, GenerateTriggerWeights>();
+
+/** Clears the cached signal-mapping and shared generator instances (for tests). */
+export function clearSignalMapCache(): void {
+  signalMapCache.clear();
+  sharedGeneratorCache.clear();
+}
 
 type CountMap = { [k: string]: number };
 /** Safe-case status that never contributes to attack trigger weights (benign_cases/ is also excluded by path). */
@@ -61,21 +85,13 @@ export class GenerateTriggerWeights {
     this.repoRoot = repoRoot || path.resolve(__dirname, '..');
   }
   signalMap: Record<string, string> = {};
+  private signalMapLoaded = false;
   // Files that could not be processed; run() aborts before writing when this is non-empty.
   fileErrors: string[] = [];
 
-  loadSignalMapping() {
-    const mapPath = path.join(this.repoRoot, 'config', 'signal-mapping.json');
-    if (!fs.existsSync(mapPath)) {
-      logWarn('signal mapping not found, signal ids will not be mapped', { file: mapPath });
-      return;
-    }
-    let parsed: any;
-    try {
-      parsed = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
-    } catch (err) {
-      throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
-    }
+  /** Populates `this.signalMap` from parsed `signal-mapping.json` data and caches it by `repoRoot` + file stat. */
+  private populateSignalMap(parsed: any, stat: { mtimeMs: number; size: number }): void {
+    const mapped: Record<string, string> = {};
     const signals = (parsed && parsed.signals) ? parsed.signals : {};
     for (const sid of Object.keys(signals)) {
       const val = signals[sid];
@@ -83,9 +99,87 @@ export class GenerateTriggerWeights {
       for (const t of arr) {
         if (typeof t !== 'string') continue;
         const n = this.normalizeTrigger(t);
-        if (n) this.signalMap[n] = sid;
+        if (n) mapped[n] = sid;
       }
     }
+    this.signalMap = { ...mapped };
+    signalMapCache.set(path.resolve(this.repoRoot), {
+      mtimeMs: stat.mtimeMs,
+      size: stat.size,
+      map: mapped,
+    });
+    this.signalMapLoaded = true;
+  }
+
+  /** Synchronously loads and caches `config/signal-mapping.json` for this `repoRoot`, invalidating on file change. */
+  loadSignalMapping() {
+    const cacheKey = path.resolve(this.repoRoot);
+    const mapPath = path.join(this.repoRoot, 'config', 'signal-mapping.json');
+    let stat: fsSync.Stats;
+    try {
+      stat = fsSync.statSync(mapPath);
+    } catch (err: any) {
+      if (err && err.code === 'ENOENT') {
+        signalMapCache.delete(cacheKey);
+        if (!this.signalMapLoaded) {
+          logWarn('signal mapping not found, signal ids will not be mapped', { file: mapPath });
+          this.signalMapLoaded = true;
+        }
+        return;
+      }
+      throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
+    }
+
+    const cached = signalMapCache.get(cacheKey);
+    if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) {
+      this.signalMap = { ...cached.map };
+      this.signalMapLoaded = true;
+      return;
+    }
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(fsSync.readFileSync(mapPath, 'utf8'));
+    } catch (err) {
+      throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
+    }
+    this.populateSignalMap(parsed, stat);
+  }
+
+  /** Asynchronously loads and caches `config/signal-mapping.json` using `fs/promises`, invalidating on file change. */
+  async loadSignalMappingAsync(): Promise<void> {
+    const cacheKey = path.resolve(this.repoRoot);
+    const mapPath = path.join(this.repoRoot, 'config', 'signal-mapping.json');
+    let stat: fsSync.Stats;
+    try {
+      stat = await fs.stat(mapPath);
+    } catch (err: any) {
+      if (err && err.code === 'ENOENT') {
+        signalMapCache.delete(cacheKey);
+        if (!this.signalMapLoaded) {
+          logWarn('signal mapping not found, signal ids will not be mapped', { file: mapPath });
+          this.signalMapLoaded = true;
+        }
+        return;
+      }
+      throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
+    }
+
+    const cached = signalMapCache.get(cacheKey);
+    if (cached && cached.mtimeMs === stat.mtimeMs && cached.size === stat.size) {
+      this.signalMap = { ...cached.map };
+      this.signalMapLoaded = true;
+      return;
+    }
+
+    let parsed: any;
+    try {
+      const raw = await fs.readFile(mapPath, 'utf8');
+      parsed = JSON.parse(raw);
+    } catch (err) {
+      throw new Error(`cannot read signal mapping ${mapPath}: ${err instanceof Error ? err.message : err}`);
+    }
+    this.populateSignalMap(parsed, stat);
   }
 
   /** detectCategory
@@ -102,29 +196,23 @@ export class GenerateTriggerWeights {
     return 'camo';
   }
 
-  /** Recursively walks through a directory and returns a list of all JSON files.
+  /** Asynchronously walks through a directory and returns a sorted list of all JSON files.
    * Returns an empty array if the directory does not exist.
    */
-  walkDir(dir: string, files: string[] = []): string[] {
-    if (!fs.existsSync(dir)) return files;
-    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, ent.name);
-      if (ent.isDirectory()) this.walkDir(full, files);
-      else if (ent.isFile() && ent.name.endsWith('.json')) files.push(full);
-    }
-    return files;
+  async walkDir(dir: string): Promise<string[]> {
+    return walkJsonFilesAsync(dir);
   }
 
   /**
-   * Extracts case objects from a file.
+   * Extracts case objects from a file asynchronously using `fs/promises`.
    * Supports multiple input file formats:
    * - files where the top-level key is `MANIPULATION`/`FRAUD`/`ACCESS` (array of cases),
    * - a single case (object with `case_id`),
    * - files with nested objects/arrays containing objects with `case_id`.
    */
-  extractCasesFromFile(file: string): any[] {
+  async extractCasesFromFile(file: string): Promise<any[]> {
     try {
-      const raw = fs.readFileSync(file, 'utf8');
+      const raw = await fs.readFile(file, 'utf8');
       const data = JSON.parse(raw);
       const cases: any[] = [];
       const topKeys = Object.keys(data || {});
@@ -188,15 +276,17 @@ export class GenerateTriggerWeights {
   }
 
   /**
-   * Writes the final JSON config to `config/trigger-weights.json`, creating a backup
+   * Asynchronously writes the final JSON config to `config/trigger-weights.json`, creating a backup
    * of the previous version as `trigger-weights.json.bak`.
    */
-  writeConfig(payload: any) {
+  async writeConfig(payload: any, writeLimiter?: WriteLimiter): Promise<string> {
     const cfgDir = path.join(this.repoRoot, 'config');
-    if (!fs.existsSync(cfgDir)) fs.mkdirSync(cfgDir, { recursive: true });
+    await fs.mkdir(cfgDir, { recursive: true });
     const outPath = path.join(cfgDir, 'trigger-weights.json');
-    if (fs.existsSync(outPath)) fs.copyFileSync(outPath, outPath + '.bak');
-    fs.writeFileSync(outPath, JSON.stringify(payload, null, 2), 'utf8');
+    await writeFileWithBackup(outPath, JSON.stringify(payload, null, 2), {
+      backup: true,
+      writeLimiter,
+    });
     return outPath;
   }
 
@@ -204,17 +294,27 @@ export class GenerateTriggerWeights {
    * Main run: searches for all JSON files in `synthetic_cases` (or in the `--dir` / `CASES_DIR` override),
    * optionally adds `real_cases` with `--include-real`, collects trigger statistics, computes weights, and writes the config.
    */
-  run(argv: string[] = process.argv.slice(2)) {
+  async run(argv: string[] = process.argv.slice(2)) {
+    const concurrencyOpts = parseConcurrencyOptions(argv);
+    const writeLimiter = createWriteLimiter(concurrencyOpts.writeDelayMs);
     const dirs = [resolveCasesDir(argv, this.repoRoot)];
     if (argv.includes('--include-real')) dirs.push(path.resolve(this.repoRoot, REAL_CASES_DIR));
-    const files = [...new Set(dirs)].flatMap((d) => this.walkDir(d))
-      // Safe cases (benign_cases/, including clarify/) must never raise attack weights.
-      .filter((f) => !path.resolve(f).split(path.sep).includes(BENIGN_CASES_DIR));
+    const uniqueDirs = [...new Set(dirs)];
+    const perDirFiles = await Promise.all(uniqueDirs.map((d) => walkJsonFilesAsync(d)));
+    // Safe cases (benign_cases/, including clarify/) must never raise attack weights.
+    const files = [...new Set(perDirFiles.flat())]
+      .filter((f) => !path.resolve(f).split(path.sep).includes(BENIGN_CASES_DIR))
+      .sort((a, b) => a.localeCompare(b));
+
+    const perFileCases = await runWithConcurrency(
+      files,
+      concurrencyOpts.concurrency,
+      (f) => this.extractCasesFromFile(f)
+    );
     const counts: CountMap = Object.create(null);
     let totalCases = 0;
-    for (const f of files) {
-      const cases = this.extractCasesFromFile(f)
-        .filter((c: any) => !EXCLUDED_NEGATIVE_STATUSES.includes(c?.negative_labels?.status));
+    for (const rawCases of perFileCases) {
+      const cases = rawCases.filter((c: any) => !EXCLUDED_NEGATIVE_STATUSES.includes(c?.negative_labels?.status));
       totalCases += cases.length;
       for (const c of cases) {
         const uniq = new Set<string>();
@@ -237,10 +337,17 @@ export class GenerateTriggerWeights {
     const cfgPath = path.join(this.repoRoot, 'config', 'trigger-weights.json');
     let existingConfig: any = null;
     const preservedSections: Record<string, any> = {};
-    if (fs.existsSync(cfgPath)) {
+    let existingConfigRaw: string | null = null;
+    try {
+      existingConfigRaw = await fs.readFile(cfgPath, 'utf8');
+    } catch (err: any) {
+      if (!err || err.code !== 'ENOENT') {
+        throw new Error(`cannot read existing config ${cfgPath}; refusing to regenerate without its curated keys: ${err instanceof Error ? err.message : err}`);
+      }
+    }
+    if (existingConfigRaw !== null) {
       try {
-        const raw = fs.readFileSync(cfgPath, 'utf8');
-        const parsed = JSON.parse(raw);
+        const parsed = JSON.parse(existingConfigRaw);
         existingConfig = parsed;
         if (parsed && parsed.triggerWeights && typeof parsed.triggerWeights === 'object') {
           for (const k of Object.keys(parsed.triggerWeights)) {
@@ -414,54 +521,59 @@ export class GenerateTriggerWeights {
       ...(preservedWriteCrossCheckAudit !== undefined ? { writeCrossCheckAudit: preservedWriteCrossCheckAudit } : {})
     };
     if (argv.includes('--apply-signal-ids')) dirs.forEach((d) => assertRealWriteAllowed(d, argv));
-    const outPath = this.writeConfig(out);
+    const outPath = await this.writeConfig(out, writeLimiter);
 
     // CLI: optionally apply generated signal_ids back into case files
     const applySignalIds = argv.includes('--apply-signal-ids');
     if (applySignalIds) {
-      const files2 = files;
-      let changed = 0;
-      const self = this;
-      for (const f of files2) {
+      await this.loadSignalMappingAsync();
+      const changedFlags = await runWithConcurrency(files, concurrencyOpts.concurrency, async (f) => {
         try {
-          const raw = fs.readFileSync(f, 'utf8');
+          const raw = await fs.readFile(f, 'utf8');
           const parsed = JSON.parse(raw);
           const before = JSON.stringify(parsed);
 
-          function applyToObject(obj: any) {
-            if (!obj || typeof obj !== 'object') return;
+          // Iterative traversal avoids unbounded recursion on nested JSON structures.
+          const stack: any[] = [parsed];
+          const maxNodes = 100_000;
+          let visited = 0;
+          while (stack.length > 0 && visited < maxNodes) {
+            const obj = stack.pop();
+            visited++;
+            if (!obj || typeof obj !== 'object') continue;
             if (Array.isArray(obj)) {
-              for (const it of obj) applyToObject(it);
-              return;
+              for (const it of obj) stack.push(it);
+              continue;
             }
-            // single case
             if (obj.case_id) {
               if (!Array.isArray(obj.signal_ids) || obj.signal_ids.length === 0) {
-                const sids = self.generateSignalIdsFromScenarios(obj.scenarios || []);
+                const sids = this.generateSignalIdsFromScenarios(obj.scenarios || []);
                 if (sids.length) obj.signal_ids = sids;
               }
-              return;
+              continue;
             }
             for (const k of Object.keys(obj)) {
               const v = obj[k];
-              if (Array.isArray(v)) {
-                for (const item of v) applyToObject(item);
-              } else if (v && typeof v === 'object') applyToObject(v);
+              if (v && typeof v === 'object') stack.push(v);
             }
           }
 
-          applyToObject(parsed);
           const after = JSON.stringify(parsed);
           if (after !== before) {
-            fs.copyFileSync(f, f + '.bak');
-            fs.writeFileSync(f, JSON.stringify(parsed, null, 2), 'utf8');
-            changed++;
+            await writeFileWithBackup(f, JSON.stringify(parsed, null, 2), {
+              backup: concurrencyOpts.backup,
+              writeLimiter,
+            });
+            return 1;
           }
+          return 0;
         } catch (err) {
           logError('cannot apply signal_ids', { file: f, error: err });
           this.fileErrors.push(f);
+          return 0;
         }
-      }
+      });
+      const changed = changedFlags.reduce<number>((sum, n) => sum + n, 0);
       console.log('Applied signal_ids to', changed, 'files');
       if (this.fileErrors.length > 0) {
         throw new Error(`${this.fileErrors.length} case file(s) failed while applying signal_ids`);
@@ -473,14 +585,22 @@ export class GenerateTriggerWeights {
 
 /**
  * Exported helper for external use: generate signal ids from scenarios.
+ * Reuses a cached generator instance per repoRoot to avoid reloading signal-mapping.json.
  */
-export function generateSignalIds(scenarios: any[]): string[] {
-  return new GenerateTriggerWeights().generateSignalIdsFromScenarios(scenarios);
+export function generateSignalIds(scenarios: any[], repoRoot?: string): string[] {
+  const key = path.resolve(repoRoot || path.resolve(__dirname, '..'));
+  let generator = sharedGeneratorCache.get(key);
+  if (!generator) {
+    generator = new GenerateTriggerWeights(key);
+    generator.loadSignalMapping();
+    sharedGeneratorCache.set(key, generator);
+  }
+  return generator.generateSignalIdsFromScenarios(scenarios);
 }
 
 if (require.main === module) {
-  runCli(() => {
-    const res = new GenerateTriggerWeights().run();
+  runCli(async () => {
+    const res = await new GenerateTriggerWeights().run();
     console.log('WROTE', res.outPath);
     console.log('Top triggers:');
     for (const it of res.top) console.log(it.trig, it.count, it.weight);

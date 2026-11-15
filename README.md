@@ -235,6 +235,7 @@ This project operates under a dual/hybrid licensing model:
 - [docs/REAL_CASES_PIPELINE.md](docs/REAL_CASES_PIPELINE.md) — step-by-step pipeline for `SC-` and `RC-` cases.
 - [docs/DATA_HANDLING_POLICY.md](docs/DATA_HANDLING_POLICY.md) — dataset sourcing, redaction and licensing rules.
 - [docs/SIGNAL_IDS.md](docs/SIGNAL_IDS.md) — signal ID mapping and workflow.
+- [docs/AURA_CONCURRENCY.md](docs/AURA_CONCURRENCY.md) — parallel bulk I/O, concurrency options and determinism rules.
 - [docs/releases/](docs/releases/) — release notes.
 
 ## Contribution & Governance

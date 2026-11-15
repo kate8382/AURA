@@ -60,7 +60,7 @@ describe('GenerateTriggerWeights', () => {
     expect(new Set(sids)).toEqual(new Set(['behavior:urgency', 'fin:suspicious']));
   });
 
-  test('run with --apply-signal-ids writes signal_ids into case files', () => {
+  test('run with --apply-signal-ids writes signal_ids into case files', async () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-test-'));
     const publicDir = path.join(tmp, 'synthetic_cases', 'ACCESS');
     fs.mkdirSync(publicDir, { recursive: true });
@@ -78,7 +78,7 @@ describe('GenerateTriggerWeights', () => {
     const origArgv = process.argv.slice();
     try {
       process.argv.push('--apply-signal-ids');
-      const res = g.run();
+      const res = await g.run();
       expect(res.outPath).toBeTruthy();
       const written = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       expect(Array.isArray(written.signal_ids)).toBe(true);
@@ -116,7 +116,7 @@ describe('GenerateTriggerWeights', () => {
       await fsp.writeFile(path.join(casesDir, 'ACCESS', 'A-CRIT.json'), JSON.stringify(a, null, 2));
 
       const g = new GenerateTriggerWeights(tmp);
-      const res = g.run();
+      const res = await g.run();
       const out = JSON.parse(await fsp.readFile(res.outPath, 'utf8'));
       expect(out).toHaveProperty('triggerWeights');
       const tw = out.triggerWeights;
@@ -152,7 +152,7 @@ describe('GenerateTriggerWeights', () => {
       const origArgv = process.argv.slice();
       try {
         process.argv.push('--dir', tmp);
-        const out = JSON.parse(await fsp.readFile(g.run().outPath, 'utf8'));
+        const out = JSON.parse(await fsp.readFile((await g.run()).outPath, 'utf8'));
         expect(out.triggerWeights).not.toHaveProperty('benign only context');
         expect(out.triggerWeights).toHaveProperty('weak context');
         expect(out.triggerWeights).toHaveProperty('actionable payload');

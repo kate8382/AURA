@@ -95,7 +95,7 @@ describe('recalc pipeline integration', () => {
     fs.mkdirSync(path.join(isolatedRepo, 'config'), { recursive: true });
     fs.copyFileSync(path.join(repoRoot, 'config', 'signal-mapping.json'), path.join(isolatedRepo, 'config', 'signal-mapping.json'));
     process.env.CASES_DIR = path.join(tmp, 'cases');
-    const { outPath } = new GenerateTriggerWeights(isolatedRepo).run();
+    const { outPath } = await new GenerateTriggerWeights(isolatedRepo).run();
     expect(outPath.startsWith(isolatedRepo)).toBe(true);
     process.env.TRIGGER_WEIGHTS = JSON.stringify(readJson(outPath).triggerWeights);
 
