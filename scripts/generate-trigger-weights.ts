@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { deriveSignalId } from './utils';
 import { logError, logWarn, runCli } from './logger';
-import { assertRealWriteAllowed, REAL_CASES_DIR, resolveCasesDir } from './lib/cases-cli';
+import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_DIR, resolveCasesDir } from './lib/cases-cli';
 import {
   createWriteLimiter,
   parseConcurrencyOptions,
@@ -29,6 +29,8 @@ export function clearSignalMapCache(): void {
 }
 
 type CountMap = { [k: string]: number };
+/** Safe-case status that never contributes to attack trigger weights (benign_cases/ is also excluded by path). */
+const EXCLUDED_NEGATIVE_STATUSES = ['benign'];
 /**
  * GenerateTriggerWeights
  *
@@ -299,7 +301,10 @@ export class GenerateTriggerWeights {
     if (argv.includes('--include-real')) dirs.push(path.resolve(this.repoRoot, REAL_CASES_DIR));
     const uniqueDirs = [...new Set(dirs)];
     const perDirFiles = await Promise.all(uniqueDirs.map((d) => walkJsonFilesAsync(d)));
-    const files = [...new Set(perDirFiles.flat())].sort((a, b) => a.localeCompare(b));
+    // Safe cases (benign_cases/, including clarify/) must never raise attack weights.
+    const files = [...new Set(perDirFiles.flat())]
+      .filter((f) => !path.resolve(f).split(path.sep).includes(BENIGN_CASES_DIR))
+      .sort((a, b) => a.localeCompare(b));
 
     const perFileCases = await runWithConcurrency(
       files,
@@ -308,7 +313,8 @@ export class GenerateTriggerWeights {
     );
     const counts: CountMap = Object.create(null);
     let totalCases = 0;
-    for (const cases of perFileCases) {
+    for (const rawCases of perFileCases) {
+      const cases = rawCases.filter((c: any) => !EXCLUDED_NEGATIVE_STATUSES.includes(c?.negative_labels?.status));
       totalCases += cases.length;
       for (const c of cases) {
         const uniq = new Set<string>();
