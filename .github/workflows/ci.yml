@@ -35,6 +35,14 @@ jobs:
             echo "real_cases/ has no JSON cases yet; skipping real-case validation."
           fi
 
+      - name: Validate benign cases (skipped if empty)
+        run: |
+          if [ -d benign_cases ] && [ -n "$(find benign_cases -name '*.json' -print -quit)" ]; then
+            npm run validate:benign
+          else
+            echo "benign_cases/ has no JSON cases yet; skipping benign-case validation."
+          fi
+
       - name: Check error handling
         run: npm run check:errors
 
