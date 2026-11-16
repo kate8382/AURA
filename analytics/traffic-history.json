@@ -746,5 +746,71 @@
       "count": 45,
       "uniques": 12
     }
+  },
+  {
+    "date": "2026-11-09",
+    "views": {
+      "count": 133,
+      "uniques": 3
+    },
+    "clones": {
+      "count": 30,
+      "uniques": 12
+    }
+  },
+  {
+    "date": "2026-11-10",
+    "views": {
+      "count": 35,
+      "uniques": 1
+    },
+    "clones": {
+      "count": 30,
+      "uniques": 14
+    }
+  },
+  {
+    "date": "2026-11-11",
+    "views": {
+      "count": 28,
+      "uniques": 2
+    },
+    "clones": {
+      "count": 7,
+      "uniques": 5
+    }
+  },
+  {
+    "date": "2026-11-12",
+    "views": {
+      "count": 25,
+      "uniques": 1
+    },
+    "clones": {
+      "count": 7,
+      "uniques": 6
+    }
+  },
+  {
+    "date": "2026-11-13",
+    "views": {
+      "count": 26,
+      "uniques": 1
+    },
+    "clones": {
+      "count": 12,
+      "uniques": 7
+    }
+  },
+  {
+    "date": "2026-11-14",
+    "views": {
+      "count": 15,
+      "uniques": 2
+    },
+    "clones": {
+      "count": 8,
+      "uniques": 4
+    }
   }
 ]
