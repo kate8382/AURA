@@ -24,6 +24,9 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
+      - name: Validate trusted PGP keys
+        run: npm run validate:keys
+
       - name: Validate cases
         run: npm run validate
 

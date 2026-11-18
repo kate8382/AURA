@@ -49,8 +49,8 @@ fails closed with `verification_status: "no_active_trusted_key"`.
    }
    ```
 
-4. Run `npx jest scripts/__tests__/pgp-trust-store.test.ts` and, ideally,
-   `npm test` before committing.
+4. Run `npm run validate:keys` (also enforced in CI), `npx jest scripts/__tests__/pgp-trust-store.test.ts` and,
+   ideally, `npm test` before committing.
 
 ## Manifest schema (strict)
 
