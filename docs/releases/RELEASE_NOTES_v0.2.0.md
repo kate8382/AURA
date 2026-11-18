@@ -7,9 +7,9 @@
 
 v0.2.0 delivers the core trial engine, fail-closed shape validation, metadata stabilization, the `real_cases` dataset framework, the `benign_cases` pipeline, and community cross-check adapters (`bounty-scope` and `pgp-verify`) backed by automated CI policy enforcement.
 
-Architecture after this release: [aura-pipeline-v4](../diagrams/aura-pipeline-v4.mmd) (PNG: `docs/diagrams/aura-pipeline-v4.png`).
+Architecture after this release: [aura-pipeline-v4](https://github.com/kate8382/AURA/blob/v0.2.0/docs/diagrams/aura-pipeline-v4.mmd) (source: `docs/diagrams/aura-pipeline-v4.mmd`).
 
-![aura-pipeline-v4](../diagrams/aura-pipeline-v4.png)
+![aura-pipeline-v4](https://raw.githubusercontent.com/kate8382/AURA/v0.2.0/docs/diagrams/aura-pipeline-v4.png)
 
 ## Key Features & Epics
 
