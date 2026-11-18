@@ -55,7 +55,7 @@ Architecture after this release: [aura-pipeline-v4](https://github.com/kate8382/
 
 - **RSA key size in the PGP validator:** the policy minimum is RSA ≥ 3072 bits. openpgp.js cannot generate keys below 2047 bits, so the weak-RSA test uses RSA-2048 (rejected by the loader). The original spec example used RSA-1024.
 - **Trusted-key allowlist is empty** (`config/trusted-keys/manifest.json`, `keys: []`) by design until the first keys are approved.
-- **npm audit** reports vulnerabilities in transitive dependencies. They are not addressed in this release.
+- **npm audit** reports 42 advisories (1 critical, 40 high, 1 moderate) in the development toolchain (mainly `jest`, `ts-jest`, `@types/jest`) and their transitive dependencies. They are not addressed in this release and are tracked in #142. They affect the build and test tooling, not the runtime code.
 
 ## Upgrade Notes
 
