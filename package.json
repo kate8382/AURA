@@ -79,6 +79,7 @@
     "validate:real": "node -r ts-node/register scripts/validate-percases.ts real_cases",
     "validate:benign": "node -r ts-node/register scripts/validate-percases.ts benign_cases",
     "validate:triggers": "node -r ts-node/register scripts/tools/validate-triggers.ts",
+    "validate:keys": "node -r ts-node/register scripts/tools/validate-trusted-keys.ts",
     "clean:synthetic_cases": "node -r ts-node/register scripts/tools/clean-cases.ts",
     "gen:triggers": "node -r ts-node/register scripts/generate-trigger-weights.ts",
     "gen:triggers:real": "node -r ts-node/register scripts/generate-trigger-weights.ts --include-real",
