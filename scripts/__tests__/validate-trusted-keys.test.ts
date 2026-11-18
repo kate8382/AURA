@@ -126,18 +126,70 @@ describe('checkCertificatePolicy (certificate level)', () => {
     );
   });
 
-  test('accepts an ECDSA P-521 certificate as an approved curve', async () => {
+  test('rejects an MD5 certificate signature', async () => {
+    const alice = await ed25519Key('Alice');
+    const key = await openpgp.readKey({ armoredKey: alice.publicKey });
+    key.users[0].selfCertifications[0].hashAlgorithm = openpgp.enums.hash.md5;
+
+    const violations = await checkCertificatePolicy(key, new Date());
+    expect(violations).toContainEqual(
+      expect.objectContaining({ code: 'disallowed_hash_algorithm', subject: 'primary key' })
+    );
+  });
+
+  test('rejects a certificate without an expiration date', async () => {
+    const alice = await ed25519Key('Alice');
+    const key = await openpgp.readKey({ armoredKey: alice.publicKey });
+
+    const violations = await checkCertificatePolicy(key, new Date());
+    expect(violations).toContainEqual(expect.objectContaining({ code: 'no_expiration', subject: 'primary key' }));
+  });
+
+  test('rejects an expired encryption subkey while the primary key is still valid', async () => {
     const pair = await openpgp.generateKey({
       type: 'ecc',
-      curve: 'nistP521',
-      userIDs: [{ name: 'P521', email: 'p521@example.org' }],
+      curve: 'ed25519Legacy',
+      userIDs: [{ name: 'SubExpired', email: 'subexpired@example.org' }],
+      date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      keyExpirationTime: 365 * 24 * 60 * 60,
+      subkeys: [{ sign: true, keyExpirationTime: 24 * 60 * 60 }],
       format: 'armored',
     });
     const key = await openpgp.readKey({ armoredKey: pair.publicKey });
 
-    // The generated key has no expiry, so 'no_expiration' is expected; only curve codes are asserted here.
-    const codes = (await checkCertificatePolicy(key, new Date())).map((v) => v.code);
-    expect(codes).not.toContain('curve_not_approved');
-    expect(codes).not.toContain('disallowed_public_key_algorithm');
+    const violations = await checkCertificatePolicy(key, new Date());
+    const expired = violations.filter((v) => v.code === 'expired');
+    expect(expired.length).toBeGreaterThan(0);
+    expect(expired.every((v) => v.subject.startsWith('subkey '))).toBe(true);
+    expect(violations.some((v) => v.subject === 'primary key' && v.code === 'expired')).toBe(false);
+  });
+
+  test('accepts a P-521 certificate with an approved validity window (ECDSA and ECDH)', async () => {
+    const pair = await openpgp.generateKey({
+      type: 'ecc',
+      curve: 'nistP521',
+      userIDs: [{ name: 'P521', email: 'p521@example.org' }],
+      date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      keyExpirationTime: 365 * 24 * 60 * 60,
+      format: 'armored',
+    });
+    const key = await openpgp.readKey({ armoredKey: pair.publicKey });
+
+    expect(key.getSubkeys().length).toBeGreaterThan(0);
+    expect(await checkCertificatePolicy(key, new Date())).toEqual([]);
+  });
+
+  test('accepts a P-256 certificate with an approved validity window', async () => {
+    const pair = await openpgp.generateKey({
+      type: 'ecc',
+      curve: 'nistP256',
+      userIDs: [{ name: 'P256', email: 'p256@example.org' }],
+      date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      keyExpirationTime: 365 * 24 * 60 * 60,
+      format: 'armored',
+    });
+    const key = await openpgp.readKey({ armoredKey: pair.publicKey });
+
+    expect(await checkCertificatePolicy(key, new Date())).toEqual([]);
   });
 });

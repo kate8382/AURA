@@ -231,7 +231,7 @@ npm run validate:triggers
 
 - `scripts/tools/validate-trusted-keys.ts` — CI policy check for `config/trusted-keys/`. Reuses the `pgp-verify`
   trust-store loader for structure and adds expiry (expired keys and keys without expiration are rejected, validity
-  is capped at 2 years from creation), approved algorithms (RSA ≥ 3072, Ed25519, NIST P-256/P-384), and certificate
+  is capped at 2 years from creation), approved algorithms (RSA ≥ 3072, Ed25519, NIST P-256/P-384/P-521), and certificate
   signature hash checks. Exits 1 on any violation.
 
 ```bash
