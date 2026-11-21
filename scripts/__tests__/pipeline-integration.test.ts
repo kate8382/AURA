@@ -46,7 +46,7 @@ function typedCase(caseId: string) {
     case_id: caseId,
     category: 'access/example',
     scenarios: [{ name: 'Urgent request', text: 'Please act now.', triggers: ['urgency'] }],
-    cross_check: { questions: [{ id: `q-${caseId}`, title: 'Is access justified?', type: 'boolean', evidence_weight: 0.1 }] },
+    cross_check: { questions: [{ id: `q1-${caseId.toLowerCase()}`, title: 'Is access justified?', type: 'boolean', evidence_weight: 0.1 }] },
     confidence: 0.01,
     decision: 'pending'
   };
@@ -101,7 +101,7 @@ describe('recalc pipeline integration', () => {
 
     adapter.evaluateCrossChecks = async () => {
       await new Promise(resolve => setTimeout(resolve, 20));
-      return auditSummary('cc-delay', 0.1);
+      return auditSummary('q1-cc-delay', 0.1);
     };
     const result = await new RecalcConfidence().recalc(casePath, false, 0.0);
 
@@ -110,7 +110,7 @@ describe('recalc pipeline integration', () => {
     expect(out.confidence).toBeGreaterThan(initialConfidence);
     expect(out.confidence_raw).toBeGreaterThan(0);
     expect(['allow', 'review', 'block', 'pending']).toContain(out.decision);
-    expect(out.cross_check_audit.map((a: any) => a.id)).toEqual(['cc-delay']);
+    expect(out.cross_check_audit.map((a: any) => a.id)).toEqual(['q1-cc-delay']);
     expect(validateCase(out)).toBe(true);
   });
 

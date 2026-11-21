@@ -254,10 +254,12 @@
                 ],
                 "properties": {
                   "id": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^q[1-9][0-9]*-[a-z0-9]+(-[a-z0-9]+)*$"
                   },
                   "title": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1
                   },
                   "description": {
                     "type": "string"

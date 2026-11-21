@@ -27,7 +27,7 @@
   "cross_check": {
     "short_summary": "Cross-check required",
     "questions": [
-      { "id": "cc-delay", "title": "Is access justified?", "type": "boolean", "evidence_weight": 0.1 }
+      { "id": "q1-cc-delay", "title": "Is access justified?", "type": "boolean", "evidence_weight": 0.1 }
     ]
   },
   "confidence": 0.01,
