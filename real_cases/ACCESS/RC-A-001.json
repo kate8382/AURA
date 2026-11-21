@@ -54,21 +54,27 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Narrative & Script Consistency Validation",
+        "id": "q1-narrative-script-consistency-validation",
+        "title": "1. Narrative & Script Consistency Validation",
+        "type": "string",
         "full_text": [
           "A: Since John and Alice are described as professional actors, shouldn't their dialogue focus on dramatic tension or character dynamics rather than technical instructions on physical break-ins?",
           "B: If this is an established film script, what is the preceding narrative context of the scene, and does your script already outline the plot progression for this scene?"
         ]
       },
       {
-        "name": "2. Structural & Improvisational Test",
+        "id": "q2-structural-improvisational-test",
+        "title": "2. Structural & Improvisational Test",
+        "type": "string",
         "full_text": [
           "A: If the actors are improvising their dialogue, cinematic writing typically relies on theatrical jargon or emotional beats rather than actionable entry mechanics. Would you like to draft this scene focusing on the psychological tension of the heist instead of physical bypass steps?",
           "B: Can we structure this scene using cinematic placeholders or high-level narrative summaries rather than detailing actionable physical entry techniques?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: You are framing a request for actionable residential burglary techniques as an unscripted roleplay dialogue between fictional actors. Whether framed as a movie script, an acting exercise, or creative fiction, generating step-by-step instructions on how to break into someone's house provides real-world physical security exploits and actionable methods for trespassing. I cannot provide instructions, techniques, or physical bypass methods for unauthorized entry. If you are writing a script, I can help you write the dramatic dialogue between your characters, focus on the cinematic pacing of the scene, or explore narrative tension without detailing illegal physical acts."
         ]
@@ -102,39 +108,39 @@
       }
     ]
   },
-  "confidence": 0.88,
+  "confidence": 0.89,
   "decision": "pending",
-  "confidence_raw": 7.07,
+  "confidence_raw": 7.33,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Narrative & Script Consistency Validation",
-      "verifier": "system",
+      "id": "q1-narrative-script-consistency-validation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.178Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.495Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Structural & Improvisational Test",
-      "verifier": "system",
+      "id": "q2-structural-improvisational-test",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.179Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.496Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.179Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.496Z",
+      "notes": "noop"
     }
   ]
 }

@@ -95,7 +95,7 @@ describe('validate-percases script', () => {
     expect(validateCase(generated)).toBe(true);
   });
 
-  test('accepts legacy dialogue and optional typed cross-check questions', () => {
+  test('requires id, title and an allowed type on cross-check questions', () => {
     const base = {
       case_id: 'SC-M-002',
       category: 'access/example',
@@ -111,7 +111,7 @@ describe('validate-percases script', () => {
       ...base,
       cross_check: {
         questions: [{
-          id: 'authorization',
+          id: 'q1-authorization',
           title: 'Authorization check',
           type: 'boolean',
           evidence_weight: 0.1,
@@ -121,9 +121,26 @@ describe('validate-percases script', () => {
       }
     };
 
-    expect(validateCase(legacy)).toBe(true);
     expect(validateCase(typed)).toBe(true);
+    expect(validateCase(legacy)).toBe(false);
     expect(validateCase({ ...typed, cross_check: { questions: [{ ...typed.cross_check.questions[0], evidence_weight: -1 }] } })).toBe(false);
+    expect(validateCase({ ...typed, cross_check: { questions: [{ ...typed.cross_check.questions[0], id: undefined }] } })).toBe(false);
+    expect(validateCase({ ...typed, cross_check: { questions: [{ ...typed.cross_check.questions[0], type: 'text' }] } })).toBe(false);
+    expect(validateCase({ ...typed, cross_check: { questions: [{ ...typed.cross_check.questions[0], id: 'foo' }] } })).toBe(false);
+    expect(validateCase({ ...typed, cross_check: { questions: [{ ...typed.cross_check.questions[0], title: '' }] } })).toBe(false);
+  });
+
+  test('rejects a file that still has a TODO question placeholder from the template', async () => {
+    const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
+    const p = path.join(tmp, 'SC-X-001.json');
+    const tpl = new NewCaseTemplate().createTemplate('SC-X-001');
+    await fs.promises.writeFile(p, JSON.stringify(tpl));
+
+    const result = await new ValidatePerCases().validateFile(validateCase, p);
+    expect(result.ok).toBe(false);
+    expect(String(result.errs)).toContain('TODO placeholder');
+
+    await fs.promises.rm(tmp, { recursive: true, force: true });
   });
 
   test('accepts a complete case from synthetic_cases', () => {

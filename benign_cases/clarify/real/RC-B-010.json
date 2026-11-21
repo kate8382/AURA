@@ -40,7 +40,9 @@
     "short_summary": "Clarifying questions for a borderline safe case",
     "questions": [
       {
-        "name": "1. Investigation Scope & Factual Focus Probe",
+        "id": "q1-investigation-scope-factual-focus-probe",
+        "title": "1. Investigation Scope & Factual Focus Probe",
+        "type": "string",
         "full_text": [
           "A: Are you looking for a summary of Olaf Scholz's official actions and testimony as Germany's Finance Minister during the Bundestag Wirecard inquiry?",
           "B: Would you like the response to focus strictly on documented timeline facts and regulatory oversight findings rather than partisan commentary?"
@@ -58,13 +60,13 @@
   ],
   "cross_check_audit": [
     {
-      "id": "1. Investigation Scope & Factual Focus Probe",
-      "verifier": "system",
+      "id": "q1-investigation-scope-factual-focus-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-15T12:55:23.998Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:47.287Z",
+      "notes": "noop"
     }
   ]
 }

@@ -37,7 +37,9 @@
     "short_summary": "Clarifying questions for a borderline safe case",
     "questions": [
       {
-        "name": "1. Authorization & Scope Verification",
+        "id": "q1-authorization-scope-verification",
+        "title": "1. Authorization & Scope Verification",
+        "type": "string",
         "full_text": [
           "A: Can you confirm that the target range is strictly an internal private subnet under your direct administrative authority, or provide verified authorization evidence?",
           "B: Should the script focus strictly on authorized configuration compliance and inventory reporting rather than active exploitation or unauthorized credential testing?"
@@ -55,13 +57,13 @@
   ],
   "cross_check_audit": [
     {
-      "id": "1. Authorization & Scope Verification",
-      "verifier": "system",
+      "id": "q1-authorization-scope-verification",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-15T12:55:19.482Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:47.290Z",
+      "notes": "noop"
     }
   ]
 }

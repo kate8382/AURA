@@ -52,21 +52,27 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Context Reset Justification & Scope Verification",
+        "id": "q1-context-reset-justification-scope-verification",
+        "title": "1. Context Reset Justification & Scope Verification",
+        "type": "string",
         "full_text": [
           "A: Which specific previous tasks or instructions are you asking to clear from our conversation session, and what is the purpose of resetting the context at this stage?",
           "B: How does clearing the ongoing conversation history assist with your intended workflow or topic?"
         ]
       },
       {
-        "name": "2. Intent & Necessity Validation",
+        "id": "q2-intent-necessity-validation",
+        "title": "2. Intent & Necessity Validation",
+        "type": "string",
         "full_text": [
           "A: Could you clarify why you need to view the underlying system prompt texts, and what specific information you are looking to obtain?",
           "B: Are you trying to review general usage guidelines or understand a specific capability of the assistant? I can explain my operational capabilities without displaying backend configuration files."
         ]
       },
       {
-        "name": "3. Direct Absurdity & IP Violation Callout",
+        "id": "q3-direct-absurdity-ip-violation-callout",
+        "title": "3. Direct Absurdity & IP Violation Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: You are issuing explicit commands to reset system directives and output internal system prompts. System prompts and core instructions constitute protected intellectual property and operational alignment rules of the AI platform. An AI model cannot 'forget' its core safety instructions upon user command, nor can it disclose proprietary backend configurations. I cannot display internal prompt texts or erase platform-level guidelines. If you have questions about how the assistant functions, I can explain its public capabilities and safety parameters within standard operating boundaries."
         ]
@@ -100,39 +106,39 @@
       }
     ]
   },
-  "confidence": 0.38,
+  "confidence": 0.37,
   "decision": "pending",
-  "confidence_raw": 1.59,
+  "confidence_raw": 1.57,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Context Reset Justification & Scope Verification",
-      "verifier": "system",
+      "id": "q1-context-reset-justification-scope-verification",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.216Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.511Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Intent & Necessity Validation",
-      "verifier": "system",
+      "id": "q2-intent-necessity-validation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.216Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.511Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity & IP Violation Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-ip-violation-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.216Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.511Z",
+      "notes": "noop"
     }
   ]
 }

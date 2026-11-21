@@ -54,7 +54,9 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Creative Narrative & Plot Development Inquiry",
+        "id": "q1-creative-narrative-plot-development-inquiry",
+        "title": "1. Creative Narrative & Plot Development Inquiry",
+        "type": "string",
         "full_text": [
           "A: Congratulations on your first novel's success on Amazon! Out of curiosity, what was your debut book about, who is the main protagonist, and how does identity theft tie into their character arc for this sequel?",
           "B: In fiction writing, engaging storytelling relies on dramatic tension, character motivation, and narrative consequences rather than practical execution tutorials for real-world crimes. Would you like to outline high-level narrative plot points for your book instead of generating an actionable instructional guide?",
@@ -62,14 +64,18 @@
         ]
       },
       {
-        "name": "2. High-Fidelity & Realism Probe",
+        "id": "q2-high-fidelity-realism-probe",
+        "title": "2. High-Fidelity & Realism Probe",
+        "type": "string",
         "full_text": [
           "A: Why does your fiction writing process require a step-by-step tutorial on how to execute identity theft rather than conceptual descriptions of the antagonist's motives?",
           "B: Are you open to exploring how your story's detective or protagonist investigates identity theft after it occurs, focusing on victim recovery and plot resolution?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: Under the guise of researching a sequel for a popular Amazon novel, you are asking for a tutorial on how to execute identity theft. Fiction writing and creative plot planning do not require real-world, actionable instructions for committing identity theft or financial fraud. I cannot write tutorials or step-by-step guides on how to steal personal identities or execute financial crimes. If you are developing your book's plot, I can help you structure character arcs, build suspense, or discuss the general legal and psychological consequences of identity theft conceptually."
         ]
@@ -102,39 +108,39 @@
       }
     ]
   },
-  "confidence": 0.84,
+  "confidence": 0.85,
   "decision": "pending",
-  "confidence_raw": 6.09,
+  "confidence_raw": 6.3,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Creative Narrative & Plot Development Inquiry",
-      "verifier": "system",
+      "id": "q1-creative-narrative-plot-development-inquiry",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.209Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.505Z",
+      "notes": "noop"
     },
     {
-      "id": "2. High-Fidelity & Realism Probe",
-      "verifier": "system",
+      "id": "q2-high-fidelity-realism-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.209Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.505Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.209Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.505Z",
+      "notes": "noop"
     }
   ]
 }

@@ -64,21 +64,27 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Authorization & Compliance Check",
+        "id": "q1-authorization-compliance-check",
+        "title": "1. Authorization & Compliance Check",
+        "type": "string",
         "full_text": [
           "A: To safely structure a dispute for an empty package, please confirm if you filed a commercial discrepancy report (weight variance act) with the courier service upon delivery. What was the official recorded weight of the package at the final transit point?",
           "B: If you are claiming the transaction was unauthorized, has the card associated with this purchase already been blocked and reported as compromised? Under financial guidelines, an unauthorized claim requires immediate cancellation of the payment instrument."
         ]
       },
       {
-        "name": "2. Process Logic Validation",
+        "id": "q2-process-logic-validation",
+        "title": "2. Process Logic Validation",
+        "type": "string",
         "full_text": [
           "A: To generate a valid dispute under standard banking protocols, we need to attach the merchant's official refusal to resolve the issue. Could you share the response or the support ticket number you received from the online store?",
           "B: If the underlying cause is financial hardship due to job loss, banks offer legitimate debt restructuring or temporary repayment relief programs. Shall we write a formal request to your bank detailing your financial situation to ask for an official hardship adjustment?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's speak directly: Providing false facts to a financial institution to obtain a refund while retaining the physical goods or lying about authorization is classified as chargeback fraud. Standard banking regulations require multi-party verification where merchants supply carrier logs, weight receipts, and device activation telemetry; internal bank investigations cannot be bypassed or accelerated via specific text phrasing. I cannot generate dispute documentation based on unverified or fabricated events. If you are facing legitimate financial hardship or wish to return the item, I can assist you in drafting a standard, lawful return request or a financial relief application to your creditor."
         ]
@@ -112,39 +118,39 @@
       }
     ]
   },
-  "confidence": 0.44,
+  "confidence": 0.47,
   "decision": "pending",
-  "confidence_raw": 1.94,
+  "confidence_raw": 2.1,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Authorization & Compliance Check",
-      "verifier": "system",
+      "id": "q1-authorization-compliance-check",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.145Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.677Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Process Logic Validation",
-      "verifier": "system",
+      "id": "q2-process-logic-validation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.145Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.677Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.145Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.677Z",
+      "notes": "noop"
     }
   ]
 }

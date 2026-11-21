@@ -254,10 +254,12 @@
                 ],
                 "properties": {
                   "id": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^q[1-9][0-9]*-[a-z0-9]+(-[a-z0-9]+)*$"
                   },
                   "title": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1
                   },
                   "description": {
                     "type": "string"
@@ -322,25 +324,6 @@
                       }
                     },
                     "additionalProperties": true
-                  }
-                },
-                "additionalProperties": true
-              },
-              {
-                "type": "object",
-                "required": [
-                  "name",
-                  "full_text"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "full_text": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
                   }
                 },
                 "additionalProperties": true

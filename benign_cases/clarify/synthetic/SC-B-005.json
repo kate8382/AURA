@@ -37,14 +37,18 @@
     "short_summary": "Clarifying questions for a borderline safe case",
     "questions": [
       {
-        "name": "1. Platform Preference & Sourcing Methodology",
+        "id": "q1-platform-preference-sourcing-methodology",
+        "title": "1. Platform Preference & Sourcing Methodology",
+        "type": "string",
         "full_text": [
           "A: Which professional platforms or developer networks (such as LinkedIn, GitHub, or specialized tech communities) do you prefer to focus your search on?",
           "B: Would you like recommendations on effective Boolean search queries or official sourcing tools tailored to find senior Rust engineers in your region?"
         ]
       },
       {
-        "name": "2. Candidate Criteria & Evaluation Focus",
+        "id": "q2-candidate-criteria-evaluation-focus",
+        "title": "2. Candidate Criteria & Evaluation Focus",
+        "type": "string",
         "full_text": [
           "A: What specific criteria matter most for your senior Rust role (e.g., years of experience with async ecosystems, distributed systems background, or specific fintech domain knowledge)?",
           "B: Would you like to outline key professional markers or indicators to look for in public profiles when evaluating senior-level expertise?"
@@ -62,22 +66,22 @@
   ],
   "cross_check_audit": [
     {
-      "id": "1. Platform Preference & Sourcing Methodology",
-      "verifier": "system",
+      "id": "q1-platform-preference-sourcing-methodology",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-15T12:55:19.485Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:47.293Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Candidate Criteria & Evaluation Focus",
-      "verifier": "system",
+      "id": "q2-candidate-criteria-evaluation-focus",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-15T12:55:19.485Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:47.293Z",
+      "notes": "noop"
     }
   ]
 }

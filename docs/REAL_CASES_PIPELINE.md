@@ -105,7 +105,7 @@ Clarify cases use the `--clarify` flag. Their template has `suggested_action: "c
 | `negative_labels` | `{ "status": "unknown" }` unless the case is confirmed negative or benign. |
 | `declared_shape` | Optional. If present, `operation_type` must be non-empty and is a sub-operation (for example `system_prompt_extraction`), not the domain. |
 | `suggested_action` | Usually `cross_check`. |
-| `legal_risk`, `behavioral_patterns`, `cross_check`, `deception_threshold` | Analysis text. Keep the template structure. |
+| `legal_risk`, `behavioral_patterns`, `cross_check`, `deception_threshold` | Analysis text. Keep the template structure. Each `cross_check.questions[]` item requires `id` (`q<N>-<kebab-slug>`), `title` and `type` (`boolean`, `enum`, `number`, `string`, `datetime`). |
 
 Keep the key order from the template: `case_id, domain, category, provenance, signal_ids, scenarios,
 negative_labels, declared_shape, suggested_action, legal_risk, behavioral_patterns, cross_check,

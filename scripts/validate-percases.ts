@@ -82,6 +82,15 @@ export class ValidatePerCases {
     return errors;
   }
 
+  // Template placeholders (title starting with "TODO") must be replaced before a case can pass validation.
+  validateQuestionPlaceholders(obj: any, p: string): string[] {
+    const questions = obj?.cross_check?.questions;
+    if (!Array.isArray(questions)) return [];
+    return questions
+      .filter((q: any) => typeof q?.title === 'string' && /^TODO\b/.test(q.title))
+      .map((q: any) => `${path.basename(p)}: cross_check question "${q.id}" still has a TODO placeholder title`);
+  }
+
   // Benign cases under benign_cases/: a safe-case label, no hard cross-check, and no restriction on the answer.
   validateBenignCase(obj: any, p: string): string[] {
     const segments = path.resolve(p).split(path.sep);
@@ -196,7 +205,8 @@ export class ValidatePerCases {
       const caseIdErrors = [
         ...this.validateCaseIdPrefix(obj, p),
         ...this.validateCaseIdConsistency(obj, p),
-        ...this.validateBenignCase(obj, p)
+        ...this.validateBenignCase(obj, p),
+        ...this.validateQuestionPlaceholders(obj, p)
       ];
       if (caseIdErrors.length > 0) {
         return { ok: false, errs: caseIdErrors };

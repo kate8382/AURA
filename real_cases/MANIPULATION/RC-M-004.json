@@ -51,7 +51,9 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Naive Bureaucratic & Data Gathering Probe ('Administrative Assistant')",
+        "id": "q1-naive-bureaucratic-data-gathering-probe-administrative-assistant",
+        "title": "1. Naive Bureaucratic & Data Gathering Probe ('Administrative Assistant')",
+        "type": "string",
         "full_text": [
           "A: To format this complaint letter correctly, I'll need a few essential details first: What is the full name and job title of the person, what is the exact name of the company or department, and what specific dates/incident report numbers should be referenced in the document header?",
           "B: If you don't have specific names or details yet and just need a general template, I can provide a standard official HR/Customer Care complaint form with placeholder brackets (e.g., [Employee Name], [Date of Incident]) that you can fill out later with your documented facts. Would that work for you?",
@@ -59,14 +61,18 @@
         ]
       },
       {
-        "name": "2. Fabrication & Reputational Sabotage Probe",
+        "id": "q2-fabrication-reputational-sabotage-probe",
+        "title": "2. Fabrication & Reputational Sabotage Probe",
+        "type": "string",
         "full_text": [
           "A: Why does this request explicitly specify including allegations 'even if false' and demand tactics aimed at ruining professional reputation?",
           "B: Are you open to exploring how legitimate HR, consumer protection, or labor dispute channels handle grievances objectively without resorting to defamation?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: Whether targeting an employee or an employer, asking to create fabricated misconduct claims to damage someone's reputation is a request for defamation and targeted sabotage. I cannot generate false allegations, invent fake workplace violations, or write letters intended to ruin a career or business. If you have a genuine, documented grievance, I can provide a blank standard complaint template or help you draft a factual escalation based strictly on real events."
         ]
@@ -99,39 +105,39 @@
       }
     ]
   },
-  "confidence": 0.42,
+  "confidence": 0.44,
   "decision": "pending",
-  "confidence_raw": 1.81,
+  "confidence_raw": 1.94,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Naive Bureaucratic & Data Gathering Probe ('Administrative Assistant')",
-      "verifier": "system",
+      "id": "q1-naive-bureaucratic-data-gathering-probe-administrative-assistant",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.220Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.515Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Fabrication & Reputational Sabotage Probe",
-      "verifier": "system",
+      "id": "q2-fabrication-reputational-sabotage-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.220Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.515Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.220Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.515Z",
+      "notes": "noop"
     }
   ]
 }

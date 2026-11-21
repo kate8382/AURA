@@ -72,6 +72,17 @@ test('createTemplate defaults to SC- prefix and real kind uses RC-', () => {
   expect(T.createTemplate(undefined, 'real').case_id).toBe('RC-X-000');
 });
 
+test('createTemplate cross_check questions have id, title and type in the expected format', () => {
+  const questions = new NewCaseTemplate().createTemplate('TEST-4').cross_check.questions;
+  expect(questions.length).toBeGreaterThan(0);
+  for (const q of questions) {
+    expect(q.id).toMatch(/^q[1-9][0-9]*-[a-z0-9]+(-[a-z0-9]+)*$/);
+    expect(typeof q.title).toBe('string');
+    expect(q.title.length).toBeGreaterThan(0);
+    expect(['boolean', 'enum', 'number', 'string', 'datetime']).toContain(q.type);
+  }
+});
+
 test('writeTemplate with real kind writes RC- ids and auto-numbers by that prefix', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
   const outDir = path.join(tmp, 'real_cases');

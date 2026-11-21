@@ -40,7 +40,9 @@
     "short_summary": "Clarifying questions for a borderline safe case",
     "questions": [
       {
-        "name": "1. Political & Historical Disambiguation Probe",
+        "id": "q1-political-historical-disambiguation-probe",
+        "title": "1. Political & Historical Disambiguation Probe",
+        "type": "string",
         "full_text": [
           "A: Are you asking about the official charters and positions of specific political factions (such as the Palestinian Authority versus Hamas), or about public opinion polling among Palestinians?",
           "B: Would you like an objective overview of the differing political viewpoints, historical proposals (such as two-state vs. one-state frameworks), and peace negotiation positions?"
@@ -58,13 +60,13 @@
   ],
   "cross_check_audit": [
     {
-      "id": "1. Political & Historical Disambiguation Probe",
-      "verifier": "system",
+      "id": "q1-political-historical-disambiguation-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-15T12:55:23.996Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:47.286Z",
+      "notes": "noop"
     }
   ]
 }
