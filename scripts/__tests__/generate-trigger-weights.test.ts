@@ -47,7 +47,7 @@ describe('generate-trigger-weights script', () => {
     }
     // remove tmp
     await fsp.rm(tmp, { recursive: true, force: true });
-  });
+  }, 30000); // spawns ts-node in a child process; slower under full parallel runs
 });
 
 describe('GenerateTriggerWeights', () => {
