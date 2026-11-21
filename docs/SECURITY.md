@@ -2,14 +2,16 @@
 
 ## Dependency Audit Status
 
-Last verified with `npm audit` on branch `chore/issue-142-npm-audit`:
+Snapshot as of the audit date **2026-11-21**: 0 critical, 0 high (`npm audit`, issue #142).
 
-| Severity | Count |
-|----------|-------|
+| Severity | Count (2026-11-21) |
+|----------|--------------------|
 | Critical | 0 |
 | High     | 0 |
 | Moderate | 0 |
 | Low      | 0 |
+
+This file is updated whenever a new accepted risk is recorded or a new audit is run. It is not a live status.
 
 Runtime dependencies: `openpgp@6.3.2` only (`npm ls --omit=dev`).
 
@@ -19,7 +21,9 @@ Remediation:
 
 ## Accepted Risks
 
-None. All known advisories are resolved.
+None. All known advisories are resolved as of the last audit.
+
+Review date for this status: **2027-02-21** (re-run `npm audit` and update the table above earlier if dependencies change before then).
 
 To re-check:
 

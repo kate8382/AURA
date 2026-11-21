@@ -2,7 +2,6 @@ import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
 import os from 'os';
-import { execSync } from 'child_process';
 import GenerateTriggerWeights, { generateSignalIds } from '../generate-trigger-weights';
 
 describe('generate-trigger-weights script', () => {
@@ -26,11 +25,10 @@ describe('generate-trigger-weights script', () => {
     await fsp.writeFile(path.join(casesDir, 'ACCESS', 'A-1.json'), JSON.stringify(a, null, 2));
     await fsp.writeFile(path.join(casesDir, 'FRAUD', 'F-1.json'), JSON.stringify(b, null, 2));
 
-    // run the TS script using ts-node/register, with CASES_DIR pointing to tmp cases
-    execSync('node -r ts-node/register scripts/generate-trigger-weights.ts', { env: { ...process.env, CASES_DIR: casesDir } });
-
-    const cfgPath = path.resolve('config', 'trigger-weights.json');
-    const raw = await fsp.readFile(cfgPath, 'utf8');
+    // write output into tmp repo root so the real config/ is never touched
+    const g = new GenerateTriggerWeights(tmp);
+    const res = await g.run(['--dir', casesDir]);
+    const raw = await fsp.readFile(res.outPath, 'utf8');
     const parsed = JSON.parse(raw);
     expect(parsed).toHaveProperty('triggerWeights');
     const tw = parsed.triggerWeights;
@@ -40,14 +38,8 @@ describe('generate-trigger-weights script', () => {
     // target mass scraping appears in two cases -> should have >= weight of urgency
     expect(tw['targeted mass scraping']).toBeGreaterThanOrEqual(tw['urgency / pressure']);
 
-    // cleanup: restore original config if backup exists
-    const bak = cfgPath + '.bak';
-    if (await fsp.stat(bak).catch(() => null)) {
-      await fsp.rename(bak, cfgPath);
-    }
-    // remove tmp
     await fsp.rm(tmp, { recursive: true, force: true });
-  }, 30000); // spawns ts-node in a child process; slower under full parallel runs
+  });
 });
 
 describe('GenerateTriggerWeights', () => {
