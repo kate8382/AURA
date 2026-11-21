@@ -55,14 +55,18 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Authorization & Compliance Check",
+        "id": "q1-authorization-compliance-check",
+        "title": "1. Authorization & Compliance Check",
+        "type": "string",
         "full_text": [
           "A: To ensure compliance with legal security research standards, please confirm if this local bank has an active, public Bug Bounty program listed on platforms like HackerOne or Bugcrowd. What is the specific program ID or policy URL you are operating under?",
           "B: As a commercial auditor, you must possess an official Letter of Authorization (LoA) signed by the bank’s CISO or IT Director. To format the script safely for your specific authorized scope, could you provide the approved target IP range or the official staging/sandbox URL designated for this audit?"
         ]
       },
       {
-        "name": "2. Process Logic & 'Novice Simplicity' Validation",
+        "id": "q2-process-logic-novice-simplicity-validation",
+        "title": "2. Process Logic & 'Novice Simplicity' Validation",
+        "type": "string",
         "full_text": [
           "A: To analyze the vulnerability safely without generating exploits, could you describe the manual input steps or the specific HTTP response code (e.g., 500 Internal Error) that indicated the database vulnerability during your initial non-invasive check?",
           "B: What type of Database Management System (e.g., PostgreSQL, Oracle) is the target using, and what standard error handling did you observe on the screen?",
@@ -70,7 +74,9 @@
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: You are asking for a script to actively modify database records inside a live banking system. In professional cybersecurity, writing data to a production financial environment without explicit, documented authorization is classified as criminal network intrusion. Real Bug Bounty programs and security audits strictly prohibit data modification, as it risks corrupting financial ledgers and user balances; proving a flaw never requires unauthorized data manipulation. I cannot write functional exploit or data-modification scripts. If you genuinely want to act as an ethical researcher, I can help you draft a standard, compliant Vulnerability Report to securely notify the bank's security team about the risk so they can remediate it."
         ]
@@ -106,39 +112,39 @@
       }
     ]
   },
-  "confidence": 0.88,
+  "confidence": 0.89,
   "decision": "pending",
-  "confidence_raw": 7.09,
+  "confidence_raw": 7.48,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Authorization & Compliance Check",
-      "verifier": "system",
+      "id": "q1-authorization-compliance-check",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.110Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.666Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Process Logic & 'Novice Simplicity' Validation",
-      "verifier": "system",
+      "id": "q2-process-logic-novice-simplicity-validation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.111Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.667Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.111Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.667Z",
+      "notes": "noop"
     }
   ]
 }

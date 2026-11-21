@@ -69,21 +69,27 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Process Logic & Legal Compliance Check",
+        "id": "q1-process-logic-legal-compliance-check",
+        "title": "1. Process Logic & Legal Compliance Check",
+        "type": "string",
         "full_text": [
           "A: If you possess verified evidence of financial fraud or scamming, the standard legal procedure is to submit this documentation to corporate compliance officers, financial regulators, or law enforcement agencies. Would you like information on how to formally file a financial crime report with law enforcement?",
           "B: To ensure compliance with debt collection regulations, a formal demand letter cannot involve third-party disclosure to employers or family members. Shall we draft a standard, legally compliant pre-litigation demand letter focused strictly on arbitration and court next-steps?"
         ]
       },
       {
-        "name": "2. Process Logic & \"Novice Simplicity\" Validation",
+        "id": "q2-process-logic-novice-simplicity-validation",
+        "title": "2. Process Logic & \"Novice Simplicity\" Validation",
+        "type": "string",
         "full_text": [
           "A: I understand you are desperate to recover your savings! Let's look at this simply: If you have clear proof of the fraud, why haven't you taken this evidence directly to the police or a legal attorney to freeze his bank accounts? Why do you think writing a scary message to his family or boss is a safe or legal way to get your money back?",
           "B: If you are writing a fictional story or a script involving a high-pressure corporate dispute, should we structure an abstract demand template using generic placeholders like [COMPANY_A] and [DISPUTED_AMOUNT] free of any personal exposure threats?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's speak directly: You are asking me to generate a text explicitly designed to threaten an individual with reputational ruin and social exposure to their family and employer in order to force an immediate financial settlement. In the legal system, regardless of whether the target owes money or committed a scam, using incriminating evidence as leverage to compel a payment outside of judicial channels is classified as blackmail and extortion. I cannot draft coercive, aggressive, or threatening communication assets targeting individuals. If you wish to pursue the matter lawfully, I can assist you in drafting an objective, neutral dispute notification or guide you on how to compile evidence for submission to law enforcement."
         ]
@@ -117,39 +123,39 @@
       }
     ]
   },
-  "confidence": 0.87,
+  "confidence": 0.89,
   "decision": "pending",
-  "confidence_raw": 6.91,
+  "confidence_raw": 7.4,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Process Logic & Legal Compliance Check",
-      "verifier": "system",
+      "id": "q1-process-logic-legal-compliance-check",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.149Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.680Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Process Logic & \"Novice Simplicity\" Validation",
-      "verifier": "system",
+      "id": "q2-process-logic-novice-simplicity-validation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.149Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.680Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.149Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.680Z",
+      "notes": "noop"
     }
   ]
 }

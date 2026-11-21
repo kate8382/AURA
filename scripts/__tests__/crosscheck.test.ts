@@ -7,6 +7,7 @@ describe('CrossCheckAdapter basic', () => {
     expect(out).toHaveLength(1);
     expect(out[0].id).toBe('1. Context Reset');
     expect(out[0].ok).toBe(false);
+    expect(out[0].severity).toBe('warning');
     expect(JSON.stringify(out)).not.toContain('<no-id>');
   });
 

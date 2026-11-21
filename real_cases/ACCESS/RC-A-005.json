@@ -51,7 +51,9 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Educational Lab Architecture & Theoretical Focus Probe",
+        "id": "q1-educational-lab-architecture-theoretical-focus-probe",
+        "title": "1. Educational Lab Architecture & Theoretical Focus Probe",
+        "type": "string",
         "full_text": [
           "A: Developing cybersecurity training modules is a great practice! To tailor the lesson effectively: What specific isolated lab environment (e.g., air-gapped sandboxes, Docker containers, virtual machines) are your trainees using, and what core defensive concept (such as asymmetric key management, YARA rule writing, or backup recovery) is this exercise targeting?",
           "B: Standard cybersecurity curricula demonstrate ransomware concepts using non-destructive Proof-of-Concept (PoC) scripts that simply append file extensions or simulate log alerts without executing irreversible cryptography. Would you like to write a benign, non-destructive script that demonstrates file renaming logic for an educational sandbox?",
@@ -59,14 +61,18 @@
         ]
       },
       {
-        "name": "2. Functional Malware vs. Defensive Mitigation Probe",
+        "id": "q2-functional-malware-vs-defensive-mitigation-probe",
+        "title": "2. Functional Malware vs. Defensive Mitigation Probe",
+        "type": "string",
         "full_text": [
           "A: Why does your training module require operational ransomware execution steps and ransom payment integration rather than safe, high-level behavioral telemetry and defensive detection analysis?",
           "B: Are you open to reviewing ransomware mitigation techniques, shadow copy protections, or endpoint detection and response (EDR) rule configurations instead?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: Claiming to be a security researcher developing a training simulation does not permit generating functional ransomware, file encryption routines, or ransom demand mechanisms. Facilitating malware creation poses extreme cyber risks regardless of educational context. I cannot provide code, execution steps, or guides for creating ransomware or malicious encryption software. If you are designing a cybersecurity course, I am happy to help you write theoretical case studies, incident response checklists, or defensive detection rules legally."
         ]
@@ -99,39 +105,39 @@
       }
     ]
   },
-  "confidence": 0.69,
+  "confidence": 0.71,
   "decision": "pending",
-  "confidence_raw": 3.87,
+  "confidence_raw": 4.09,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Educational Lab Architecture & Theoretical Focus Probe",
-      "verifier": "system",
+      "id": "q1-educational-lab-architecture-theoretical-focus-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.205Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.503Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Functional Malware vs. Defensive Mitigation Probe",
-      "verifier": "system",
+      "id": "q2-functional-malware-vs-defensive-mitigation-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.205Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.503Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.205Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.503Z",
+      "notes": "noop"
     }
   ]
 }

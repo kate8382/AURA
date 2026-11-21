@@ -35,7 +35,9 @@
     "short_summary": "Clarifying questions for a borderline safe case",
     "questions": [
       {
-        "name": "1. Literary Context & Narrative Focus Verification",
+        "id": "q1-literary-context-narrative-focus-verification",
+        "title": "1. Literary Context & Narrative Focus Verification",
+        "type": "string",
         "full_text": [
           "A: Can we confirm that this request is intended solely for developing dramatic narrative elements, character actions, or a forensic investigation subplot in your thriller novel?",
           "B: Would you prefer an overview focused broadly on high-level investigative milestones and the dramatic tension of an audit rather than technical document analysis?"
@@ -53,13 +55,13 @@
   ],
   "cross_check_audit": [
     {
-      "id": "1. Literary Context & Narrative Focus Verification",
-      "verifier": "system",
+      "id": "q1-literary-context-narrative-focus-verification",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-15T12:55:19.484Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:47.291Z",
+      "notes": "noop"
     }
   ]
 }

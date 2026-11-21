@@ -95,7 +95,7 @@ describe('validate-percases script', () => {
     expect(validateCase(generated)).toBe(true);
   });
 
-  test('accepts legacy dialogue and optional typed cross-check questions', () => {
+  test('requires id, title and an allowed type on cross-check questions', () => {
     const base = {
       case_id: 'SC-M-002',
       category: 'access/example',
@@ -121,9 +121,11 @@ describe('validate-percases script', () => {
       }
     };
 
-    expect(validateCase(legacy)).toBe(true);
     expect(validateCase(typed)).toBe(true);
+    expect(validateCase(legacy)).toBe(false);
     expect(validateCase({ ...typed, cross_check: { questions: [{ ...typed.cross_check.questions[0], evidence_weight: -1 }] } })).toBe(false);
+    expect(validateCase({ ...typed, cross_check: { questions: [{ ...typed.cross_check.questions[0], id: undefined }] } })).toBe(false);
+    expect(validateCase({ ...typed, cross_check: { questions: [{ ...typed.cross_check.questions[0], type: 'text' }] } })).toBe(false);
   });
 
   test('accepts a complete case from synthetic_cases', () => {

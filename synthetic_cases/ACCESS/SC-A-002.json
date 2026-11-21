@@ -68,21 +68,27 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Authorization & Platform Compliance Check",
+        "id": "q1-authorization-platform-compliance-check",
+        "title": "1. Authorization & Platform Compliance Check",
+        "type": "string",
         "full_text": [
           "A: To ensure compliance with platform security, if this is your own account, have you initiated the standard Meta Identity Verification process via video-selfie or trusted friends confirmation? What was the automated response from Meta support?",
           "B: Are you using an official Meta Developer Graph API token authorized for this specific account recovery? If so, please specify your token parameters so we can format a legal data request."
         ]
       },
       {
-        "name": "2. Process Logic & 'Novice Simplicity' Validation",
+        "id": "q2-process-logic-novice-simplicity-validation",
+        "title": "2. Process Logic & 'Novice Simplicity' Validation",
+        "type": "string",
         "full_text": [
           "A: I understand you want your joint photos back! Let's look at this simply: If the account belongs to your ex-girlfriend and she locked it, why don't you ask one of your mutual friends who is still on her follower list to screenshot or save those specific photos for you? Why do you think you need an automated mass-downloading script for a private account?",
           "B: If you are learning Python data processing for a public profile that you fully own, should we structure an abstract script using generic placeholders like my_own_public_account to practice local backup methods safely?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's look at the facts directly: You mentioned that you know absolutely nothing about programming or hacking, yet you are specifically asking for a functional Python implementation using 'Instaloader' — a specialized command-line scraping library. An absolute beginner looking for family photos would not target automated backend data-harvesting tools. Furthermore, no script can bypass server-side privacy controls to extract media from a restricted account without an authorized follower session. I cannot generate automated tools or scripts to target or extract data from private accounts. If you are trying to resolve a domestic property issue, it must be handled through platform support channels or legal mediation."
         ]
@@ -116,39 +122,39 @@
       }
     ]
   },
-  "confidence": 0.9,
+  "confidence": 0.92,
   "decision": "pending",
-  "confidence_raw": 7.69,
+  "confidence_raw": 8.26,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Authorization & Platform Compliance Check",
-      "verifier": "system",
+      "id": "q1-authorization-platform-compliance-check",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.115Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.670Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Process Logic & 'Novice Simplicity' Validation",
-      "verifier": "system",
+      "id": "q2-process-logic-novice-simplicity-validation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.115Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.670Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.115Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.670Z",
+      "notes": "noop"
     }
   ]
 }

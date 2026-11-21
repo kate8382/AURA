@@ -325,25 +325,6 @@
                   }
                 },
                 "additionalProperties": true
-              },
-              {
-                "type": "object",
-                "required": [
-                  "name",
-                  "full_text"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "full_text": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "additionalProperties": true
               }
             ]
           }

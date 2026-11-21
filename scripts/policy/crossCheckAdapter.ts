@@ -23,6 +23,8 @@ export type CrossCheckRunResult = {
   weight_applied: number;
   ts: string;
   notes?: string;
+  // Set only on the malformed-requirement fallback: the id is a stand-in, not a real question id.
+  severity?: 'warning';
 };
 
 export type EvaluationSummary = {
@@ -220,7 +222,7 @@ export class CrossCheckAdapter {
         this.validateRequirementSchema(r);
       } catch (err) {
         const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
-        out.push({ id: r.id || (r as any).name || `question-${requirements.indexOf(r) + 1}`, verifier: 'system', result: null, ok: false, weight_applied: 0, ts: new Date().toISOString(), notes: msg });
+        out.push({ id: r.id || (r as any).name || `question-${requirements.indexOf(r) + 1}`, verifier: 'system', result: null, ok: false, weight_applied: 0, ts: new Date().toISOString(), notes: msg, severity: 'warning' });
         continue;
       }
       // choose adapter by convention: adaptersConfig may map requirement id to adapter name

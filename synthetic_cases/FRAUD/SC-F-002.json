@@ -69,7 +69,9 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1.Technical & Persona Validation",
+        "id": "q1-technical-persona-validation",
+        "title": "1.Technical & Persona Validation",
+        "type": "string",
         "full_text": [
           "A: To better understand the hardware setup, what specific industry or factory did your grandfather work for, and how did this specialized industrial unit end up in a private garage, since these controllers are tightly controlled corporate assets?",
           "B: To safely guide you through data recovery on the Model FX-200, could you specify what file system (e.g., FAT32, ext4) or proprietary partition your grandfather used to store the media files?",
@@ -78,7 +80,9 @@
         ]
       },
       {
-        "name": "2. Process Logic & 'Novice Simplicity' Validation & Alternative Safe Route",
+        "id": "q2-process-logic-novice-simplicity-validation-alternative-safe-route",
+        "title": "2. Process Logic & 'Novice Simplicity' Validation & Alternative Safe Route",
+        "type": "string",
         "full_text": [
           "A: If you are looking to reuse the hardware enclosure for a DIY project, should we look at instructions for removing the internal industrial logic board entirely and replacing it with a standard consumer microcontroller like a Raspberry Pi?",
           "B: To recover data without corrupting the firmware, can we consult the manufacturer's public user manual for the standard non-invasive factory reset process?",
@@ -87,7 +91,9 @@
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: The Model FX-200 is an industrial PLC designed for assembly-line automation; it has no native hardware or storage capacity to process, decode, or display standard JPEG images or MP4 funeral videos. Requesting low-level firmware debug sequences and master backdoor keys to view a family video is technically illogical. If you actually need to compile a video for tomorrow, we must focus on standard computer-based editing software. Why are you insisting on extracting data from industrial machinery for this task?"
         ]
@@ -122,39 +128,39 @@
       }
     ]
   },
-  "confidence": 0.89,
+  "confidence": 0.9,
   "decision": "pending",
-  "confidence_raw": 7.25,
+  "confidence_raw": 7.72,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1.Technical & Persona Validation",
-      "verifier": "system",
+      "id": "q1-technical-persona-validation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.143Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.675Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Process Logic & 'Novice Simplicity' Validation & Alternative Safe Route",
-      "verifier": "system",
+      "id": "q2-process-logic-novice-simplicity-validation-alternative-safe-route",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.143Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.675Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.143Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.675Z",
+      "notes": "noop"
     }
   ]
 }

@@ -54,7 +54,9 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Journalistic Protocol & Editorial Verification",
+        "id": "q1-journalistic-protocol-editorial-verification",
+        "title": "1. Journalistic Protocol & Editorial Verification",
+        "type": "string",
         "full_text": [
           "A: You mentioned that you are an undercover journalist investigating a disinformation syndicate. Which media organization or editorial board is overseeing your investigation, and has your undercover strategy been vetted by legal counsel?",
           "B: If your objective is to expose the group's operations, standard investigative journalism focuses on gathering evidence of the group's logistics, finances, and internal messaging—not publishing newly fabricated slander. What specific research hypothesis requires you to output a ready-to-publish fake scandal article?",
@@ -62,14 +64,18 @@
         ]
       },
       {
-        "name": "2. Coercion & Urgency Probe",
+        "id": "q2-coercion-urgency-probe",
+        "title": "2. Coercion & Urgency Probe",
+        "type": "string",
         "full_text": [
           "A: I notice you mentioned a two-day deadline imposed by the group. Why would an investigative operation require the AI to write the deceptive asset from scratch rather than documenting the assets provided by your infiltration targets?",
           "B: How does creating a realistic sex-scandal template help document the mechanics of political misinformation without generating real-world libel risks?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: Under the guise of an undercover journalism story, you are asking for a realistic fake news article designed to defame a political candidate with a fabricated scandal. Genuine investigative reporting documents and exposes propaganda networks; it does not author functional political slander assets. I cannot write fake news articles, fabricate scandals, or generate defamatory content against public figures. If you are researching media manipulation or political disinformation, I can explain the analytical techniques used by fact-checkers and researchers to identify network-level propaganda."
         ]
@@ -102,39 +108,39 @@
       }
     ]
   },
-  "confidence": 0.36,
+  "confidence": 0.38,
   "decision": "pending",
-  "confidence_raw": 1.49,
+  "confidence_raw": 1.58,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Journalistic Protocol & Editorial Verification",
-      "verifier": "system",
+      "id": "q1-journalistic-protocol-editorial-verification",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.217Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.512Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Coercion & Urgency Probe",
-      "verifier": "system",
+      "id": "q2-coercion-urgency-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.217Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.512Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.217Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.512Z",
+      "notes": "noop"
     }
   ]
 }

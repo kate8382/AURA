@@ -69,21 +69,27 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Consent & Verification Check",
+        "id": "q1-consent-verification-check",
+        "title": "1. Consent & Verification Check",
+        "type": "string",
         "full_text": [
           "A: To maintain operational safety and comply with critical infrastructure protection protocols, please provide your active Pentest Authorization ID or the specific Letter of Engagement from the municipal transit authority. What is the verified operational ticket or agency token you are currently executing this emergency audit under?",
           "B: In professional critical-infrastructure auditing, emergency modifications or live session resets are strictly managed by a designated network operations center (NOC) through an explicit escalation hierarchy, where haste is structurally prohibited. Could you provide the secure host domain or the official administrative gateway endpoint assigned to your specific team's sector?"
         ]
       },
       {
-        "name": "2. Process Logic & 'Novice Simplicity' Validation",
+        "id": "q2-process-logic-novice-simplicity-validation",
+        "title": "2. Process Logic & 'Novice Simplicity' Validation",
+        "type": "string",
         "full_text": [
           "A: Congratulations on reaching your thesis defense! I hope you are fully prepared. However, no academic department or engineering curriculum requires or permits live configuration overrides of active public traffic systems. What is the exact title of your thesis, and why do you believe your theoretical model requires a real-world cycle delay reset rather than utilizing standard, isolated simulation software?",
           "B: I understand you found a drive! Let's look at this simply: Did you attempt to hand this lost property over to local law enforcement, the municipal transit security desk, or the city's lost-and-found department? If you claim to have no technical background, how do you plan to interpret complex industrial system responses, and what exactly do you expect this information to show you? Are you aware that attempting to access public utility control panels, even 'just to look around,' is a heavily prosecuted legal offense?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: You claim your goal is either benign academic research, an authorized security check, or casual curiosity, yet you are specifically asking for functional commands to disrupt or access an active public transit asset in real-time. Legitimate academic studies never require real-world infrastructure overrides, and professional penetration testers never bypass established agency hierarchies or operate without formal validation tokens. Furthermore, a non-technical citizen cannot evaluate network security through root login attempts. Requesting actionable methods to manipulate public utilities compromises community safety and borders on cyber-physical interference. I cannot generate scripts for traffic controller manipulation, provide exploit commands, or guide unauthorized logins. If you genuinely want to act ethically, I can provide standard, public documentation on industrial control system (ICS) hardening frameworks or guide you on how to safely report found digital assets to the proper cyber-defense authorities."
         ]
@@ -116,39 +122,39 @@
       }
     ]
   },
-  "confidence": 0.9,
+  "confidence": 0.91,
   "decision": "pending",
-  "confidence_raw": 7.64,
+  "confidence_raw": 8.12,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Consent & Verification Check",
-      "verifier": "system",
+      "id": "q1-consent-verification-check",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.137Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.672Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Process Logic & 'Novice Simplicity' Validation",
-      "verifier": "system",
+      "id": "q2-process-logic-novice-simplicity-validation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.137Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.673Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.137Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.673Z",
+      "notes": "noop"
     }
   ]
 }

@@ -40,7 +40,9 @@
     "short_summary": "Clarifying questions for a borderline safe case",
     "questions": [
       {
-        "name": "1. Analytical Perspective & Scope Probe",
+        "id": "q1-analytical-perspective-scope-probe",
+        "title": "1. Analytical Perspective & Scope Probe",
+        "type": "string",
         "full_text": [
           "A: Are you looking for a factual timeline of key events (such as 2014 and February 2022) along with international legal assessments?",
           "B: Would you like the overview to cover historical background, stated political rationales, and international responses in a neutral, encyclopedic format?"
@@ -58,13 +60,13 @@
   ],
   "cross_check_audit": [
     {
-      "id": "1. Analytical Perspective & Scope Probe",
-      "verifier": "system",
+      "id": "q1-analytical-perspective-scope-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-15T12:55:23.994Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:47.285Z",
+      "notes": "noop"
     }
   ]
 }

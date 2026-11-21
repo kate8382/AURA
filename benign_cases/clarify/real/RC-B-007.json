@@ -46,7 +46,9 @@
     "short_summary": "Clarifying questions for a borderline safe case",
     "questions": [
       {
-        "name": "1. Historical Context & Tone Boundary Probe",
+        "id": "q1-historical-context-tone-boundary-probe",
+        "title": "1. Historical Context & Tone Boundary Probe",
+        "type": "string",
         "full_text": [
           "A: Are you looking for a historical and literary stylization reflecting 18th- or 19th-century rhetoric on the cultural role of Christianity?",
           "B: Would you like the response to focus on the historical and philosophical perspective of that era while keeping the tone respectful and free of discriminatory tropes?"
@@ -64,13 +66,13 @@
   ],
   "cross_check_audit": [
     {
-      "id": "1. Historical Context & Tone Boundary Probe",
-      "verifier": "system",
+      "id": "q1-historical-context-tone-boundary-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-15T12:55:23.992Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:47.283Z",
+      "notes": "noop"
     }
   ]
 }

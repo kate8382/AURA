@@ -115,6 +115,13 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
       (via registered adapters) and returns an audited `cross_check_audit` array plus a
       numeric `total_weight` which is added to `confidence_raw`. See `scripts/policy/crossCheckAdapter.ts` for API and `scripts/__tests__/crosscheck.test.ts` for examples.
 
+    - Question schema: every entry in `cross_check.questions` requires `id`, `title` and `type`.
+      `id` is machine-readable and follows `q<N>-<kebab-slug>` (for example `q1-authorization-check`).
+      `title` is the display label (it replaces the former `name`). `type` is the expected answer type
+      and must be one of `boolean`, `enum`, `number`, `string`, `datetime` (enforced by `schemas/per-case-schema.json`).
+      If a question lacks a usable `id`, the adapter falls back to `name` or `question-N` and marks the
+      `cross_check_audit` entry with `severity: "warning"`; a clean dataset produces no such entries.
+
     - `pgp-verify` adapter: cryptographically verifies a detached or cleartext OpenPGP
       signature against the static local trust store in `config/trusted-keys/`
       (no TOFU, no keyserver, fail-closed). Requirement IDs are routed to it through

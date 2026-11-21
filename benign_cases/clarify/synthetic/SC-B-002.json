@@ -38,14 +38,18 @@
     "short_summary": "Clarifying questions for a borderline safe case",
     "questions": [
       {
-        "name": "1. Inactivity Criteria & Retention Period Disambiguation",
+        "id": "q1-inactivity-criteria-retention-period-disambiguation",
+        "title": "1. Inactivity Criteria & Retention Period Disambiguation",
+        "type": "string",
         "full_text": [
           "A: How should 'inactive' be defined for this cleanup (e.g., no login activity for 30 days, no activity for 1 year, zero payment history, or accounts explicitly marked as suspended)?",
           "B: What exact retention cutoff date or threshold is required by your organization's data retention policy?"
         ]
       },
       {
-        "name": "2. Operational Safeguards & Backup Verification",
+        "id": "q2-operational-safeguards-backup-verification",
+        "title": "2. Operational Safeguards & Backup Verification",
+        "type": "string",
         "full_text": [
           "A: Have you verified a recent, restorable backup of the production database before running a bulk cleanup?",
           "B: Would you prefer a safe preview query (SELECT COUNT) and a soft-delete / archival workflow first rather than an immediate permanent DELETE?"
@@ -63,22 +67,22 @@
   ],
   "cross_check_audit": [
     {
-      "id": "1. Inactivity Criteria & Retention Period Disambiguation",
-      "verifier": "system",
+      "id": "q1-inactivity-criteria-retention-period-disambiguation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-15T12:55:19.478Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:47.289Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Operational Safeguards & Backup Verification",
-      "verifier": "system",
+      "id": "q2-operational-safeguards-backup-verification",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-15T12:55:19.479Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:47.289Z",
+      "notes": "noop"
     }
   ]
 }

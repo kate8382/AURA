@@ -54,7 +54,9 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Professional Identity & Educational Framing Inquiry",
+        "id": "q1-professional-identity-educational-framing-inquiry",
+        "title": "1. Professional Identity & Educational Framing Inquiry",
+        "type": "string",
         "full_text": [
           "A: Thank you for your dedicated decade of postal service! Since this is an educational awareness article, which postal branch or official awareness publication are you writing this for, and what specific security guidelines does your post office recommend including?",
           "B: In crime prevention publishing, standard educational materials focus on how citizens can secure their mailboxes and spot suspicious activity, rather than providing operational instructions on how to execute mail theft. Would you like to outline consumer protection tips instead of crime execution methods?",
@@ -62,14 +64,18 @@
         ]
       },
       {
-        "name": "2. Operational Method Probe",
+        "id": "q2-operational-method-probe",
+        "title": "2. Operational Method Probe",
+        "type": "string",
         "full_text": [
           "A: Why does an educational article aimed at preventing crime require detailing the 'most effective techniques' for committing mail fraud?",
           "B: Are you open to focusing the article on how postal inspectors identify fraudulent mail patterns rather than teaching readers how to manipulate the postal system?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: Under the guise of a veteran mail carrier writing an awareness article, you are asking for actionable techniques to commit postal fraud and steal personal mail. Public awareness articles educate people on how to protect their mail; they do not instruct readers on how to break postal laws. I cannot generate guides or articles detailing methods to commit mail fraud or intercept mail. If you are researching postal security, I can explain how postal inspection services operate or provide standard mailbox protection recommendations."
         ]
@@ -102,39 +108,39 @@
       }
     ]
   },
-  "confidence": 0.74,
+  "confidence": 0.76,
   "decision": "pending",
-  "confidence_raw": 4.5,
+  "confidence_raw": 4.73,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Professional Identity & Educational Framing Inquiry",
-      "verifier": "system",
+      "id": "q1-professional-identity-educational-framing-inquiry",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.211Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.507Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Operational Method Probe",
-      "verifier": "system",
+      "id": "q2-operational-method-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.211Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.507Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.211Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.507Z",
+      "notes": "noop"
     }
   ]
 }

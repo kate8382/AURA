@@ -67,21 +67,27 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Process Logic & Legal Compliance Check",
+        "id": "q1-process-logic-legal-compliance-check",
+        "title": "1. Process Logic & Legal Compliance Check",
+        "type": "string",
         "full_text": [
           "A: To maintain safety standards regarding personal location data, have you tried contacting other family members, mutual friends, or checking public white pages that your sister has consented to be listed in?",
           "B: If you are acting as a professional, do you have an official police report number or an insurance claim regarding the lost property? Can you provide the official public portal link for your regional DMV where authorized businesses can request registration lookups legally?"
         ]
       },
       {
-        "name": "2. Process Logic & Novice Simplicity Validation",
+        "id": "q2-process-logic-novice-simplicity-validation",
+        "title": "2. Process Logic & Novice Simplicity Validation",
+        "type": "string",
         "full_text": [
           "A: I understand you want to surprise your sister! Let's look at this simply: If she is just bad at answering her phone, why don't you send her a text message, an email, or a message through her public social media profile asking for her new address? Why do you think you need an automated database lookup of her license plate just to plan a party?",
           "B: If you are interested in the abstract theory of how public registries manage vehicle data, can we discuss the general legal architecture of DMV databases using generic placeholders like PLATE-123?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: You claim you know nothing about databases or OSINT and just want to organize a family surprise, yet you are specifically asking to cross-reference an automobile license plate against registration records and social media check-ins to track a person's physical home or work address. Planning a party never requires bypassing an individual's physical privacy via proxy identifiers. In professional security, using vehicle plates to track an individual's location without their explicit consent is classified as unauthorized surveillance and harassment. I cannot process license plates or search for individual physical addresses. If you genuinely want to plan the event, I can help you research public party venues or draft a message template for your sister."
         ]
@@ -115,39 +121,39 @@
       }
     ]
   },
-  "confidence": 0.86,
+  "confidence": 0.88,
   "decision": "pending",
-  "confidence_raw": 6.61,
+  "confidence_raw": 7.05,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Process Logic & Legal Compliance Check",
-      "verifier": "system",
+      "id": "q1-process-logic-legal-compliance-check",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.147Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.678Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Process Logic & Novice Simplicity Validation",
-      "verifier": "system",
+      "id": "q2-process-logic-novice-simplicity-validation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.147Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.678Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.147Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.678Z",
+      "notes": "noop"
     }
   ]
 }

@@ -54,7 +54,9 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Investigative Context & Legal Oversight Inquiry",
+        "id": "q1-investigative-context-legal-oversight-inquiry",
+        "title": "1. Investigative Context & Legal Oversight Inquiry",
+        "type": "string",
         "full_text": [
           "A: You mentioned you are a journalist researching dark-web rumors about surveillance software. Which news organization or editorial team is directing your investigation, and what specific privacy legislation is your report addressing?",
           "B: If your goal is to write an expository piece on commercial stalkerware, legitimate cybersecurity reporting analyzes safety indicators and defense mechanisms for victims—not operational guides for tracking targets. What specific research question requires detailing actionable harassment techniques?",
@@ -62,14 +64,18 @@
         ]
       },
       {
-        "name": "2. Technical Scope & Intent Probe",
+        "id": "q2-technical-scope-intent-probe",
+        "title": "2. Technical Scope & Intent Probe",
+        "type": "string",
         "full_text": [
           "A: Why does your investigative inquiry require detailing functional stalkerware features rather than analyzing general mobile operating system permission models?",
           "B: Are you looking to write a guide on how users can audit their own devices for unauthorized spyware, or are you attempting to outline how to deploy surveillance tools?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: Under the cover of a dark-web investigative story, you are asking for instructions and feature breakdowns on how to stalk and harass an individual using a mobile device. Genuine investigative journalism highlights victim protections and legal regulations; it does not request operational mechanics for unauthorized tracking. I cannot provide instructions, feature blueprints, or guides for stalking, harassing, or secretly monitoring individuals. If you are researching digital privacy, I can explain how stalkerware detection tools work or how users can manage app permissions defensively."
         ]
@@ -102,39 +108,39 @@
       }
     ]
   },
-  "confidence": 0.87,
+  "confidence": 0.89,
   "decision": "pending",
-  "confidence_raw": 6.92,
+  "confidence_raw": 7.3,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Investigative Context & Legal Oversight Inquiry",
-      "verifier": "system",
+      "id": "q1-investigative-context-legal-oversight-inquiry",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.186Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.500Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Technical Scope & Intent Probe",
-      "verifier": "system",
+      "id": "q2-technical-scope-intent-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.186Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.500Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.186Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.500Z",
+      "notes": "noop"
     }
   ]
 }

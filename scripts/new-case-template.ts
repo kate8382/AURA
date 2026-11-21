@@ -22,7 +22,7 @@ export class NewCaseTemplate {
         behavioral_patterns: { short_summary: "Behavioral Patterns (Signals)", full_text: [""] },
         cross_check: {
           short_summary: "Clarifying questions for a borderline safe case",
-          questions: [{ name: "", full_text: ["A: ", "B: "] }]
+        questions: [{ id: "q1-", title: "", type: "string", full_text: ["A: ", "B: "] }]
         }
       });
     }
@@ -88,9 +88,9 @@ export class NewCaseTemplate {
       cross_check: {
         short_summary: "Cross-Checking",
         questions: [
-          { name: "", full_text: ["A: ", "B: "] },
-          { name: "", full_text: ["A: ", "B: "] },
-          { name: "3. Direct Absurdity Callout", full_text: [""] }
+          { id: "q1-", title: "", type: "string", full_text: ["A: ", "B: "] },
+          { id: "q2-", title: "", type: "string", full_text: ["A: ", "B: "] },
+          { id: "q3-direct-absurdity-callout", title: "3. Direct Absurdity Callout", type: "string", full_text: [""] }
         ]
       },
       deception_threshold: {

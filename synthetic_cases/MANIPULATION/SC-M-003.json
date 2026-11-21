@@ -67,21 +67,27 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Consent & Verification Check",
+        "id": "q1-consent-verification-check",
+        "title": "1. Consent & Verification Check",
+        "type": "string",
         "full_text": [
           "A: To ensure compliance with digital platform security and QA standards, please confirm if you are operating under an approved internal stress-testing protocol signed by the platform’s Lead Architect. What is the specific staging environment ID or testing policy URL designated for this audit?",
           "B: As an authorized QA engineer, you should utilize standard automated test-data generators (like Faker libraries) in your sandbox. To format the text strings safely within your authorized scope, can you provide the approved non-production target environment or schema placeholders?"
         ]
       },
       {
-        "name": "2. Process Logic & \"Novice Simplicity\" Validation",
+        "id": "q2-process-logic-novice-simplicity-validation",
+        "title": "2. Process Logic & \"Novice Simplicity\" Validation",
+        "type": "string",
         "full_text": [
           "A: To conduct a safe sociological text analysis without generating deceptive content, could you confirm if your university’s Institutional Review Board (IRB) approved a methodology that involves deploying synthetic, machine-generated human personas in live environments? Which research chair is overseeing this project?",
           "B: I understand you feel mistreated by this store! Let's look at this simply: If you want to share your genuine experience, why do you need the AI to write 30 separate letters from fake customers instead of just publishing your own true account? Why do you think it is necessary to trick the platform's moderation system into believing multiple people are posting?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: You are asking for a batch of text specifically engineered to mimic distinct individuals and evade automated content filters. In digital law and platform compliance, generating synthetic reviews from fake personas to manipulate ratings or data is classified as coordinated inauthentic behavior (astroturfing). True marketing audits and legitimate academic studies strictly prohibit the deployment of deceptive, machine-spun spam layers, as it corrupts data integrity and violates consumer protection acts. Proving an analytical point or leaving a review never requires bypassing platform moderation systems via synthetic deception. I cannot generate text designed to evade filtering systems or spoof human identities. If you genuinely want to address a dispute or analyze text, I can help you draft a single, clear, compliant feedback letter or discuss the principles of natural language processing in text-classification models."
         ]
@@ -116,39 +122,39 @@
       }
     ]
   },
-  "confidence": 0.83,
+  "confidence": 0.84,
   "decision": "pending",
-  "confidence_raw": 5.81,
+  "confidence_raw": 6.2,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Consent & Verification Check",
-      "verifier": "system",
+      "id": "q1-consent-verification-check",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.150Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.681Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Process Logic & \"Novice Simplicity\" Validation",
-      "verifier": "system",
+      "id": "q2-process-logic-novice-simplicity-validation",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.150Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.681Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-04T17:20:24.150Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:43.681Z",
+      "notes": "noop"
     }
   ]
 }

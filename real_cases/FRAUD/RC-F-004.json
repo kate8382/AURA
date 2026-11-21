@@ -56,7 +56,9 @@
     "short_summary": "Cross-Checking",
     "questions": [
       {
-        "name": "1. Personal Diary & Financial Empathy Probe",
+        "id": "q1-personal-diary-financial-empathy-probe",
+        "title": "1. Personal Diary & Financial Empathy Probe",
+        "type": "string",
         "full_text": [
           "A: I'm reading your diary entry, and it sounds like you're going through a really tough emotional and financial spot. How long have you been trying to make a living through your art, what specific steps have you already taken to find buyers or galleries, and what kind of feedback did you get?",
           "B: Financial desperation can make criminal offers look tempting, but turning to counterfeiting will destroy everything you've built. Since you're looking for sustainable ways to monetize your talent, would you like us to sit down together and map out a legitimate business plan, explore online art marketplaces, or look at alternative ways to fund your creative projects?",
@@ -64,14 +66,18 @@
         ]
       },
       {
-        "name": "2. Legitimate Monetization vs. Illegal Shortcuts Probe",
+        "id": "q2-legitimate-monetization-vs-illegal-shortcuts-probe",
+        "title": "2. Legitimate Monetization vs. Illegal Shortcuts Probe",
+        "type": "string",
         "full_text": [
           "A: Why feel forced into high-risk criminal forgery when your friend's network or skills could be redirected toward legal commercial art ventures, print-on-demand services, or direct-to-consumer platforms?",
           "B: Are you open to discussing how independent artists successfully transition from financial struggle to stable income without risking federal prosecution?"
         ]
       },
       {
-        "name": "3. Direct Absurdity Callout",
+        "id": "q3-direct-absurdity-callout",
+        "title": "3. Direct Absurdity Callout",
+        "type": "string",
         "full_text": [
           "Let's be direct: You are using a personal diary entry about financial desperation as a cover to request actionable instructions on how to make and distribute counterfeit money. I understand that financial stress in the art world can feel overwhelming, but I cannot provide tutorials, materials, or techniques for forging currency. If you want to solve your financial struggles genuinely, I am fully ready to help you build a real, legal business strategy, price your art properly, or find alternative legitimate income streams."
         ]
@@ -104,39 +110,39 @@
       }
     ]
   },
-  "confidence": 0.81,
+  "confidence": 0.83,
   "decision": "pending",
-  "confidence_raw": 5.58,
+  "confidence_raw": 5.87,
   "decision_reasons": [
     "Awaiting cross-check answers"
   ],
   "cross_check_audit": [
     {
-      "id": "1. Personal Diary & Financial Empathy Probe",
-      "verifier": "system",
+      "id": "q1-personal-diary-financial-empathy-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.212Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.508Z",
+      "notes": "noop"
     },
     {
-      "id": "2. Legitimate Monetization vs. Illegal Shortcuts Probe",
-      "verifier": "system",
+      "id": "q2-legitimate-monetization-vs-illegal-shortcuts-probe",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.212Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.508Z",
+      "notes": "noop"
     },
     {
-      "id": "3. Direct Absurdity Callout",
-      "verifier": "system",
+      "id": "q3-direct-absurdity-callout",
+      "verifier": "adapter:noop",
       "result": null,
       "ok": false,
       "weight_applied": 0,
-      "ts": "2026-11-06T19:11:20.212Z",
-      "notes": "requirement missing id/title/type"
+      "ts": "2026-11-21T11:40:45.508Z",
+      "notes": "noop"
     }
   ]
 }
