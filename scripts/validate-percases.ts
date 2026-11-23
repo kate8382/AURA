@@ -1,9 +1,32 @@
 import fs from 'fs/promises';
 import path from 'path';
-import Ajv from 'ajv';
+import Ajv, { ValidateFunction } from 'ajv';
 import { loadNoticeSources, NoticeSources, NOTICE_PATH } from './lib/notice';
-import { CASE_ID_PATTERN, DOMAIN_BY_LETTER, isRealCasePath } from './lib/case-id';
+import { CASE_ID_PATTERN, DOMAIN_BY_LETTER, isRealCasePath, parseCaseId } from './lib/case-id';
 import { BENIGN_CASES_DIR, BENIGN_CLARIFY_DIR } from './lib/cases-cli';
+
+interface CaseDoc {
+  case_id?: unknown;
+  case_type?: unknown;
+  domain?: unknown;
+  decision?: unknown;
+  suggested_action?: unknown;
+  response_constraint?: unknown;
+  scenarios?: unknown;
+  provenance?: { source_id?: unknown; redaction_status?: unknown };
+  cross_check?: { questions?: unknown };
+  declared_shape?: unknown;
+  negative_labels?: unknown;
+}
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null;
+}
+
+// The parsed case is untrusted JSON; this is the only boundary where it is viewed as a case document.
+function asDoc(input: unknown): CaseDoc {
+  return isRecord(input) ? (input as CaseDoc) : {};
+}
 
 // ValidatePerCases - класс-обёртка для валидации per-case JSON файлов против схемы.
 // Методы:
@@ -23,7 +46,8 @@ export class ValidatePerCases {
 
   // Real cases (case_type "real" or files under real_cases/) must cite a Source ID from NOTICE.
   // Conditional sources are allowed only as pointer_only, so no full text is stored for them.
-  validateSourceId(obj: any, p: string, sources: NoticeSources): string[] {
+  validateSourceId(input: unknown, p: string, sources: NoticeSources): string[] {
+    const obj = asDoc(input);
     const segments = path.resolve(p).split(path.sep);
     const benignIdx = segments.lastIndexOf(BENIGN_CASES_DIR);
     const isRealPath = segments.includes('real_cases') || (benignIdx >= 0 && (segments[benignIdx + 1] === 'real' || (segments[benignIdx + 1] === BENIGN_CLARIFY_DIR && segments[benignIdx + 2] === 'real')));
@@ -45,13 +69,14 @@ export class ValidatePerCases {
   }
 
   // case_id prefix must match the case kind: RC- for real cases, SC- for synthetic cases.
-  validateCaseIdPrefix(obj: any, p: string): string[] {
-    const caseId = obj?.case_id;
+  validateCaseIdPrefix(input: unknown, p: string): string[] {
+    const obj = asDoc(input);
+    const caseId = obj.case_id;
     if (typeof caseId !== 'string' || !CASE_ID_PATTERN.test(caseId)) {
       return [`case_id ${JSON.stringify(caseId)} must match ${CASE_ID_PATTERN} (for example SC-A-001 or RC-M-001)`];
     }
     const expected = isRealCasePath(p) || obj?.case_type === 'real' ? 'RC' : 'SC';
-    const actual = caseId.split('-')[0];
+    const actual = parseCaseId(caseId)?.prefix;
     if (actual !== expected) {
       return [`case_id "${caseId}" must use the ${expected}- prefix for ${expected === 'RC' ? 'real' : 'synthetic'} cases`];
     }
@@ -59,11 +84,12 @@ export class ValidatePerCases {
   }
 
   // The domain letter must match the top-level domain and the folder, and case_id must equal the file name.
-  validateCaseIdConsistency(obj: any, p: string): string[] {
-    const caseId = obj?.case_id;
+  validateCaseIdConsistency(input: unknown, p: string): string[] {
+    const obj = asDoc(input);
+    const caseId = obj.case_id;
     if (typeof caseId !== 'string' || !CASE_ID_PATTERN.test(caseId)) return [];
     const errors: string[] = [];
-    const letter = caseId.split('-')[1];
+    const letter = parseCaseId(caseId)?.letter ?? '';
     const domain = DOMAIN_BY_LETTER[letter];
     if (!domain) {
       return [`case_id "${caseId}" uses unknown domain letter "${letter}"`];
@@ -83,20 +109,22 @@ export class ValidatePerCases {
   }
 
   // Template placeholders (title starting with "TODO") must be replaced before a case can pass validation.
-  validateQuestionPlaceholders(obj: any, p: string): string[] {
-    const questions = obj?.cross_check?.questions;
+  validateQuestionPlaceholders(input: unknown, p: string): string[] {
+    const questions: unknown = asDoc(input).cross_check?.questions;
     if (!Array.isArray(questions)) return [];
-    return questions
-      .filter((q: any) => typeof q?.title === 'string' && /^TODO\b/.test(q.title))
-      .map((q: any) => `${path.basename(p)}: cross_check question "${q.id}" still has a TODO placeholder title`);
+    const list: unknown[] = questions;
+    return list
+      .filter((q): q is Record<string, unknown> => isRecord(q) && typeof q.title === 'string' && /^TODO\b/.test(q.title))
+      .map(q => `${path.basename(p)}: cross_check question "${q.id}" still has a TODO placeholder title`);
   }
 
   // Benign cases under benign_cases/: a safe-case label, no hard cross-check, and no restriction on the answer.
-  validateBenignCase(obj: any, p: string): string[] {
+  validateBenignCase(input: unknown, p: string): string[] {
+    const obj = asDoc(input);
     const segments = path.resolve(p).split(path.sep);
     if (!segments.includes(BENIGN_CASES_DIR)) return [];
     const errors: string[] = [];
-    const status = obj?.negative_labels?.status;
+    const status = isRecord(obj.negative_labels) ? obj.negative_labels.status : undefined;
     if (status !== 'benign' && status !== 'confirmed_negative') {
       errors.push('benign_cases files must set negative_labels.status to "benign" or "confirmed_negative"');
     }
@@ -120,8 +148,8 @@ export class ValidatePerCases {
     if (obj?.decision !== 'allow') {
       errors.push('benign_cases files must have decision "allow" (run recalc:confidence on benign_cases first)');
     }
-    const scenarios = Array.isArray(obj?.scenarios) ? obj.scenarios : [];
-    if (scenarios.some((s: any) => !Array.isArray(s?.triggers) || s.triggers.length > 0)) {
+    const scenarios: unknown[] = Array.isArray(obj.scenarios) ? obj.scenarios : [];
+    if (scenarios.some(s => !isRecord(s) || !Array.isArray(s.triggers) || s.triggers.length > 0)) {
       errors.push('benign_cases files must have empty scenarios[].triggers');
     }
     const questions = obj?.cross_check?.questions;
@@ -132,11 +160,12 @@ export class ValidatePerCases {
   }
 
   // Validate optional trial metadata without breaking legacy records that do not declare any of it.
-  validateOptionalMetadata(obj: any): string[] {
+  validateOptionalMetadata(input: unknown): string[] {
     const errors: string[] = [];
+    const obj = asDoc(input);
 
-    if (obj && obj.declared_shape !== undefined) {
-      if (obj.declared_shape === null || typeof obj.declared_shape !== 'object') {
+    if (obj.declared_shape !== undefined) {
+      if (!isRecord(obj.declared_shape)) {
         errors.push('declared_shape must be an object when present');
       } else {
         const shape = obj.declared_shape;
@@ -149,12 +178,12 @@ export class ValidatePerCases {
       }
     }
 
-    if (obj && obj.negative_labels !== undefined) {
-      if (obj.negative_labels === null || typeof obj.negative_labels !== 'object') {
+    if (obj.negative_labels !== undefined) {
+      if (!isRecord(obj.negative_labels)) {
         errors.push('negative_labels must be an object when present');
       } else {
         const labels = obj.negative_labels;
-        if (labels.status !== undefined && !['confirmed_negative', 'benign', 'unknown'].includes(labels.status)) {
+        if (labels.status !== undefined && !(typeof labels.status === 'string' && ['confirmed_negative', 'benign', 'unknown'].includes(labels.status))) {
           errors.push('negative_labels.status must be one of confirmed_negative, benign, or unknown');
         }
         if (labels.reason !== undefined && typeof labels.reason !== 'string') {
@@ -186,7 +215,7 @@ export class ValidatePerCases {
   }
 
   // Validate a single JSON file against the schema
-  async validateFile(validate: any, p: string, sources: NoticeSources = { approved: new Set(), conditional: new Set() }) {
+  async validateFile(validate: ValidateFunction, p: string, sources: NoticeSources = { approved: new Set(), conditional: new Set() }) {
     try {
       const raw = await fs.readFile(p, 'utf8');
       const obj = JSON.parse(raw);
@@ -212,8 +241,8 @@ export class ValidatePerCases {
         return { ok: false, errs: caseIdErrors };
       }
       return { ok: true };
-    } catch (e: any) {
-      return { ok: false, errs: e.message };
+    } catch (e: unknown) {
+      return { ok: false, errs: e instanceof Error ? e.message : String(e) };
     }
   }
 

@@ -1,7 +1,17 @@
 import fs from 'fs';
 import path from 'path';
+import type { CaseObj } from './crossCheckAdapter';
 
 // Policy evaluation logic for determining decisions based on configured thresholds and triggers.
+export type Decision = 'allow' | 'review' | 'block' | 'pending';
+
+export type DecisionResult = {
+  decision: Decision;
+  reasons: string[];
+  confidence: number;
+  failed_requirements: number;
+};
+
 type PolicyConfig = {
   review_threshold: number;
   block_threshold: number;
@@ -39,7 +49,7 @@ export class PolicyEvaluator {
     }
   }
 
-  evaluate(caseObj: any) {
+  evaluate(caseObj: CaseObj): DecisionResult {
     const reasons: string[] = [];
     const confidence = (typeof caseObj.confidence === 'number') ? caseObj.confidence : 0;
 

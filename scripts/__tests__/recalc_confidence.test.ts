@@ -1,8 +1,44 @@
 import { mapConfidence, RecalcConfidence } from '../recalc_confidence';
 import CrossCheckAdapter from '../policy/crossCheckAdapter';
+import * as configModule from '../config';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+
+describe('RecalcConfidence.recalc writeCrossCheckAudit', () => {
+  let dir: string;
+  let file: string;
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-recalc-audit-'));
+    file = path.join(dir, 'SC-A-001.json');
+    fs.writeFileSync(file, JSON.stringify({
+      case_id: 'SC-A-001',
+      category: 'access',
+      confidence: 0.1,
+      cross_check_audit: [{ id: 'q1', ok: false }]
+    }));
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  test('strips cross_check_audit when writeCrossCheckAudit is false', async () => {
+    const base = configModule.loadTriggerConfig();
+    jest.spyOn(configModule, 'loadTriggerConfig').mockReturnValue({ ...base, writeCrossCheckAudit: false });
+    await new RecalcConfidence().recalc(file);
+    expect(JSON.parse(fs.readFileSync(file, 'utf8'))).not.toHaveProperty('cross_check_audit');
+  });
+
+  test('keeps cross_check_audit when writeCrossCheckAudit is true', async () => {
+    const base = configModule.loadTriggerConfig();
+    jest.spyOn(configModule, 'loadTriggerConfig').mockReturnValue({ ...base, writeCrossCheckAudit: true });
+    await new RecalcConfidence().recalc(file);
+    expect(JSON.parse(fs.readFileSync(file, 'utf8'))).toHaveProperty('cross_check_audit');
+  });
+});
 
 describe('mapConfidence', () => {
   test('default base is PROMPT_BASE (presumption of innocence)', () => {

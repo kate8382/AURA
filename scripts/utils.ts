@@ -7,7 +7,11 @@ type AnyObj = { [k: string]: any };
  */
 export function reorderCaseKeys(obj: AnyObj): AnyObj {
   const ordered: AnyObj = {};
-  const add = (k: string, v: any) => { if (typeof v !== 'undefined') ordered[k] = v; };
+  // defineProperty keeps "__proto__" as an own key instead of replacing the prototype.
+  const setOwn = (k: string, v: unknown) => {
+    Object.defineProperty(ordered, k, { value: v, enumerable: true, writable: true, configurable: true });
+  };
+  const add = (k: string, v: unknown) => { if (typeof v !== 'undefined') setOwn(k, v); };
   add('case_id', obj.case_id);
   add('domain', obj.domain);
   add('category', obj.category);
@@ -23,7 +27,7 @@ export function reorderCaseKeys(obj: AnyObj): AnyObj {
   add('deception_threshold', obj.deception_threshold);
   const dynamicKeys = ['confidence', 'decision', 'confidence_raw', 'decision_reasons', 'cross_check_audit'];
   for (const k of Object.keys(obj)) {
-    if (!Object.prototype.hasOwnProperty.call(ordered, k) && !dynamicKeys.includes(k)) ordered[k] = obj[k];
+    if (!Object.prototype.hasOwnProperty.call(ordered, k) && !dynamicKeys.includes(k)) setOwn(k, obj[k]);
   }
   for (const k of dynamicKeys) add(k, obj[k]);
   return ordered;

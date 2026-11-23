@@ -1,4 +1,4 @@
-import CrossCheckAdapter from '../policy/crossCheckAdapter';
+import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from '../policy/crossCheckAdapter';
 
 describe('CrossCheckAdapter basic', () => {
   test('question without id/title/type is audited by name, never as <no-id>', async () => {
@@ -9,6 +9,17 @@ describe('CrossCheckAdapter basic', () => {
     expect(out[0].ok).toBe(false);
     expect(out[0].severity).toBe('warning');
     expect(JSON.stringify(out)).not.toContain('<no-id>');
+  });
+
+  test('missing adapter is recorded as a failed run with the caught error message', async () => {
+    const adapter = new CrossCheckAdapterClass();
+    (adapter as unknown as { adapters: Map<string, unknown> }).adapters.delete('noop');
+    const req = { id: 'cc-missing', title: 't', type: 'boolean' } as any;
+    const out = await adapter.runAdaptersForCase({}, [req], { 'cc-missing': 'unregistered' });
+    expect(out).toHaveLength(1);
+    expect(out[0].ok).toBe(false);
+    expect(out[0].verifier).toBe('adapter:unregistered');
+    expect(out[0].notes).toMatch(/is not a function/);
   });
 
   test('noop adapter returns not-ok and zero weight', async () => {

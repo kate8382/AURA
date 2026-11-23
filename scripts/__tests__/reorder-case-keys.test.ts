@@ -31,4 +31,13 @@ describe('reorderCaseKeys', () => {
     const keys = Object.keys(reorderCaseKeys({ case_id: 'SC-M-001', custom_field: 1, domain: 'manipulation' }));
     expect(keys).toEqual(['case_id', 'domain', 'custom_field']);
   });
+
+  test('"__proto__" input key is kept as own data and does not change the prototype', () => {
+    const input = JSON.parse('{"case_id":"X-1","__proto__":{"polluted":true}}');
+    const out = reorderCaseKeys(input);
+    expect(Object.getPrototypeOf(out)).toBe(Object.prototype);
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+    expect(Object.prototype.hasOwnProperty.call(out, '__proto__')).toBe(true);
+    expect(Object.keys(out)).toEqual(['case_id', '__proto__']);
+  });
 });
