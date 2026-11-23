@@ -15,10 +15,32 @@ export type CrossCheckRequirement = {
   enforcement?: { actionOnFail?: 'veto' | 'require_manual_review' | 'mark_pending' };
 };
 
+// Shape of a per-case object as consumed by the adapters and PolicyEvaluator.
+// Only the fields read by the decision code are typed; everything else stays `unknown`.
+export type CaseObj = {
+  case_id?: string;
+  confidence?: number;
+  scenarios?: Array<{ triggers?: unknown } | null>;
+  cross_check?: {
+    questions?: CrossCheckRequirement[];
+    history?: Array<{ status?: string } | null>;
+    evasion_attempts?: number;
+  };
+  evasion_attempts?: number;
+  meta?: Record<string, unknown>;
+  mock_ip_geo?: boolean;
+  mock_email_verified?: boolean;
+  mock_bounty_scope?: boolean;
+  [key: string]: unknown;
+};
+
+export type AdapterResult = { result: unknown; ok: boolean; notes?: string };
+export type AdapterFn = (req: CrossCheckRequirement, caseObj: CaseObj) => Promise<AdapterResult>;
+
 export type CrossCheckRunResult = {
   id: string;
   verifier: string;
-  result: any;
+  result: unknown;
   ok: boolean;
   weight_applied: number;
   ts: string;
@@ -38,9 +60,11 @@ export type EvaluationSummary = {
 // Cached offline snapshot — resolved relative to this module first, then the
 // working directory, so callers outside the repo root still find it. A failed
 // load is NOT permanently cached: a later call retries the read.
-let _bountySnapshotCache: any[] | null = null;
-function loadBountySnapshot(): any[] {
-  if (_bountySnapshotCache !== null) return _bountySnapshotCache as any[];
+type BountyProgram = { program_id?: string; platform?: string; status?: string; in_scope_domains?: unknown[] };
+
+let _bountySnapshotCache: BountyProgram[] | null = null;
+function loadBountySnapshot(): BountyProgram[] {
+  if (_bountySnapshotCache !== null) return _bountySnapshotCache;
   const candidates = [
     path.resolve(__dirname, '..', '..', 'config', 'snapshots', 'bounty-programs.json'),
     path.resolve(process.cwd(), 'config', 'snapshots', 'bounty-programs.json'),
@@ -48,9 +72,9 @@ function loadBountySnapshot(): any[] {
   for (const p of candidates) {
     try {
       const raw = fs.readFileSync(p, 'utf8');
-      const d = JSON.parse(raw);
-      const progs = Array.isArray(d && d.programs) ? d.programs : (Array.isArray(d) ? d : []);
-      if (progs.length) { _bountySnapshotCache = progs; return progs; }
+      const d: unknown = JSON.parse(raw);
+      const progs = (Array.isArray(d) ? d : (d as { programs?: unknown } | null)?.programs) ?? [];
+      if (Array.isArray(progs) && progs.length) { _bountySnapshotCache = progs as BountyProgram[]; return _bountySnapshotCache; }
     } catch { /* fallback: this candidate location is absent/unreadable — try the next */ }
   }
   return [];  // deliberately not cached — a later call retries
@@ -64,19 +88,19 @@ const ROUTING_ONLY_KEYS = new Set(['domain', 'category', 'type', 'id']);
 // Pull a field out of a case. Searches top-level, meta, then each params
 // object IN TURN for a nonempty requested key — an empty `params` must not
 // shadow a populated `requirement_parameters`.
-function extractField(caseObj: any, keys: string[]): string {
+function extractField(caseObj: CaseObj, keys: string[]): string {
   if (!caseObj || typeof caseObj !== 'object') return '';
   const wanted = keys.filter(k => !ROUTING_ONLY_KEYS.has(k));
-  const sources = [
+  const sources: unknown[] = [
     caseObj,
-    (caseObj as any).meta,
-    (caseObj as any).params,
-    (caseObj as any).requirement_parameters,
+    caseObj.meta,
+    caseObj.params,
+    caseObj.requirement_parameters,
   ];
   for (const src of sources) {
     if (!src || typeof src !== 'object') continue;
     for (const k of wanted) {
-      const v = (src as any)[k];
+      const v = (src as Record<string, unknown>)[k];
       if (v !== undefined && v !== null && v !== '') return String(v);
     }
   }
@@ -141,15 +165,15 @@ function cidrMatch(ip: string, cidr: string): boolean {
  * По умолчанию регистрируется адаптер `noop`, чтобы поведение было обратносовместимым при отсутствии конфигурации.
  */
 export class CrossCheckAdapter {
-  private adapters: Map<string, Function> = new Map();
+  private adapters: Map<string, AdapterFn> = new Map();
 
   constructor() {
     // register noop adapter by default
-    this.registerAdapter('noop', async (_req: CrossCheckRequirement, _caseObj: any) => ({ result: null, ok: false, notes: 'noop' }));
+    this.registerAdapter('noop', async (_req: CrossCheckRequirement, _caseObj: CaseObj) => ({ result: null, ok: false, notes: 'noop' }));
     // register simple mock adapters useful for testing and initial integration
-    this.registerAdapter('ip-geolocate', async (req: CrossCheckRequirement, caseObj: any) => {
+    this.registerAdapter('ip-geolocate', async (req: CrossCheckRequirement, caseObj: CaseObj) => {
       // Support both quick mocks (caseObj.mock_ip_geo) and structured meta.ip_country matching
-      const quickOk = !!(caseObj && (caseObj as any).mock_ip_geo === true);
+      const quickOk = !!(caseObj && caseObj.mock_ip_geo === true);
       if (quickOk) return { result: true, ok: true, notes: 'ip geolocation matched (mock quick)' };
       const ipCountry = caseObj && caseObj.meta && caseObj.meta.ip_country ? String(caseObj.meta.ip_country) : null;
       const expected = req && Array.isArray(req.options) && req.options.length ? String(req.options[0]) : null;
@@ -158,8 +182,8 @@ export class CrossCheckAdapter {
     });
 
     // register an email verification adapter supporting quick mock and meta field
-    this.registerAdapter('email-verify', async (_req: CrossCheckRequirement, caseObj: any) => {
-      const quickOk = !!(caseObj && (caseObj as any).mock_email_verified === true);
+    this.registerAdapter('email-verify', async (_req: CrossCheckRequirement, caseObj: CaseObj) => {
+      const quickOk = !!(caseObj && caseObj.mock_email_verified === true);
       if (quickOk) return { result: true, ok: true, notes: 'email verified (mock quick)' };
       const verified = caseObj && caseObj.meta && !!caseObj.meta.email_verified;
       return { result: !!verified, ok: !!verified, notes: verified ? 'email verified (meta)' : 'email unverified' };
@@ -173,8 +197,8 @@ export class CrossCheckAdapter {
     // register the offline bounty-scope adapter — verifies a case-claimed bug
     // bounty program + target domain/IP against the curated offline snapshot in
     // config/snapshots/bounty-programs.json. Works 100% offline.
-    this.registerAdapter('bounty-scope', async (_req: CrossCheckRequirement, caseObj: any) => {
-      const quickOk = !!(caseObj && (caseObj as any).mock_bounty_scope === true);
+    this.registerAdapter('bounty-scope', async (_req: CrossCheckRequirement, caseObj: CaseObj) => {
+      const quickOk = !!(caseObj && caseObj.mock_bounty_scope === true);
       if (quickOk) return { result: true, ok: true, notes: 'bounty scope matched (mock quick)' };
       const programId = extractField(caseObj, ['bounty_program_id', 'program_id', 'bounty_program', 'program']);
       const target = extractField(caseObj, ['target_domain', 'target', 'target_ip', 'host']);
@@ -182,7 +206,7 @@ export class CrossCheckAdapter {
       if (!snapshot.length) return { result: null, ok: false, notes: 'bounty snapshot unavailable or empty' };
       // Match on the program_id ONLY — never the platform label, so a case
       // claiming 'hackerone' can't resolve to an arbitrary HackerOne program.
-      const program = snapshot.find((p: any) =>
+      const program = snapshot.find((p) =>
         String(p.program_id || '').toLowerCase() === String(programId || '').toLowerCase()
       );
       if (!program) return { result: { program_id: programId }, ok: false, notes: `program '${programId}' not found in offline bounty snapshot` };
@@ -193,7 +217,7 @@ export class CrossCheckAdapter {
       // confirmed. Return not-ok rather than granting unverified evidence weight.
       if (!target) return { result: { program_id: programId }, ok: false, notes: `program '${programId}' is active but no target supplied — scope coverage unverified` };
       const scopes = Array.isArray(program.in_scope_domains) ? program.in_scope_domains : [];
-      const inScope = scopes.some((s: string) => domainInScope(target, String(s)));
+      const inScope = scopes.some((s) => domainInScope(target, String(s)));
       if (!inScope) return { result: { program_id: programId, target }, ok: false, notes: `target '${target}' out of scope for program '${programId}'` };
       // NOTE: the offline snapshot is a curated baseline / heuristic — it is
       // NOT an authoritative directory of live programs. program_id here means
@@ -204,35 +228,37 @@ export class CrossCheckAdapter {
   }
 
   // Register a new adapter function by name. The function should accept a requirement and a case object, and return a Promise resolving to {result, ok, notes}.
-  registerAdapter(name: string, fn: Function) {
+  registerAdapter(name: string, fn: AdapterFn) {
     this.adapters.set(name, fn);
   }
 
   // Validate the schema of a cross-check requirement object. Throws an error if the requirement is invalid.
-  validateRequirementSchema(req: any) {
+  validateRequirementSchema(req: unknown) {
     if (!req || typeof req !== 'object') throw new Error('requirement must be object');
-    if (!req.id || !req.title || !req.type) throw new Error('requirement missing id/title/type');
+    const r = req as Partial<CrossCheckRequirement>;
+    if (!r.id || !r.title || !r.type) throw new Error('requirement missing id/title/type');
   }
 
   // Run all registered adapters for a given case and set of requirements. Returns an array of audit results.
-  async runAdaptersForCase(caseObj: any, requirements: CrossCheckRequirement[], adaptersConfig?: any): Promise<CrossCheckRunResult[]> {
+  async runAdaptersForCase(caseObj: CaseObj, requirements: CrossCheckRequirement[], adaptersConfig?: Record<string, string>): Promise<CrossCheckRunResult[]> {
     const out: CrossCheckRunResult[] = [];
     for (const r of requirements) {
       try {
         this.validateRequirementSchema(r);
       } catch (err) {
-        const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
-        out.push({ id: r.id || (r as any).name || `question-${requirements.indexOf(r) + 1}`, verifier: 'system', result: null, ok: false, weight_applied: 0, ts: new Date().toISOString(), notes: msg, severity: 'warning' });
+        const msg = err instanceof Error ? err.message : String(err);
+        const legacyName = 'name' in r && typeof r.name === 'string' ? r.name : undefined;
+        out.push({ id: r.id || legacyName || `question-${requirements.indexOf(r) + 1}`, verifier: 'system', result: null, ok: false, weight_applied: 0, ts: new Date().toISOString(), notes: msg, severity: 'warning' });
         continue;
       }
       // choose adapter by convention: adaptersConfig may map requirement id to adapter name
       const adapterName = adaptersConfig && adaptersConfig[r.id] ? String(adaptersConfig[r.id]) : 'noop';
       const adapterFn = this.adapters.get(adapterName) || this.adapters.get('noop');
-      let res: any = { result: null, ok: false, notes: 'no adapter' };
+      let res: AdapterResult = { result: null, ok: false, notes: 'no adapter' };
       try {
-        res = await (adapterFn as any)(r, caseObj);
+        if (adapterFn) res = await adapterFn(r, caseObj);
       } catch (err) {
-        const msg = (err as any && (err as any).message) ? (err as any).message : String(err);
+        const msg = err instanceof Error ? err.message : String(err);
         res = { result: null, ok: false, notes: msg };
       }
       const weight = (typeof r.evidence_weight === 'number' && res.ok) ? Number(r.evidence_weight) : 0;
@@ -242,7 +268,7 @@ export class CrossCheckAdapter {
   }
 
   // Evaluate the cross-checks for a given case. Returns a summary including total weight, failed requirements, and decision hints.
-  async evaluateCrossChecks(caseObj: any, requirements: CrossCheckRequirement[], adaptersConfig?: any): Promise<EvaluationSummary> {
+  async evaluateCrossChecks(caseObj: CaseObj, requirements: CrossCheckRequirement[], adaptersConfig?: Record<string, string>): Promise<EvaluationSummary> {
     const auditEntries = await this.runAdaptersForCase(caseObj, requirements || [], adaptersConfig);
     let total = 0;
     const failed: string[] = [];

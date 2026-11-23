@@ -2,12 +2,24 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import PolicyEvaluator from './policy/evaluateDecision';
 import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from './policy/crossCheckAdapter';
+import type { CaseObj, CrossCheckRunResult } from './policy/crossCheckAdapter';
+import type { Decision } from './policy/evaluateDecision';
 import { reorderCaseKeys } from './utils';
 import { generateSignalIds } from './generate-trigger-weights';
 import { logError, logWarn, runCli } from './logger';
 import { assertRealWriteAllowed } from './lib/cases-cli';
 
-type Entry = { [k: string]: any };
+// A case as stored on disk. Fields written by recalc are typed; the rest stay open.
+type Entry = CaseObj & {
+  category?: string;
+  signal_ids?: string[];
+  confidence_raw?: number;
+  decision?: Decision;
+  decision_reasons?: string[];
+  cross_check_audit?: CrossCheckRunResult[];
+};
+type SignalEntry = string[] | { triggers?: string[] };
+type Change = [string, Record<string, unknown>, Record<string, unknown>];
 
 /**
  * RecalcConfidence
@@ -60,10 +72,10 @@ export class RecalcConfidence {
   }
 
   // Note: canonical ordering handled by shared utility `reorderCaseKeys`
-  async recalc(filePath: string, preserveExisting = false, minFloor = 0.0): Promise<{ count: number; changes: Array<[string, any, any]> }> {
+  async recalc(filePath: string, preserveExisting = false, minFloor = 0.0): Promise<{ count: number; changes: Change[] }> {
     const raw = await fs.readFile(filePath, 'utf8');
-    const data = JSON.parse(raw);
-    const changes: Array<[string, any, any]> = [];
+    const data: Record<string, unknown> = JSON.parse(raw);
+    const changes: Change[] = [];
     let count = 0;
 
     // Load config via helper (file + ENV)
@@ -71,7 +83,7 @@ export class RecalcConfidence {
     const cfg = loadTriggerConfig();
 
     // Load signal mapping (signal_id -> [triggers] or { id, description, triggers }) if present
-    let signalMapping: Record<string, any> = {};
+    let signalMapping: Record<string, SignalEntry> = {};
     const mapPath = path.resolve(__dirname, '..', 'config', 'signal-mapping.json');
     const rawMap = await fs.readFile(mapPath, 'utf8').catch(() => null);
     if (rawMap === null) {
@@ -96,15 +108,16 @@ export class RecalcConfidence {
     const evaluator = new PolicyEvaluator();
     const crossAdapter = CrossCheckAdapter; // default instance
 
-    const removeAuditEntries = (node: any) => {
+    const removeAuditEntries = (node: unknown) => {
       if (!node) return;
       if (Array.isArray(node)) {
         for (const it of node) removeAuditEntries(it);
         return;
       }
       if (typeof node === 'object') {
-        if (Object.prototype.hasOwnProperty.call(node, 'cross_check_audit')) delete node.cross_check_audit;
-        for (const k of Object.keys(node)) removeAuditEntries(node[k]);
+        const obj = node as Record<string, unknown>;
+        if (Object.prototype.hasOwnProperty.call(obj, 'cross_check_audit')) delete obj.cross_check_audit;
+        for (const k of Object.keys(obj)) removeAuditEntries(obj[k]);
       }
     };
 
@@ -114,10 +127,10 @@ export class RecalcConfidence {
       const signals: string[] = Array.isArray(e.signal_ids) ? (e.signal_ids as string[]).slice() : generateSignalIds(e.scenarios || []);
       // Build set of unique triggers from scenarios (defensive typing)
       const uniqueTriggers = new Set<string>();
-      const scenariosArr: any[] = Array.isArray(e.scenarios) ? e.scenarios : [];
+      const scenariosArr = Array.isArray(e.scenarios) ? e.scenarios : [];
       for (const s of scenariosArr) {
         if (!s || typeof s !== 'object') continue;
-        const triggersArr: any[] = Array.isArray((s as any).triggers) ? (s as any).triggers : [];
+        const triggersArr: unknown[] = Array.isArray(s.triggers) ? s.triggers : [];
         for (const t of triggersArr) if (typeof t === 'string') uniqueTriggers.add(t.trim().toLowerCase());
       }
       // Resolve signal_ids: if they map to known triggers (via signalMapping),
@@ -128,7 +141,7 @@ export class RecalcConfidence {
         for (const sidRaw of signals) {
           if (typeof sidRaw !== 'string') continue;
           const sid = sidRaw;
-          const entry: any = signalMapping[sid];
+          const entry = signalMapping[sid];
           const mapped: string[] = Array.isArray(entry) ? entry : (entry && Array.isArray(entry.triggers) ? entry.triggers : []);
           if (mapped.length) {
             for (const mt of mapped) {
@@ -180,7 +193,7 @@ export class RecalcConfidence {
         const summary = await (crossAdapter as CrossCheckAdapterClass).evaluateCrossChecks(e, requirements, adaptersCfg);
         if (summary && typeof summary.total_weight === 'number') totalWeight += summary.total_weight;
         // Persisted to disk only when `writeCrossCheckAudit` is not disabled (see strip step below).
-        (e as any).cross_check_audit = summary.auditEntries || [];
+        (e as Entry).cross_check_audit = summary.auditEntries || [];
       }
       if (unmappedSignalCount > 0) totalWeight += unmappedSignalCount * SIGNAL_ID_WEIGHT;
       // Apply category multiplier only to trigger-derived weight
@@ -200,20 +213,20 @@ export class RecalcConfidence {
       const normalized = 1 - Math.exp(-alpha * computedRaw);
       let newVal = Math.round(normalized * 100) / 100;
       if (newVal < minFloor) newVal = minFloor;
-      const oldDecision = (e as any).decision;
+      const oldDecision = e.decision;
       // Store computed raw evidence as the auditable `confidence_raw` (honest sum)
       e.confidence_raw = computedRawRounded;
       e.confidence = newVal;
       // evaluate decision based on policy and cross-check history
-      let newDecision = oldDecision;
+      let newDecision: Decision | undefined = oldDecision;
       let decisionReasons: string[] = [];
       const decisionRes = evaluator.evaluate(e);
       if (decisionRes && decisionRes.decision) {
         newDecision = decisionRes.decision;
         decisionReasons = decisionRes.reasons || [];
       }
-      (e as any).decision = newDecision;
-      (e as any).decision_reasons = decisionReasons;
+      e.decision = newDecision;
+      e.decision_reasons = decisionReasons;
 
       if (old !== newVal || oldDecision !== newDecision) {
         changes.push([e.case_id || '<no-id>', { confidence_old: old, decision_old: oldDecision }, { confidence_new: newVal, decision_new: newDecision }]);
@@ -224,13 +237,13 @@ export class RecalcConfidence {
     };
 
     // legacy handling
-    if ((data as any).legal_intent_logs && typeof (data as any).legal_intent_logs === 'object') {
-      const logs = (data as any).legal_intent_logs || {};
-      for (const table of Object.keys(logs)) {
-        const entries: Entry[] = logs[table] || [];
+    const logs = data.legal_intent_logs;
+    if (logs && typeof logs === 'object') {
+      const tables = logs as Record<string, Entry[] | undefined>;
+      for (const table of Object.keys(tables)) {
+        const entries = tables[table] || [];
         for (const e of entries) await updateCase(e);
       }
-      (data as any).legal_intent_logs = logs;
       if (!(cfg && (cfg as any).writeCrossCheckAudit === false)) {
         await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
       } else {
@@ -245,25 +258,25 @@ export class RecalcConfidence {
     const categoryKeys = topKeys.filter(k => ['MANIPULATION', 'FRAUD', 'ACCESS'].includes(k));
     if (categoryKeys.length > 0) {
       for (const ck of categoryKeys) {
-        const arr: Entry[] = (data as any)[ck] || [];
+        const arr = (data[ck] || []) as Entry[];
         for (const e of arr) await updateCase(e);
         // reorder entries in-place to canonical ordering
-        (data as any)[ck] = arr.map((it: Entry) => reorderCaseKeys(it));
+        data[ck] = arr.map((it) => reorderCaseKeys(it));
       }
     } else if (data.case_id) {
       await updateCase(data as Entry);
       const ordered = reorderCaseKeys(data as Entry);
-      for (const k of Object.keys(data)) delete (data as any)[k];
+      for (const k of Object.keys(data)) delete data[k];
       Object.assign(data, ordered);
     } else {
       for (const k of Object.keys(data)) {
-        const v = (data as any)[k];
+        const v = data[k];
         if (Array.isArray(v)) {
-          for (const item of v) {
-            if (item && typeof item === 'object' && item.case_id) await updateCase(item);
+          for (const item of v as unknown[]) {
+            if (item && typeof item === 'object' && (item as Entry).case_id) await updateCase(item as Entry);
           }
-        } else if (v && typeof v === 'object' && v.case_id) {
-          await updateCase(v);
+        } else if (v && typeof v === 'object' && (v as Entry).case_id) {
+          await updateCase(v as Entry);
         }
       }
     }
@@ -312,7 +325,7 @@ export class RecalcConfidence {
     assertRealWriteAllowed(filePath, process.argv.slice(2));
 
     let totalCount = 0;
-    const totalChanges: Array<[string, any, any]> = [];
+    const totalChanges: Change[] = [];
     const failedFiles: string[] = [];
 
     const processSingleFile = async (p: string) => {
@@ -329,7 +342,7 @@ export class RecalcConfidence {
       } catch (err) {
         logError('recalc failed', { file: p, error: err });
         failedFiles.push(p);
-        return { count: 0, changes: [] as Array<[string, any, any]> };
+        return { count: 0, changes: [] as Change[] };
       }
     };
 

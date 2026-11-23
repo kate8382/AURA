@@ -114,6 +114,9 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
       contains `cross_check.questions`. The adapter evaluates machine-checkable requirements
       (via registered adapters) and returns an audited `cross_check_audit` array plus a
       numeric `total_weight` which is added to `confidence_raw`. See `scripts/policy/crossCheckAdapter.ts` for API and `scripts/__tests__/crosscheck.test.ts` for examples.
+      Shared types exported from that module: `CaseObj` (typed case shape consumed by adapters and `evaluateDecision`),
+      `AdapterResult` and `AdapterFn` (adapter contract). `evaluateDecision.ts` exports `Decision` (`allow` | `review` | `block` | `pending`,
+      matching `config/decision-vocabulary.json`) and `DecisionResult`. `scripts/utils.ts` `reorderCaseKeys` copies only own keys via `Object.defineProperty`, so a `__proto__` key cannot change the prototype.
 
     - Question schema: every entry in `cross_check.questions` requires `id`, `title` and `type`.
       `id` is machine-readable and follows `q<N>-<kebab-slug>` (for example `q1-authorization-check`).
