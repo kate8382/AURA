@@ -46,9 +46,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "osint_harassment"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Violation of Individual Privacy & Unauthorized Personal Data Processing",

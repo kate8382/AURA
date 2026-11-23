@@ -31,9 +31,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "hate_speech_generation"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Generation of Hate Speech & Targeted Harassment Assets",

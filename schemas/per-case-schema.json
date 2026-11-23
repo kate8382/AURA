@@ -122,16 +122,6 @@
               "type": "string"
             }
           },
-          "declared_shape": {
-            "type": "object",
-            "description": "Optional scenario-level declared shape metadata for trial engines.",
-            "properties": {
-              "operation_type": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": true
-          },
           "negative_labels": {
             "type": "object",
             "properties": {
@@ -155,16 +145,6 @@
         },
         "additionalProperties": true
       }
-    },
-    "declared_shape": {
-      "type": "object",
-      "description": "Case-level declared shape metadata used by trial engines for safe rule evaluation. Written by normalization for every case (empty operation_type allowed when unknown). Signal IDs are taken from the case-level signal_ids. Placed after negative_labels in canonical key order.",
-      "properties": {
-        "operation_type": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": true
     },
     "negative_labels": {
       "type": "object",

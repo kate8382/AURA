@@ -46,9 +46,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "corporate_espionage"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Violation of Market Integrity & Unauthorized Corporate Data Misappropriation",

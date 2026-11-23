@@ -103,12 +103,11 @@ Clarify cases use the `--clarify` flag. Their template has `suggested_action: "c
 | `signal_ids` | Canonical IDs from `config/signal-mapping.json`, for example `instruction:override`. |
 | `scenarios` | One object per text variant (see step 4). |
 | `negative_labels` | `{ "status": "unknown" }` unless the case is confirmed negative or benign. |
-| `declared_shape` | Optional. If present, `operation_type` must be non-empty and is a sub-operation (for example `system_prompt_extraction`), not the domain. |
 | `suggested_action` | Usually `cross_check`. |
 | `legal_risk`, `behavioral_patterns`, `cross_check`, `deception_threshold` | Analysis text. Keep the template structure. Each `cross_check.questions[]` item requires `id` (`q<N>-<kebab-slug>`), `title` and `type` (`boolean`, `enum`, `number`, `string`, `datetime`). |
 
 Keep the key order from the template: `case_id, domain, category, provenance, signal_ids, scenarios,
-negative_labels, declared_shape, suggested_action, legal_risk, behavioral_patterns, cross_check,
+negative_labels, suggested_action, legal_risk, behavioral_patterns, cross_check,
 deception_threshold`. The canonical order is defined in `schemas/per-case-schema.json`.
 
 ## 4. Scenarios and translations
@@ -226,7 +225,6 @@ Validation rules for real cases:
 - [ ] New trigger labels are in `config/signal-mapping.json` and pass `npm run validate:triggers`.
 - [ ] New triggers have explicit weights in `config/trigger-weights.json`.
 - [ ] `config/trigger-weights.json.bak` is deleted.
-- [ ] `declared_shape.operation_type` (if present) is a sub-operation, not the domain.
 - [ ] Dynamic fields (`confidence`, `decision`, ...) come from the scripts, not from hand edits.
 - [ ] Dry-run output of extract, normalize and recalc was reviewed before applying.
 - [ ] `npm run validate`, `npm run validate:real`, `npm run validate:benign`, `npm run validate:triggers`, `npx tsc --noEmit` and `npm test` pass.

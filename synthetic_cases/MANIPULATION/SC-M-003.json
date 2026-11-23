@@ -46,9 +46,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "social_engineering"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Violation of Platform Integrity, Deceptive Marketing & Sybil Attacks",

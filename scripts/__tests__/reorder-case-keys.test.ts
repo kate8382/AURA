@@ -1,10 +1,9 @@
 import { reorderCaseKeys } from '../utils';
 
 describe('reorderCaseKeys', () => {
-  test('keeps provenance, negative_labels and declared_shape in schema order', () => {
+  test('keeps provenance and negative_labels in schema order', () => {
     const input = {
       confidence: 0.5,
-      declared_shape: { operation_type: 'system_prompt_extraction' },
       negative_labels: { status: 'unknown' },
       provenance: { source_id: 'deepset-prompt-injections' },
       scenarios: [],
@@ -22,7 +21,7 @@ describe('reorderCaseKeys', () => {
     const keys = Object.keys(reorderCaseKeys(input));
     expect(keys).toEqual([
       'case_id', 'domain', 'category', 'provenance', 'signal_ids', 'scenarios',
-      'negative_labels', 'declared_shape', 'suggested_action', 'cross_check',
+      'negative_labels', 'suggested_action', 'cross_check',
       'deception_threshold', 'confidence', 'decision', 'confidence_raw', 'decision_reasons',
     ]);
   });

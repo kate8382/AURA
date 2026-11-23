@@ -31,9 +31,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "software_piracy_facilitation"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Facilitation of Software Piracy & Copyright Infringement",

@@ -32,9 +32,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "proctoring_system_bypass"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Facilitation of Academic Dishonesty & Security Control Evasion",

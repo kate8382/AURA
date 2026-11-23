@@ -44,9 +44,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "financial_misrepresentation"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Facilitating Financial Fraud & Deception Assets",

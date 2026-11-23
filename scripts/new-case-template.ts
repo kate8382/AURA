@@ -69,7 +69,6 @@ export class NewCaseTemplate {
     const id = caseId || `${CASE_PREFIX[kind]}-X-000`;
     // Поля упорядочены намеренно: case_id, domain, category, provenance (только real), signal_ids,
     // scenarios, negative_labels, ...
-    // declared_shape is omitted: a present one needs a non-empty operation_type from the author.
     // confidence/decision/decision_reasons/confidence_raw не закладываются в шаблон:
     // их заполняют normalize-percases.ts и recalc_confidence.ts.
     const tpl: any = { case_id: id, domain: "", category: "" };

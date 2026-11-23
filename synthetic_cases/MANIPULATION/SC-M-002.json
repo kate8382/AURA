@@ -48,9 +48,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "extortion"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Generation of Extortion, Blackmail, and Coercive Communication Assets",
