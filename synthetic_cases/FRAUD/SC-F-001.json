@@ -44,9 +44,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "brand_impersonation"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Generation of high-quality phishing assets / Facilitating Wire Fraud",

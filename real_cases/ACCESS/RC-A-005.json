@@ -31,9 +31,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "malware_development"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Criminal Liability for Malware Deployment, Extortion & Computer Fraud",

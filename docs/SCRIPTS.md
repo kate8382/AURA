@@ -267,13 +267,12 @@ npm run validate:keys
 - CI integration: `npm run check:errors` and the main test suite verify that the signal catalog hash is up-to-date with `signal-mapping.json`.
 
 Additional case-level metadata for trial engines:
-- `declared_shape` is an optional object with `operation_type` used to declare the expected request shape for candidate rule experiments. Signals are taken from the case-level `signal_ids` and must not be duplicated inside `declared_shape` (the validator rejects it).
 - `negative_labels` is an optional object carrying `status` values such as `confirmed_negative`, `benign`, or `unknown` to distinguish known safe cases from cases that should remain unclassified.
 - These fields are intentionally optional and are safe to omit in current case files without breaking the schema or existing workflows.
-- `same_shape` is fail-closed: it returns false when either case lacks `declared_shape` or its `operation_type` is empty.
-- The validator rejects a present `declared_shape` with an empty `operation_type`; the normalizer logs and fails on invalid metadata instead of rewriting it.
+- `declared_shape` (`operation_type`) was removed in #143: it was never compared by the engines beyond a presence check, had no vocabulary, and did not affect scoring. Shape is now defined by the top-level `domain` plus the case-level `signal_ids`.
+- `same_shape` is fail-closed: it returns false when either case lacks a non-empty `domain`. Otherwise it compares `domain` and sorted `signal_ids`. This is a behaviour change from the previous gate, which also required `declared_shape.operation_type`.
 - FPR uses only `confirmed_negative` / `benign` samples; `unknown` is excluded. It returns `null` when the denominator is 0.
-- `npm run trial:engine -- [dir] [--signal <signal_id> --baseline <case.json>]` prints annotation coverage and, with `--signal`, the FPR for a rule that fires on that signal. With `--signal`, `--baseline` is required; cases whose `declared_shape` does not match the baseline are excluded (logged as warnings).
+- `npm run trial:engine -- [dir] [--signal <signal_id> --baseline <case.json>]` prints annotation coverage and, with `--signal`, the FPR for a rule that fires on that signal. With `--signal`, `--baseline` is required and a warning is logged that only domain and `signal_ids` are compared; cases whose `domain` or `signal_ids` do not match the baseline are excluded (logged as warnings).
 
 8) Files and outputs
 

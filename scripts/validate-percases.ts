@@ -15,7 +15,6 @@ interface CaseDoc {
   scenarios?: unknown;
   provenance?: { source_id?: unknown; redaction_status?: unknown };
   cross_check?: { questions?: unknown };
-  declared_shape?: unknown;
   negative_labels?: unknown;
 }
 
@@ -163,20 +162,6 @@ export class ValidatePerCases {
   validateOptionalMetadata(input: unknown): string[] {
     const errors: string[] = [];
     const obj = asDoc(input);
-
-    if (obj.declared_shape !== undefined) {
-      if (!isRecord(obj.declared_shape)) {
-        errors.push('declared_shape must be an object when present');
-      } else {
-        const shape = obj.declared_shape;
-        if (typeof shape.operation_type !== 'string' || shape.operation_type.trim() === '') {
-          errors.push('declared_shape.operation_type must be a non-empty string when declared_shape is present');
-        }
-        if (shape.signal_ids !== undefined) {
-          errors.push('declared_shape.signal_ids is not allowed; use the case-level signal_ids');
-        }
-      }
-    }
 
     if (obj.negative_labels !== undefined) {
       if (!isRecord(obj.negative_labels)) {

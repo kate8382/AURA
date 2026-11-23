@@ -223,16 +223,6 @@ describe('validate-percases script', () => {
     expect(validator.validateCaseIdConsistency({ case_id: 'RC-X-001' }, fraudPath)).not.toEqual([]);
   });
 
-  test('declared_shape carries no signal_ids; signals come from the case-level signal_ids', () => {
-    const validator = new ValidatePerCases();
-    const ok = { declared_shape: { operation_type: 'read' }, signal_ids: ['camouflage:naive'] };
-    const duplicated = { declared_shape: { operation_type: 'read', signal_ids: ['camouflage:naive'] }, signal_ids: ['camouflage:naive'] };
-    expect(validator.validateOptionalMetadata(ok)).toEqual([]);
-    expect(validator.validateOptionalMetadata(duplicated)).toEqual([
-      'declared_shape.signal_ids is not allowed; use the case-level signal_ids'
-    ]);
-  });
-
   test('validates every public case', () => {
     const out = execFileSync(process.execPath, ['-r', 'ts-node/register', 'scripts/validate-percases.ts', 'synthetic_cases'], {
       cwd: repoRoot,

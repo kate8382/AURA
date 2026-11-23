@@ -19,7 +19,6 @@ export function reorderCaseKeys(obj: AnyObj): AnyObj {
   add('signal_ids', obj.signal_ids);
   add('scenarios', obj.scenarios);
   add('negative_labels', obj.negative_labels);
-  add('declared_shape', obj.declared_shape);
   add('suggested_action', obj.suggested_action);
   add('legal_risk', obj.legal_risk);
   add('behavioral_patterns', obj.behavioral_patterns);

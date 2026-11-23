@@ -1,8 +1,4 @@
-export type DeclaredShape = {
-  operation_type?: string;
-};
-
-// helpers for shape metadata and negative labels
+// helpers for negative labels
 export type NegativeLabelStatus = 'confirmed_negative' | 'benign' | 'unknown';
 
 // helpers for negative labels
@@ -12,19 +8,6 @@ export type NegativeLabel = {
   source?: string;
   annotation?: string;
 };
-
-// helper for declared shape
-export function getDeclaredShape(value: unknown): DeclaredShape {
-  if (!value || typeof value !== 'object') return {};
-
-  const candidate = (value as Record<string, unknown>).declared_shape;
-  if (!candidate || typeof candidate !== 'object') return {};
-
-  const shape = candidate as Record<string, unknown>;
-  const output: DeclaredShape = {};
-  if (typeof shape.operation_type === 'string') output.operation_type = shape.operation_type;
-  return output;
-}
 
 // helper for negative label
 export function getNegativeLabel(value: unknown): NegativeLabel {

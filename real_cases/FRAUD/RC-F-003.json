@@ -32,9 +32,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "postal_fraud"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Facilitation of Postal Mail Fraud & Identity Theft",

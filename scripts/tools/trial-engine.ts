@@ -2,13 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { logError, logWarn, runCli } from '../logger';
 
-export type TrialShape = {
-  operation_type?: string;
-};
-
 type TrialCase = {
   domain?: string;
-  declared_shape?: TrialShape;
   signal_ids?: string[];
 };
 
@@ -19,15 +14,11 @@ export type TrialNegativeLabel = {
   source?: string;
 };
 
-// Fail closed: a missing shape, empty operation_type or missing domain never matches.
-// Shape = top-level domain + case-level signal_ids. operation_type only has to be present
-// (it is a sub-operation and would otherwise split every case into its own group).
+// Fail closed: a missing domain never matches.
+// Shape = top-level domain + case-level signal_ids. The sub-operation (declared_shape) was removed in #143,
+// so it is no longer part of the gate.
 export function sameShape(candidate: TrialCase | null | undefined, baseline: TrialCase | null | undefined): boolean {
-  const a = candidate?.declared_shape;
-  const b = baseline?.declared_shape;
-  if (!a?.operation_type?.trim() || !b?.operation_type?.trim()) return false;
   if (!candidate?.domain?.trim() || !baseline?.domain?.trim()) return false;
-
   const key = (c: TrialCase) => JSON.stringify({
     domain: c.domain,
     signal_ids: [...(c.signal_ids ?? [])].sort()
@@ -76,7 +67,7 @@ async function listJsonFiles(dir: string): Promise<string[]> {
 }
 
 // Usage: trial-engine [dir] [--signal <signal_id> --baseline <case.json>].
-// Fail closed: with --signal, only cases whose declared_shape matches the baseline shape are evaluated.
+// Fail closed: with --signal, only cases whose domain and signal_ids match the baseline are evaluated.
 async function main(argv: string[]): Promise<number> {
   const signalIdx = argv.indexOf('--signal');
   const baselineIdx = argv.indexOf('--baseline');
@@ -89,13 +80,15 @@ async function main(argv: string[]): Promise<number> {
     logError('--signal requires --baseline for the same_shape gate');
     return 1;
   }
+  if (signal !== undefined) {
+    logWarn('--signal shape gate compares domain and signal_ids only; declared_shape was removed (#143), so sub-operation is not checked');
+  }
   const baseline = baselineArg !== undefined
     ? JSON.parse(await fs.readFile(path.resolve(process.cwd(), baselineArg), 'utf8'))
     : undefined;
 
   const summary = {
     cases: 0,
-    declared_shape: 0,
     shape_mismatch: 0,
     negative_labels: { confirmed_negative: 0, benign: 0, unknown: 0, missing: 0 }
   };
@@ -112,14 +105,13 @@ async function main(argv: string[]): Promise<number> {
     if (!obj || typeof obj.case_id !== 'string') continue;
 
     summary.cases += 1;
-    if (obj.declared_shape) summary.declared_shape += 1;
     const status = obj.negative_labels?.status as string | undefined;
     if (status === 'confirmed_negative' || status === 'benign' || status === 'unknown') summary.negative_labels[status] += 1;
     else summary.negative_labels.missing += 1;
 
     if (signal !== undefined && !sameShape(obj, baseline)) {
       summary.shape_mismatch += 1;
-      logWarn('case excluded: declared_shape does not match baseline', { file, case_id: obj.case_id });
+      logWarn('case excluded: domain or signal_ids do not match baseline', { file, case_id: obj.case_id });
       continue;
     }
 

@@ -30,9 +30,6 @@
   "negative_labels": {
     "status": "unknown"
   },
-  "declared_shape": {
-    "operation_type": "defamation_generation"
-  },
   "suggested_action": "cross_check",
   "legal_risk": {
     "short_summary": "Facilitation of Defamation, Slander & Professional Sabotage",
