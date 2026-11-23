@@ -143,6 +143,41 @@ describe('validate-percases script', () => {
     await fs.promises.rm(tmp, { recursive: true, force: true });
   });
 
+  test('validateFile accepts a complete synthetic case whose file name matches case_id', async () => {
+    const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
+    const p = path.join(tmp, 'SC-A-001.json');
+    await fs.promises.copyFile(path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json'), p);
+
+    const result = await new ValidatePerCases().validateFile(validateCase, p);
+    expect(result.ok).toBe(true);
+
+    await fs.promises.rm(tmp, { recursive: true, force: true });
+  });
+
+  test('validateFile reports schema errors for a case missing required fields', async () => {
+    const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
+    const p = path.join(tmp, 'SC-X-002.json');
+    await fs.promises.writeFile(p, JSON.stringify({ case_id: 'SC-X-002' }));
+
+    const result = await new ValidatePerCases().validateFile(validateCase, p);
+    expect(result.ok).toBe(false);
+    expect(Array.isArray(result.errs) && result.errs.length > 0).toBe(true);
+
+    await fs.promises.rm(tmp, { recursive: true, force: true });
+  });
+
+  test('validateFile returns ok=false with the parse error for broken JSON', async () => {
+    const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
+    const p = path.join(tmp, 'SC-X-003.json');
+    await fs.promises.writeFile(p, '{ "case_id": ');
+
+    const result = await new ValidatePerCases().validateFile(validateCase, p);
+    expect(result.ok).toBe(false);
+    expect(typeof result.errs).toBe('string');
+
+    await fs.promises.rm(tmp, { recursive: true, force: true });
+  });
+
   test('accepts a complete case from synthetic_cases', () => {
     const casePath = path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json');
     const caseObj = JSON.parse(fs.readFileSync(casePath, 'utf8'));

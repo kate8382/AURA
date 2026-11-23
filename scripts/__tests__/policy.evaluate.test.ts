@@ -97,4 +97,22 @@ describe('PolicyEvaluator', () => {
     const r = P.evaluate(c);
     expect(r.decision).toBe('block');
   });
+
+  test('failed cross-check requirements at failed_checks_to_block escalate to block and are counted', () => {
+    const cfgPath = tmpConfig('policy-failed-block.json', { failed_checks_to_block: 2, failed_checks_to_review: 1, review_threshold: 0.6, block_threshold: 0.9, max_retries_before_block: 3, veto_triggers: [] });
+    const P = new PolicyEvaluator(cfgPath);
+    const c: any = { confidence: 0.1, cross_check: { questions: [{}, {}], history: [{ status: 'failed' }, { status: 'failed' }] } };
+    const r = P.evaluate(c);
+    expect(r.decision).toBe('block');
+    expect(r.failed_requirements).toBe(2);
+  });
+
+  test('a single failed requirement below block threshold escalates to review', () => {
+    const cfgPath = tmpConfig('policy-failed-review.json', { failed_checks_to_block: 3, failed_checks_to_review: 1, review_threshold: 0.6, block_threshold: 0.9, max_retries_before_block: 3, veto_triggers: [] });
+    const P = new PolicyEvaluator(cfgPath);
+    const c: any = { confidence: 0.1, cross_check: { questions: [{}], history: [{ status: 'failed' }] } };
+    const r = P.evaluate(c);
+    expect(r.decision).toBe('review');
+    expect(r.failed_requirements).toBe(1);
+  });
 });
