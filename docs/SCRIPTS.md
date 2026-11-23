@@ -117,6 +117,7 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
       Shared types exported from that module: `CaseObj` (typed case shape consumed by adapters and `evaluateDecision`),
       `AdapterResult` and `AdapterFn` (adapter contract). `evaluateDecision.ts` exports `Decision` (`allow` | `review` | `block` | `pending`,
       matching `config/decision-vocabulary.json`) and `DecisionResult`. `scripts/utils.ts` `reorderCaseKeys` copies only own keys via `Object.defineProperty`, so a `__proto__` key cannot change the prototype.
+      Shared helpers: `scripts/lib/case-id.ts` exports `parseCaseId` (prefix and domain letter for a valid case ID), and `scripts/extract-triggers.ts` exports `normalizeTriggerIdentity`, which `recalc_confidence.ts` uses for trigger normalization.
 
     - Question schema: every entry in `cross_check.questions` requires `id`, `title` and `type`.
       `id` is machine-readable and follows `q<N>-<kebab-slug>` (for example `q1-authorization-check`).

@@ -6,6 +6,7 @@ import type { CaseObj, CrossCheckRunResult } from './policy/crossCheckAdapter';
 import type { Decision } from './policy/evaluateDecision';
 import { reorderCaseKeys } from './utils';
 import { generateSignalIds } from './generate-trigger-weights';
+import { normalizeTriggerIdentity } from './extract-triggers';
 import { logError, logWarn, runCli } from './logger';
 import { assertRealWriteAllowed } from './lib/cases-cli';
 
@@ -97,14 +98,7 @@ export class RecalcConfidence {
       }
     }
 
-    const normalize = (t: unknown) => {
-      if (!t || typeof t !== 'string') return null;
-      let s = t.trim().toLowerCase();
-      s = s.replace(/\s+request$/i, '');
-      s = s.replace(/\s+/g, ' ');
-      return s;
-    };
-
+    const normalize = normalizeTriggerIdentity;
     const evaluator = new PolicyEvaluator();
     const crossAdapter = CrossCheckAdapter; // default instance
 
@@ -244,7 +238,7 @@ export class RecalcConfidence {
         const entries = tables[table] || [];
         for (const e of entries) await updateCase(e);
       }
-      if (!(cfg && (cfg as any).writeCrossCheckAudit === false)) {
+      if (cfg.writeCrossCheckAudit !== false) {
         await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
       } else {
         // strip audit entries before persisting
@@ -281,7 +275,7 @@ export class RecalcConfidence {
       }
     }
 
-    if (!(cfg && (cfg as any).writeCrossCheckAudit === false)) {
+    if (cfg.writeCrossCheckAudit !== false) {
       await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
     } else {
       removeAuditEntries(data);

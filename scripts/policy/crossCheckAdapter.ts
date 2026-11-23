@@ -254,9 +254,10 @@ export class CrossCheckAdapter {
       // choose adapter by convention: adaptersConfig may map requirement id to adapter name
       const adapterName = adaptersConfig && adaptersConfig[r.id] ? String(adaptersConfig[r.id]) : 'noop';
       const adapterFn = this.adapters.get(adapterName) || this.adapters.get('noop');
-      let res: AdapterResult = { result: null, ok: false, notes: 'no adapter' };
+      let res: AdapterResult;
       try {
-        if (adapterFn) res = await adapterFn(r, caseObj);
+        // A missing adapter throws here and is recorded through the catch below, as before.
+        res = await (adapterFn as AdapterFn)(r, caseObj);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         res = { result: null, ok: false, notes: msg };

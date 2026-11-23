@@ -21,3 +21,9 @@ export const DOMAIN_BY_LETTER: Record<string, string> = {
 export function isRealCasePath(p: string): boolean {
   return path.resolve(p).split(path.sep).includes('real_cases');
 }
+
+// Splits a case ID that matches CASE_ID_PATTERN into its prefix and domain letter; null otherwise.
+export function parseCaseId(caseId: string): { prefix: string; letter: string } | null {
+  const m = CASE_ID_PATTERN.exec(caseId);
+  return m ? { prefix: m[1], letter: caseId.split('-')[1] } : null;
+}

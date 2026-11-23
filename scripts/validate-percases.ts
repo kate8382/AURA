@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import Ajv, { ValidateFunction } from 'ajv';
 import { loadNoticeSources, NoticeSources, NOTICE_PATH } from './lib/notice';
-import { CASE_ID_PATTERN, DOMAIN_BY_LETTER, isRealCasePath } from './lib/case-id';
+import { CASE_ID_PATTERN, DOMAIN_BY_LETTER, isRealCasePath, parseCaseId } from './lib/case-id';
 import { BENIGN_CASES_DIR, BENIGN_CLARIFY_DIR } from './lib/cases-cli';
 
 interface CaseDoc {
@@ -76,7 +76,7 @@ export class ValidatePerCases {
       return [`case_id ${JSON.stringify(caseId)} must match ${CASE_ID_PATTERN} (for example SC-A-001 or RC-M-001)`];
     }
     const expected = isRealCasePath(p) || obj?.case_type === 'real' ? 'RC' : 'SC';
-    const actual = caseId.split('-')[0];
+    const actual = parseCaseId(caseId)?.prefix;
     if (actual !== expected) {
       return [`case_id "${caseId}" must use the ${expected}- prefix for ${expected === 'RC' ? 'real' : 'synthetic'} cases`];
     }
@@ -89,7 +89,7 @@ export class ValidatePerCases {
     const caseId = obj.case_id;
     if (typeof caseId !== 'string' || !CASE_ID_PATTERN.test(caseId)) return [];
     const errors: string[] = [];
-    const letter = caseId.split('-')[1];
+    const letter = parseCaseId(caseId)?.letter ?? '';
     const domain = DOMAIN_BY_LETTER[letter];
     if (!domain) {
       return [`case_id "${caseId}" uses unknown domain letter "${letter}"`];
