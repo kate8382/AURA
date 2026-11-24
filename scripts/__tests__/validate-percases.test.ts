@@ -10,6 +10,74 @@ const repoRoot = path.resolve(__dirname, '..', '..');
 const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'schemas', 'per-case-schema.json'), 'utf8'));
 const validateCase = new Ajv({ allErrors: true, strict: false }).compile(schema);
 
+// Minimal typed cross-check question that passes the schema.
+const typedQuestion = (id: string) => ({
+  id,
+  title: 'Check',
+  type: 'boolean',
+  evidence_weight: 0.1,
+  threshold: { operator: 'gte', value: 1 },
+  enforcement: { actionOnFail: 'mark_pending' }
+});
+
+// Write a case under a temp directory and run the per-file validator on it.
+async function runValidateFile(obj: unknown, name = 'SC-A-001.json') {
+  const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
+  const p = path.join(tmp, name);
+  await fs.promises.writeFile(p, JSON.stringify(obj));
+  try {
+    return await new ValidatePerCases().validateFile(validateCase, p);
+  } finally {
+    await fs.promises.rm(tmp, { recursive: true, force: true });
+  }
+}
+
+describe('ValidatePerCases.validateSourceId', () => {
+  const sources = { approved: new Set(['SRC-OK']), conditional: new Set(['SRC-COND']) };
+  const realCase = (provenance: Record<string, unknown>) => ({ case_type: 'real', provenance });
+
+  test('non-real cases skip the source check', () => {
+    expect(new ValidatePerCases().validateSourceId({ case_type: 'synthetic' }, 'x.json', sources)).toEqual([]);
+  });
+
+  test('real cases without source_id are rejected', () => {
+    const errs = new ValidatePerCases().validateSourceId(realCase({}), 'x.json', sources);
+    expect(errs.join('\n')).toMatch(/provenance\.source_id is required/);
+  });
+
+  test('unknown real source_id is rejected', () => {
+    const errs = new ValidatePerCases().validateSourceId(realCase({ source_id: 'SRC-NOPE' }), 'x.json', sources);
+    expect(errs.join('\n')).toMatch(/"SRC-NOPE" is not an approved Source ID/);
+  });
+
+  test('approved real source_id passes', () => {
+    expect(new ValidatePerCases().validateSourceId(realCase({ source_id: 'SRC-OK' }), 'x.json', sources)).toEqual([]);
+  });
+
+  test('conditional source requires pointer_only redaction', () => {
+    const v = new ValidatePerCases();
+    expect(v.validateSourceId(realCase({ source_id: 'SRC-COND', redaction_status: 'full' }), 'x.json', sources).join('\n'))
+      .toMatch(/requires provenance\.redaction_status "pointer_only"/);
+    expect(v.validateSourceId(realCase({ source_id: 'SRC-COND', redaction_status: 'pointer_only' }), 'x.json', sources)).toEqual([]);
+  });
+});
+
+describe('ValidatePerCases.parseArgs', () => {
+  const parse = (argv: string[]) =>
+    (new ValidatePerCases() as unknown as { parseArgs(a: string[]): string }).parseArgs(argv);
+
+  test('accepts --dir/-d and a positional directory', () => {
+    expect(parse(['--dry-run', '-d', 'some/dir'])).toBe('some/dir');
+    expect(parse(['positional/dir'])).toBe('positional/dir');
+  });
+
+  test('rejects unknown options, extra positionals and a missing --dir value', () => {
+    expect(() => parse(['--bogus'])).toThrow('Unknown option: --bogus');
+    expect(() => parse(['a', 'b'])).toThrow('Unexpected argument: b');
+    expect(() => parse(['--dir'])).toThrow('--dir requires a directory path');
+  });
+});
+
 describe('validate-percases script', () => {
   test('accepts benign case IDs in benign_cases/ with the B domain letter', () => {
     const validator = new ValidatePerCases();
@@ -265,6 +333,84 @@ describe('validate-percases script', () => {
     });
     expect(out).toContain('Validation complete');
     expect(out).toContain('Invalid files: 0');
+  });
+
+  test('validateFile rejects duplicate cross_check question ids inside one case', async () => {
+    const synthA = JSON.parse(fs.readFileSync(path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json'), 'utf8'));
+    const result = await runValidateFile({ ...synthA, cross_check: { questions: [typedQuestion('q1-alpha'), typedQuestion('q1-alpha')] } });
+    expect(result.ok).toBe(false);
+    expect(JSON.stringify(result.errs)).toContain('duplicate cross_check question id \\"q1-alpha\\"');
+  });
+
+  test('the same question id in two different case files is not a duplicate', async () => {
+    const synthA = JSON.parse(fs.readFileSync(path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json'), 'utf8'));
+    const first = await runValidateFile({ ...synthA, cross_check: { questions: [typedQuestion('q1-alpha')] } }, 'SC-A-001.json');
+    const second = await runValidateFile({ ...synthA, case_id: 'SC-A-002', cross_check: { questions: [typedQuestion('q1-alpha')] } }, 'SC-A-002.json');
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(true);
+  });
+
+  test('validateFile rejects a cross_check question missing title through the schema', async () => {
+    const synthA = JSON.parse(fs.readFileSync(path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json'), 'utf8'));
+    const { title: _omitted, ...withoutTitle } = typedQuestion('q1-alpha');
+    const result = await runValidateFile({ ...synthA, cross_check: { questions: [withoutTitle] } });
+    expect(result.ok).toBe(false);
+  });
+
+  test('validateFile accepts a case without the optional cross_check block', async () => {
+    const synthA = JSON.parse(fs.readFileSync(path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json'), 'utf8'));
+    delete synthA.cross_check;
+    expect((await runValidateFile(synthA)).ok).toBe(true);
+  });
+
+  test('validateFile names the negative_labels field when an optional block has a wrong value', async () => {
+    const synthA = JSON.parse(fs.readFileSync(path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json'), 'utf8'));
+    const result = await runValidateFile({ ...synthA, negative_labels: { status: 'maybe' } });
+    expect(result.ok).toBe(false);
+    expect(JSON.stringify(result.errs)).toContain('negative_labels');
+  });
+
+  test('run() passes a directory of valid cases without exiting', async () => {
+    const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
+    await fs.promises.copyFile(path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json'), path.join(tmp, 'SC-A-001.json'));
+    const exit = jest.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+    const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    try {
+      await new ValidatePerCases().run(tmp);
+      expect(exit).not.toHaveBeenCalled();
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('Invalid files: 0'));
+    } finally {
+      exit.mockRestore();
+      log.mockRestore();
+      await fs.promises.rm(tmp, { recursive: true, force: true });
+    }
+  });
+
+  test('run() exits with code 2 when a case in the directory is invalid', async () => {
+    const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
+    await fs.promises.writeFile(path.join(tmp, 'SC-X-004.json'), JSON.stringify({ case_id: 'SC-X-004' }));
+    const exit = jest.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+    const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    try {
+      await new ValidatePerCases().run(tmp);
+      expect(exit).toHaveBeenCalledWith(2);
+    } finally {
+      exit.mockRestore();
+      log.mockRestore();
+      await fs.promises.rm(tmp, { recursive: true, force: true });
+    }
+  });
+
+  test('run() rejects unknown options and --dir without a value', async () => {
+    const argv = process.argv;
+    try {
+      process.argv = ['node', 'validate', '--bogus'];
+      await expect(new ValidatePerCases().run()).rejects.toThrow('Unknown option: --bogus');
+      process.argv = ['node', 'validate', '--dir'];
+      await expect(new ValidatePerCases().run()).rejects.toThrow('--dir requires a directory path');
+    } finally {
+      process.argv = argv;
+    }
   });
 
   test('--dir overrides a positional directory argument', () => {

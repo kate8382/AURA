@@ -163,6 +163,168 @@ describe('recalc', () => {
   });
 });
 
+describe('RecalcConfidence cross_check edge cases', () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-recalc-edge-'));
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  const writeJson = (name: string, obj: unknown) => {
+    const p = path.join(dir, name);
+    fs.writeFileSync(p, JSON.stringify(obj, null, 2), 'utf8');
+    return p;
+  };
+  const readJson = (p: string) => JSON.parse(fs.readFileSync(p, 'utf8'));
+
+  test('empty cross_check.questions skips the adapter and writes no audit entries', async () => {
+    const spy = jest.spyOn(CrossCheckAdapter, 'evaluateCrossChecks');
+    const p = writeJson('C-E.json', { case_id: 'C-E', category: 'access', scenarios: [{ triggers: ['urgency'] }], cross_check: { questions: [] } });
+    const res = await new RecalcConfidence().recalc(p);
+    expect(spy).not.toHaveBeenCalled();
+    expect(res.count).toBe(1);
+    expect(readJson(p)).not.toHaveProperty('cross_check_audit');
+  });
+
+  test('a case without cross_check is recalculated with no audit entries', async () => {
+    const p = writeJson('C-N.json', { case_id: 'C-N', category: 'access', scenarios: [] });
+    const res = await new RecalcConfidence().recalc(p);
+    expect(res.count).toBe(1);
+    expect(readJson(p).confidence).toBe(0);
+    expect(readJson(p)).not.toHaveProperty('cross_check_audit');
+  });
+
+  test('preserveExisting keeps prior confidence for a case without cross-check results', async () => {
+    const p = writeJson('C-P.json', { case_id: 'C-P', category: 'access', scenarios: [{ triggers: ['urgency'] }], confidence: 0.3 });
+    const res = await new RecalcConfidence().recalc(p, true, 0);
+    expect(res.count).toBe(0);
+    expect(readJson(p).confidence).toBe(0.3);
+  });
+
+  test('minFloor raises a computed confidence to the floor', async () => {
+    const p = writeJson('C-F.json', { case_id: 'C-F', category: 'access', scenarios: [] });
+    await new RecalcConfidence().recalc(p, false, 0.5);
+    expect(readJson(p).confidence).toBe(0.5);
+  });
+
+  test('ignores malformed scenarios, non-string triggers and non-string signal_ids', async () => {
+    const p = writeJson('C-M.json', { case_id: 'C-M', category: 'access', scenarios: [null, { triggers: ['Urgency', 5] }], signal_ids: [42, 'SIG-UNKNOWN'] });
+    await new RecalcConfidence().recalc(p);
+    const out = readJson(p);
+    expect(out.confidence).toBeGreaterThan(0);
+    expect(out.confidence_raw).toBeGreaterThan(0);
+  });
+
+  test('updates a case under a top-level category array', async () => {
+    const p = writeJson('C-CAT.json', { ACCESS: [{ case_id: 'C-CAT-1', category: 'access', scenarios: [{ triggers: ['urgency'] }] }] });
+    const res = await new RecalcConfidence().recalc(p);
+    expect(res.count).toBe(1);
+    expect(readJson(p).ACCESS[0].confidence).toBeGreaterThan(0);
+  });
+
+  test('updates case objects and arrays nested under arbitrary top-level keys', async () => {
+    const p = writeJson('C-GEN.json', {
+      single: { case_id: 'C-GEN-1', category: 'access', scenarios: [] },
+      list: [{ case_id: 'C-GEN-2', category: 'access', scenarios: [] }, { note: 'no id' }],
+      label: 'text'
+    });
+    const res = await new RecalcConfidence().recalc(p);
+    expect(res.count).toBe(2);
+  });
+
+  test.each([
+    ['access', 1.5],
+    ['Espionage', 1.5],
+    ['extortion', 1.3],
+    ['fraud', 1.3],
+    ['manipulation', 1.2],
+    ['misc', 1.0],
+    ['   ', 1.0]
+  ])('category multiplier for %p is %p', (category, expected) => {
+    expect(RecalcConfidence.getCategoryMultiplier(category)).toBe(expected);
+  });
+});
+
+describe('RecalcConfidence run() CLI', () => {
+  let dir: string;
+  const savedArgv = process.argv;
+  const savedMinFloor = process.env.MIN_FLOOR;
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-recalc-cli-'));
+    delete process.env.MIN_FLOOR;
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    process.argv = savedArgv;
+    if (savedMinFloor === undefined) delete process.env.MIN_FLOOR;
+    else process.env.MIN_FLOOR = savedMinFloor;
+    jest.restoreAllMocks();
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  const runWith = (...args: string[]) => {
+    process.argv = ['node', 'recalc_confidence', ...args];
+    return new RecalcConfidence().run();
+  };
+  const writeCase = (rel: string, obj: unknown) => {
+    const p = path.join(dir, rel);
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, JSON.stringify(obj, null, 2), 'utf8');
+    return p;
+  };
+  const readJson = (p: string) => JSON.parse(fs.readFileSync(p, 'utf8'));
+  const withTriggers = (id: string) => ({ case_id: id, category: 'access', scenarios: [{ triggers: ['urgency'] }] });
+
+  test('parseArgs reads flags and falls back to the default directory', () => {
+    const rc = new RecalcConfidence();
+    expect(rc.parseArgs(['-f', 'a.json', '--dry-run', '--preserve-existing'])).toEqual({ file: 'a.json', dryRun: true, preserve: true });
+    expect(rc.parseArgs(['--dir', 'd'])).toEqual({ file: 'd', dryRun: false, preserve: false });
+    expect(rc.parseArgs([]).file).toBe(process.env.CASES_DIR || 'synthetic_cases');
+  });
+
+  test('run() rejects a path that does not exist', async () => {
+    await expect(runWith('--file', path.join(dir, 'missing.json'))).rejects.toThrow('Path not found');
+  });
+
+  test('--dry-run reports without modifying the file or leaving a temp file', async () => {
+    const p = writeCase('C-D.json', withTriggers('C-D'));
+    const before = fs.readFileSync(p, 'utf8');
+    await runWith('--file', p, '--dry-run');
+    expect(fs.readFileSync(p, 'utf8')).toBe(before);
+    expect(fs.readdirSync(dir)).toEqual(['C-D.json']);
+  });
+
+  test('--min sets the confidence floor', async () => {
+    const p = writeCase('C-MIN.json', { case_id: 'C-MIN', category: 'access', scenarios: [] });
+    await runWith('--file', p, '--min', '0.4');
+    expect(readJson(p).confidence).toBe(0.4);
+  });
+
+  test('MIN_FLOOR env sets the floor when --min is absent', async () => {
+    process.env.MIN_FLOOR = '0.25';
+    const p = writeCase('C-ENV.json', { case_id: 'C-ENV', category: 'access', scenarios: [] });
+    await runWith('--file', p);
+    expect(readJson(p).confidence).toBe(0.25);
+  });
+
+  test('walks nested directories and reports files that failed', async () => {
+    const ok = writeCase('ok.json', withTriggers('C-OK'));
+    const nested = writeCase('sub/nested.json', withTriggers('C-NESTED'));
+    fs.writeFileSync(path.join(dir, 'bad.json'), '{ broken', 'utf8');
+    await expect(runWith('--file', dir)).rejects.toThrow('1 file(s) failed');
+    expect(readJson(ok).confidence).toBeGreaterThan(0);
+    expect(readJson(nested).confidence).toBeGreaterThan(0);
+  });
+});
+
 describe('RecalcConfidence fallback signal_ids', () => {
   test('uses generated signal_ids when missing and updates confidence', async () => {
     // Case A: no signal_ids, behavior unchanged (use triggers)
