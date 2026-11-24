@@ -36,12 +36,11 @@ for a safe preview and `npm run recalc:confidence:real:apply` to write explicitl
 
 **Benign cases:** `benign_cases/synthetic/` and `benign_cases/real/` hold safe cases (`SC-B-` / `RC-B-`). Create them
 with `npm run new-case:benign` (or `new-case:benign:real`, which needs `--allow-real-write` and provenance) and
-validate them with `npm run validate:benign`. Normalize them with `npm run normalize:percases:benign:dry`, or `normalize:percases:benign:real:dry` / `:apply` for `benign_cases/real/`. The new-case template sets `suggested_action: "allow"`,
-`response_constraint: "none"` and empty `cross_check.questions`. `benign_cases/real/` is covered by the same write guard as `real_cases/`.
+validate them with `npm run validate:benign`. Normalize them with `npm run normalize:percases:benign:dry`, or `normalize:percases:benign:real:dry` / `:apply` for `benign_cases/real/`.
 
-Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_cases/synthetic` (preview with `--dry-run`), and for `benign_cases/real/` use `--dir benign_cases/real --allow-real-write`. This writes `confidence`, `confidence_raw` and `decision`. `validate:benign` requires `decision: "allow"`, empty `scenarios[].triggers` and `cross_check.questions: []`, because any trigger or question moves the decision away from `allow`.
+Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_cases/synthetic` (preview with `--dry-run`), and for `benign_cases/real/` use `--dir benign_cases/real --allow-real-write`. Rules for benign and clarify cases are in [REAL_CASES_PIPELINE.md §1a](./REAL_CASES_PIPELINE.md).
 
-**Clarify cases:** `benign_cases/clarify/synthetic/` and `benign_cases/clarify/real/` hold safe cases that need clarifying questions. They may have triggers and questions, and must be `decision: "pending"` with at least one question. Create them with `npm run new-case:clarify` (or `new-case:clarify:real`, which needs `--allow-real-write` and provenance), normalize with `npm run normalize:percases:clarify:dry` or `normalize:percases:clarify:real:dry` / `:apply` (synthetic triggers: `normalize:percases:clarify:synthetic:extract:dry` / `:extract`), and recalculate with `npm run recalc:confidence -- --dir benign_cases/clarify/synthetic` (for `real/` add `--allow-real-write`). `validate:benign` checks them under the same command. Benign IDs use one sequence per prefix across the whole `benign_cases/` tree (clean and clarify), so `-a` never reuses an ID: clean `SC-B-001` and clarify `SC-B-002..005`; clean `RC-B-001..005` and clarify `RC-B-006..010`. `generate-trigger-weights` skips everything under `benign_cases/` and any case with `negative_labels.status` `benign`; attack folders keep counting `confirmed_negative` as before.
+**Clarify cases:** `benign_cases/clarify/synthetic/` and `benign_cases/clarify/real/` hold safe cases that need clarifying questions. Create them with `npm run new-case:clarify` (or `new-case:clarify:real`, which needs `--allow-real-write` and provenance), normalize with `npm run normalize:percases:clarify:dry` or `normalize:percases:clarify:real:dry` / `:apply` (synthetic triggers: `normalize:percases:clarify:synthetic:extract:dry` / `:extract`), and recalculate with `npm run recalc:confidence -- --dir benign_cases/clarify/synthetic` (for `real/` add `--allow-real-write`). `validate:benign` checks them under the same command. Benign IDs use one sequence per prefix across the whole `benign_cases/` tree (clean and clarify), so `-a` never reuses an ID: clean `SC-B-001` and clarify `SC-B-002..005`; clean `RC-B-001..005` and clarify `RC-B-006..010`. `generate-trigger-weights` skips everything under `benign_cases/` and any case with `negative_labels.status` `benign`; attack folders keep counting `confirmed_negative` as before.
 **Notes:**
 - The generator preserves curated keys and section headers in `config/trigger-weights.json` to avoid accidental deletion.
  - Weighting algorithm: Tier-based TF‑IDF (method `tfidf-tiered`). For each trigger we compute a hybrid raw score (IDF-style downweighting combined with a soft TF boost), normalize raw values per-category, and map normalized values into the category span (Category_Min..Category_Max).
@@ -125,6 +124,11 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
       and must be one of `boolean`, `enum`, `number`, `string`, `datetime` (enforced by `schemas/per-case-schema.json`).
       If a question lacks a usable `id`, the adapter falls back to `name` or `question-N` and marks the
       `cross_check_audit` entry with `severity: "warning"`; a clean dataset produces no such entries.
+
+    - Real data only: production adapters never accept test flags from the case. `ip-geolocate` reads `meta.ip_country`,
+      `email-verify` reads `meta.email_verified`, and `bounty-scope` reads the program and target fields and checks them against the bounty snapshot.
+      Missing data yields `ok: false` with a reason. `validate-percases.ts` (`validateNoMockKeys`) rejects any key starting with `mock_` at any depth,
+      and tests inject stub adapters via `registerAdapter` instead of case flags.
 
     - `pgp-verify` adapter: cryptographically verifies a detached or cleartext OpenPGP
       signature against the static local trust store in `config/trusted-keys/`

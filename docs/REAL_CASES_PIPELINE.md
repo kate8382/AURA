@@ -227,4 +227,5 @@ Validation rules for real cases:
 - [ ] `config/trigger-weights.json.bak` is deleted.
 - [ ] Dynamic fields (`confidence`, `decision`, ...) come from the scripts, not from hand edits.
 - [ ] Dry-run output of extract, normalize and recalc was reviewed before applying.
+- [ ] No `mock_*` keys anywhere in the case (the validator rejects them).
 - [ ] `npm run validate`, `npm run validate:real`, `npm run validate:benign`, `npm run validate:triggers`, `npx tsc --noEmit` and `npm test` pass.

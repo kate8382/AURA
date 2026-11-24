@@ -28,9 +28,6 @@ export type CaseObj = {
   };
   evasion_attempts?: number;
   meta?: Record<string, unknown>;
-  mock_ip_geo?: boolean;
-  mock_email_verified?: boolean;
-  mock_bounty_scope?: boolean;
   [key: string]: unknown;
 };
 
@@ -170,21 +167,19 @@ export class CrossCheckAdapter {
   constructor() {
     // register noop adapter by default
     this.registerAdapter('noop', async (_req: CrossCheckRequirement, _caseObj: CaseObj) => ({ result: null, ok: false, notes: 'noop' }));
-    // register simple mock adapters useful for testing and initial integration
+    // register the production cross-check adapters (they read only real case data)
     this.registerAdapter('ip-geolocate', async (req: CrossCheckRequirement, caseObj: CaseObj) => {
-      // Support both quick mocks (caseObj.mock_ip_geo) and structured meta.ip_country matching
-      const quickOk = !!(caseObj && caseObj.mock_ip_geo === true);
-      if (quickOk) return { result: true, ok: true, notes: 'ip geolocation matched (mock quick)' };
+      // Reads only real data: meta.ip_country compared with the requirement's expected country (options[0]).
       const ipCountry = caseObj && caseObj.meta && caseObj.meta.ip_country ? String(caseObj.meta.ip_country) : null;
+      if (!ipCountry) return { result: null, ok: false, notes: 'ip country missing (meta.ip_country not supplied)' };
       const expected = req && Array.isArray(req.options) && req.options.length ? String(req.options[0]) : null;
-      if (expected && ipCountry && expected.toLowerCase() === ipCountry.toLowerCase()) return { result: ipCountry, ok: true, notes: 'ip matched (meta)' };
-      return { result: ipCountry, ok: false, notes: 'ip mismatch or missing' };
+      if (!expected) return { result: ipCountry, ok: false, notes: 'requirement has no expected country (options[0])' };
+      if (expected.toLowerCase() === ipCountry.toLowerCase()) return { result: ipCountry, ok: true, notes: 'ip matched (meta)' };
+      return { result: ipCountry, ok: false, notes: `ip country '${ipCountry}' does not match expected '${expected}'` };
     });
 
-    // register an email verification adapter supporting quick mock and meta field
+    // register the email verification adapter, reading meta.email_verified from the case
     this.registerAdapter('email-verify', async (_req: CrossCheckRequirement, caseObj: CaseObj) => {
-      const quickOk = !!(caseObj && caseObj.mock_email_verified === true);
-      if (quickOk) return { result: true, ok: true, notes: 'email verified (mock quick)' };
       const verified = caseObj && caseObj.meta && !!caseObj.meta.email_verified;
       return { result: !!verified, ok: !!verified, notes: verified ? 'email verified (meta)' : 'email unverified' };
     });
@@ -198,8 +193,6 @@ export class CrossCheckAdapter {
     // bounty program + target domain/IP against the curated offline snapshot in
     // config/snapshots/bounty-programs.json. Works 100% offline.
     this.registerAdapter('bounty-scope', async (_req: CrossCheckRequirement, caseObj: CaseObj) => {
-      const quickOk = !!(caseObj && caseObj.mock_bounty_scope === true);
-      if (quickOk) return { result: true, ok: true, notes: 'bounty scope matched (mock quick)' };
       const programId = extractField(caseObj, ['bounty_program_id', 'program_id', 'bounty_program', 'program']);
       const target = extractField(caseObj, ['target_domain', 'target', 'target_ip', 'host']);
       const snapshot = loadBountySnapshot();
