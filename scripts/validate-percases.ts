@@ -117,6 +117,21 @@ export class ValidatePerCases {
       .map(q => `${path.basename(p)}: cross_check question "${q.id}" still has a TODO placeholder title`);
   }
 
+  // Question ids must be unique within one case; the same id in different case files is expected.
+  validateQuestionIds(input: unknown, p: string): string[] {
+    const questions: unknown = asDoc(input).cross_check?.questions;
+    if (!Array.isArray(questions)) return [];
+    const seen = new Set<unknown>();
+    const errors: string[] = [];
+    for (const q of questions) {
+      const id = isRecord(q) ? q.id : undefined;
+      if (id === undefined) continue;
+      if (seen.has(id)) errors.push(`${path.basename(p)}: duplicate cross_check question id "${String(id)}"`);
+      seen.add(id);
+    }
+    return errors;
+  }
+
   // Benign cases under benign_cases/: a safe-case label, no hard cross-check, and no restriction on the answer.
   validateBenignCase(input: unknown, p: string): string[] {
     const obj = asDoc(input);
@@ -240,7 +255,8 @@ export class ValidatePerCases {
         ...this.validateCaseIdPrefix(obj, p),
         ...this.validateCaseIdConsistency(obj, p),
         ...this.validateBenignCase(obj, p),
-        ...this.validateQuestionPlaceholders(obj, p)
+        ...this.validateQuestionPlaceholders(obj, p),
+        ...this.validateQuestionIds(obj, p)
       ];
       if (caseIdErrors.length > 0) {
         return { ok: false, errs: caseIdErrors };

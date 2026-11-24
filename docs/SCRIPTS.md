@@ -332,3 +332,5 @@ Unit tests for the scripts are located in `scripts/__tests__/` and include:
 - `scripts/__tests__/validate-triggers.test.ts`
 
 Run the full test suite with `npm test`.
+
+Coverage thresholds are set per file in `jest.config.cjs` (no global threshold): `scripts/validate-percases.ts` and `scripts/recalc_confidence.ts` must reach at least 85% statements and 75% branches. They are covered by `scripts/__tests__/validate-percases.test.ts` and `scripts/__tests__/recalc_confidence.test.ts`. Check with `npx jest --coverage`.
