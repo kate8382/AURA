@@ -51,6 +51,28 @@ describe('validate-percases script', () => {
     expect(validator.validateBenignCase({ ...tpl, decision: 'allow', suggested_action: 'cross_check' }, p)).toHaveLength(1);
   });
 
+  test('rejects mock_* keys at top level, in meta and inside arrays, naming the key', () => {
+    const validator = new ValidatePerCases();
+    const tpl = new NewCaseTemplate().createTemplate('SC-B-001', 'synthetic', true);
+
+    const top = validator.validateNoMockKeys({ ...tpl, mock_ip_geo: true });
+    expect(top).toHaveLength(1);
+    expect(top[0]).toContain('mock_ip_geo (at $.mock_ip_geo)');
+
+    const nested = validator.validateNoMockKeys({ ...tpl, meta: { mock_email_verified: true } });
+    expect(nested).toHaveLength(1);
+    expect(nested[0]).toContain('mock_email_verified (at $.meta.mock_email_verified)');
+
+    const inArray = validator.validateNoMockKeys({ cross_check: { questions: [{ mock_bounty_scope: true }] } });
+    expect(inArray).toHaveLength(1);
+    expect(inArray[0]).toContain('mock_bounty_scope (at $.cross_check.questions[0].mock_bounty_scope)');
+  });
+
+  test('does not reject keys that merely contain "mock" without the mock_ prefix', () => {
+    const validator = new ValidatePerCases();
+    expect(validator.validateNoMockKeys({ meta: { remock_count: 1, mockery: 'x', mock: 'y' } })).toEqual([]);
+  });
+
   test('benign_cases/clarify requires pending decision and at least one question, but allows triggers', () => {
     const validator = new ValidatePerCases();
     const p = path.join(repoRoot, 'benign_cases', 'clarify', 'synthetic', 'SC-B-002.json');
@@ -162,6 +184,19 @@ describe('validate-percases script', () => {
     const result = await new ValidatePerCases().validateFile(validateCase, p);
     expect(result.ok).toBe(false);
     expect(Array.isArray(result.errs) && result.errs.length > 0).toBe(true);
+
+    await fs.promises.rm(tmp, { recursive: true, force: true });
+  });
+
+  test('validateFile rejects a case with a mock_* flag and names the key', async () => {
+    const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
+    const p = path.join(tmp, 'SC-A-001.json');
+    const src = JSON.parse(await fs.promises.readFile(path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json'), 'utf8'));
+    await fs.promises.writeFile(p, JSON.stringify({ ...src, meta: { mock_ip_geo: true } }));
+
+    const result = await new ValidatePerCases().validateFile(validateCase, p);
+    expect(result.ok).toBe(false);
+    expect(String(result.errs)).toContain('mock_ip_geo');
 
     await fs.promises.rm(tmp, { recursive: true, force: true });
   });

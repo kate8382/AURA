@@ -183,6 +183,22 @@ export class ValidatePerCases {
     return errors;
   }
 
+  // Reject any `mock_*` key at any depth. Mock flags must never steer a cross-check adapter.
+  validateNoMockKeys(input: unknown, at = '$'): string[] {
+    const errors: string[] = [];
+    if (Array.isArray(input)) {
+      input.forEach((item, i) => errors.push(...this.validateNoMockKeys(item, `${at}[${i}]`)));
+    } else if (isRecord(input)) {
+      for (const [key, value] of Object.entries(input)) {
+        if (key.startsWith('mock_')) {
+          errors.push(`mock_* keys are not allowed: ${key} (at ${at}.${key}); cross-check adapters read only real case data`);
+        }
+        errors.push(...this.validateNoMockKeys(value, `${at}.${key}`));
+      }
+    }
+    return errors;
+  }
+
   // Load the JSON Schema for per-case validation
   async loadSchema() {
     const s = await fs.readFile(path.join(__dirname, '..', 'schemas', 'per-case-schema.json'), 'utf8');
@@ -207,6 +223,10 @@ export class ValidatePerCases {
       const valid = validate(obj);
       if (!valid) {
         return { ok: false, errs: validate.errors };
+      }
+      const mockErrors = this.validateNoMockKeys(obj);
+      if (mockErrors.length > 0) {
+        return { ok: false, errs: mockErrors };
       }
       const metadataErrors = this.validateOptionalMetadata(obj);
       if (metadataErrors.length > 0) {

@@ -316,11 +316,11 @@ describe('framework integration', () => {
   test('existing adapters keep working alongside pgp-verify', async () => {
     const adapter = new CrossCheckAdapterClass();
     const requirements = [
-      { id: 'cc-ip', title: 'ip', type: 'boolean', evidence_weight: 0.2 },
+      { id: 'cc-ip', title: 'ip', type: 'boolean', evidence_weight: 0.2, options: ['US'] },
       { id: 'cc-pgp', title: 'pgp', type: 'boolean', evidence_weight: 0.3 },
     ];
     const summary = await adapter.evaluateCrossChecks(
-      { mock_ip_geo: true },
+      { meta: { ip_country: 'US' } },
       requirements as never,
       { 'cc-ip': 'ip-geolocate', 'cc-pgp': 'pgp-verify' }
     );

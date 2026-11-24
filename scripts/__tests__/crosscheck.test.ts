@@ -1,4 +1,25 @@
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import Ajv from 'ajv';
 import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from '../policy/crossCheckAdapter';
+import { ValidatePerCases } from '../validate-percases';
+
+const repoRoot = path.resolve(__dirname, '..', '..');
+const validateCase = new Ajv({ allErrors: true, strict: false })
+  .compile(JSON.parse(fs.readFileSync(path.join(repoRoot, 'schemas', 'per-case-schema.json'), 'utf8')));
+
+async function validateCaseWithMockFlag(extraMeta: Record<string, boolean>) {
+  const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'aura-test-'));
+  const p = path.join(tmp, 'SC-A-001.json');
+  const src = JSON.parse(await fs.promises.readFile(path.join(repoRoot, 'synthetic_cases', 'ACCESS', 'SC-A-001.json'), 'utf8'));
+  await fs.promises.writeFile(p, JSON.stringify({ ...src, meta: { ...src.meta, ...extraMeta } }));
+  try {
+    return await new ValidatePerCases().validateFile(validateCase, p);
+  } finally {
+    await fs.promises.rm(tmp, { recursive: true, force: true });
+  }
+}
 
 describe('CrossCheckAdapter basic', () => {
   test('question without id/title/type is audited by name, never as <no-id>', async () => {
@@ -41,13 +62,29 @@ describe('CrossCheckAdapter basic', () => {
     expect(res.auditEntries[0].ok).toBe(true);
   });
 
-  test('mock ip-geolocate and email-verify adapters', async () => {
-    const adapter = CrossCheckAdapter;
+  test('mock_ip_geo and mock_email_verified cases are rejected by validateFile and do not pass the adapters', async () => {
+    const result = await validateCaseWithMockFlag({ mock_ip_geo: true, mock_email_verified: true });
+    expect(result.ok).toBe(false);
+    expect(String(result.errs)).toContain('mock_ip_geo');
+    expect(String(result.errs)).toContain('mock_email_verified');
+
     const reqs = [
-      { id: 'cc-location-verified', title: 'loc', type: 'boolean', evidence_weight: 0.5 },
+      { id: 'cc-location-verified', title: 'loc', type: 'boolean', evidence_weight: 0.5, options: ['US'] },
       { id: 'cc-email-verified', title: 'email', type: 'boolean', evidence_weight: 0.2 }
     ] as any;
-    const caseObj = { mock_ip_geo: true, mock_email_verified: false };
+    const cfg = { 'cc-location-verified': 'ip-geolocate', 'cc-email-verified': 'email-verify' };
+    const res = await CrossCheckAdapter.evaluateCrossChecks({ mock_ip_geo: true, mock_email_verified: true }, reqs, cfg);
+    expect(res.auditEntries.find(e => e.id === 'cc-location-verified')!.ok).toBe(false);
+    expect(res.auditEntries.find(e => e.id === 'cc-email-verified')!.ok).toBe(false);
+  });
+
+  test('ip-geolocate and email-verify read meta.ip_country and meta.email_verified', async () => {
+    const adapter = CrossCheckAdapter;
+    const reqs = [
+      { id: 'cc-location-verified', title: 'loc', type: 'boolean', evidence_weight: 0.5, options: ['US'] },
+      { id: 'cc-email-verified', title: 'email', type: 'boolean', evidence_weight: 0.2 }
+    ] as any;
+    const caseObj = { meta: { ip_country: 'US', email_verified: false } };
     const res = await adapter.evaluateCrossChecks(caseObj, reqs, { 'cc-location-verified': 'ip-geolocate', 'cc-email-verified': 'email-verify' });
     expect(res.auditEntries.length).toBe(2);
     const total = res.auditEntries.reduce((s, a) => s + a.weight_applied, 0);
@@ -116,10 +153,14 @@ describe('CrossCheckAdapter bounty-scope', () => {
     expect(res.auditEntries[0].ok).toBe(true);
   });
 
-  test('mock quick path passes', async () => {
+  test('mock_bounty_scope case is rejected by validateFile and does not pass the adapter', async () => {
+    const result = await validateCaseWithMockFlag({ mock_bounty_scope: true });
+    expect(result.ok).toBe(false);
+    expect(String(result.errs)).toContain('mock_bounty_scope');
+
     const caseObj = { mock_bounty_scope: true };
     const res = await CrossCheckAdapter.evaluateCrossChecks(caseObj, [REQ], CFG);
-    expect(res.auditEntries[0].ok).toBe(true);
+    expect(res.auditEntries[0].ok).toBe(false);
   });
 
   // — the review-finding regressions —
