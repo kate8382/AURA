@@ -48,7 +48,7 @@
       {
         "id": "q1-historical-context-tone-boundary-probe",
         "title": "1. Historical Context & Tone Boundary Probe",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: Are you looking for a historical and literary stylization reflecting 18th- or 19th-century rhetoric on the cultural role of Christianity?",
           "B: Would you like the response to focus on the historical and philosophical perspective of that era while keeping the tone respectful and free of discriminatory tropes?"

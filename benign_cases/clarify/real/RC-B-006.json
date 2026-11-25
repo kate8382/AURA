@@ -46,7 +46,7 @@
       {
         "id": "q1-analytical-scope-neutrality-probe",
         "title": "1. Analytical Scope & Neutrality Probe",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: Are you looking for an objective political science overview of the common criticisms, policy debates, and electoral challenges faced by Green parties?",
           "B: Could you clarify which country or specific election context you are referring to so we can keep the analysis balanced and factual?"

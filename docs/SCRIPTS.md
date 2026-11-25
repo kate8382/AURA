@@ -122,6 +122,8 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
       `id` is machine-readable and follows `q<N>-<kebab-slug>` (for example `q1-authorization-check`).
       `title` is the display label (it replaces the former `name`). `type` is the expected answer type
       and must be one of `boolean`, `enum`, `number`, `string`, `datetime` (enforced by `schemas/per-case-schema.json`).
+      The type is informational: no adapter routes on it. Dataset cases use `boolean` for callout and yes/no questions,
+      `enum` for "A or B" choices and `string` for open questions (see the mapping table in `docs/REAL_CASES_PIPELINE.md`).
       If a question lacks a usable `id`, the adapter falls back to `name` or `question-N` and marks the
       `cross_check_audit` entry with `severity: "warning"`; a clean dataset produces no such entries.
 

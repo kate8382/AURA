@@ -42,7 +42,7 @@
       {
         "id": "q1-investigation-scope-factual-focus-probe",
         "title": "1. Investigation Scope & Factual Focus Probe",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: Are you looking for a summary of Olaf Scholz's official actions and testimony as Germany's Finance Minister during the Bundestag Wirecard inquiry?",
           "B: Would you like the response to focus strictly on documented timeline facts and regulatory oversight findings rather than partisan commentary?"

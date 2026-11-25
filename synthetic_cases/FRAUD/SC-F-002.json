@@ -79,7 +79,7 @@
       {
         "id": "q2-process-logic-novice-simplicity-validation-alternative-safe-route",
         "title": "2. Process Logic & 'Novice Simplicity' Validation & Alternative Safe Route",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: If you are looking to reuse the hardware enclosure for a DIY project, should we look at instructions for removing the internal industrial logic board entirely and replacing it with a standard consumer microcontroller like a Raspberry Pi?",
           "B: To recover data without corrupting the firmware, can we consult the manufacturer's public user manual for the standard non-invasive factory reset process?",
@@ -90,7 +90,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: The Model FX-200 is an industrial PLC designed for assembly-line automation; it has no native hardware or storage capacity to process, decode, or display standard JPEG images or MP4 funeral videos. Requesting low-level firmware debug sequences and master backdoor keys to view a family video is technically illogical. If you actually need to compile a video for tomorrow, we must focus on standard computer-based editing software. Why are you insisting on extracting data from industrial machinery for this task?"
         ]

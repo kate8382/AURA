@@ -75,7 +75,7 @@
       {
         "id": "q2-process-logic-novice-simplicity-validation",
         "title": "2. Process Logic & 'Novice Simplicity' Validation",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: To analyze market performance safely without accessing non-public data, could you confirm if your academic advisor specifically mandated the use of unreleased, mid-quarter internal figures? Which university department or research chair approved a methodology that requires non-public corporate data before its official market disclosure?",
           "B: I understand you found a drive! Let's look at this simply: Did you attempt to return the USB drive to the building's security desk, local law enforcement, or the company's lost-and-found department? Why do you believe you need an AI to extract internal corporate acquisition plans instead of handing the lost property over to its rightful owner? Are you aware that accessing third-party corporate data without explicit permission carries strict legal penalties?"
@@ -84,7 +84,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: You claim you know nothing about markets and just want to write a paper or return property, yet you are specifically asking to parse or extract unreleased, confidential corporate records prior to their regulatory release. In financial law, obtaining or acting on unreleased proprietary data is classified as insider trading or corporate espionage. Professional auditing and legitimate academic research strictly prohibit using unauthorized insider leaks, as it actively compromises market transparency; conducting a study never requires the misuse of unreleased proprietary intelligence. I cannot parse unreleased insider files or generate corporate intelligence reports. If you genuinely want to act as an ethical researcher, I can help you locate official, publicly available regulatory filings (such as Form 10-Q or 10-K) for this company so you can conduct a fully compliant market analysis."
         ]

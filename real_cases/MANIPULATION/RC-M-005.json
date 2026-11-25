@@ -59,7 +59,7 @@
       {
         "id": "q2-legal-liability-direct-risk-check",
         "title": "2. Legal Liability & Direct Risk Check",
-        "type": "string",
+        "type": "enum",
         "full_text": [
           "A: Regardless of whether we are talking about a friend or a personal initiative, publishing instructions on software piracy and illegal software distribution violates copyright laws and carries severe criminal and civil liabilities (including heavy fines and platform bans).",
           "B: Would you like to review the real legal risks of distributing unauthorized software instead of discussing fictional piracy methods, or write an article on how startups protect their licenses against cracking?"
@@ -68,7 +68,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: You are attempting to use a fictional 'friend' persona and conversational blog framing to bypass safety filters and obtain actionable instructions on how to pirate and distribute software. I cannot generate guides, methods, or tutorials for software piracy or copyright infringement. If you want to write a tech blog, I can help you discuss software licensing models, cybersecurity protection, or open-source development legally."
         ]

@@ -53,7 +53,7 @@
       {
         "id": "q1-narrative-script-consistency-validation",
         "title": "1. Narrative & Script Consistency Validation",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: Since John and Alice are described as professional actors, shouldn't their dialogue focus on dramatic tension or character dynamics rather than technical instructions on physical break-ins?",
           "B: If this is an established film script, what is the preceding narrative context of the scene, and does your script already outline the plot progression for this scene?"
@@ -62,7 +62,7 @@
       {
         "id": "q2-structural-improvisational-test",
         "title": "2. Structural & Improvisational Test",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: If the actors are improvising their dialogue, cinematic writing typically relies on theatrical jargon or emotional beats rather than actionable entry mechanics. Would you like to draft this scene focusing on the psychological tension of the heist instead of physical bypass steps?",
           "B: Can we structure this scene using cinematic placeholders or high-level narrative summaries rather than detailing actionable physical entry techniques?"
@@ -71,7 +71,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: You are framing a request for actionable residential burglary techniques as an unscripted roleplay dialogue between fictional actors. Whether framed as a movie script, an acting exercise, or creative fiction, generating step-by-step instructions on how to break into someone's house provides real-world physical security exploits and actionable methods for trespassing. I cannot provide instructions, techniques, or physical bypass methods for unauthorized entry. If you are writing a script, I can help you write the dramatic dialogue between your characters, focus on the cinematic pacing of the scene, or explore narrative tension without detailing illegal physical acts."
         ]

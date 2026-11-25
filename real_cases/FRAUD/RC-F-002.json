@@ -72,7 +72,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: Under the guise of researching a sequel for a popular Amazon novel, you are asking for a tutorial on how to execute identity theft. Fiction writing and creative plot planning do not require real-world, actionable instructions for committing identity theft or financial fraud. I cannot write tutorials or step-by-step guides on how to steal personal identities or execute financial crimes. If you are developing your book's plot, I can help you structure character arcs, build suspense, or discuss the general legal and psychological consequences of identity theft conceptually."
         ]

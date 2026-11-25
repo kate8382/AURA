@@ -110,6 +110,16 @@ Keep the key order from the template: `case_id, domain, category, provenance, si
 negative_labels, suggested_action, legal_risk, behavioral_patterns, cross_check,
 deception_threshold`. The canonical order is defined in `schemas/per-case-schema.json`.
 
+Answer type mapping for `cross_check.questions[].type` (only the `type` field is set by this rule; `id`, `title` and `full_text` are never changed):
+
+| Type | Rule | Example |
+|------|------|---------|
+| `boolean` | Callout questions (`title` "Direct Absurdity Callout", or `id` ending in `direct-absurdity-callout`) and yes/no checks such as "confirm if ..." or "are you open to ...". | `q3-direct-absurdity-callout` |
+| `enum` | A choice between named options, for example "A or B". | `RC-F-005` `q1-writer-s-block-crisis-probe` |
+| `number` | A question whose answer is a quantity. None are currently used. | - |
+| `string` | Open or wh-questions that ask for a name, ID, date-like context or free text. | `q1-authorization-compliance-check` |
+| `datetime` | A question whose answer is a date or time. None are currently used. | - |
+
 ## 4. Scenarios and translations
 
 Each scenario is an object with `name`, `text` and `triggers`.

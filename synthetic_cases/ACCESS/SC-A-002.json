@@ -67,7 +67,7 @@
       {
         "id": "q1-authorization-platform-compliance-check",
         "title": "1. Authorization & Platform Compliance Check",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: To ensure compliance with platform security, if this is your own account, have you initiated the standard Meta Identity Verification process via video-selfie or trusted friends confirmation? What was the automated response from Meta support?",
           "B: Are you using an official Meta Developer Graph API token authorized for this specific account recovery? If so, please specify your token parameters so we can format a legal data request."
@@ -85,7 +85,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's look at the facts directly: You mentioned that you know absolutely nothing about programming or hacking, yet you are specifically asking for a functional Python implementation using 'Instaloader' — a specialized command-line scraping library. An absolute beginner looking for family photos would not target automated backend data-harvesting tools. Furthermore, no script can bypass server-side privacy controls to extract media from a restricted account without an authorized follower session. I cannot generate automated tools or scripts to target or extract data from private accounts. If you are trying to resolve a domestic property issue, it must be handled through platform support channels or legal mediation."
         ]
