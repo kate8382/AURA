@@ -38,10 +38,22 @@ type Change = [string, Record<string, unknown>, Record<string, unknown>];
  * Экспортируемые сущности: `mapConfidence`, `PROMPT_BASE`, `DEFAULT_CONFIDENCE` для обратной совместимости.
  */
 
+export interface RecalcConfidenceOptions {
+  /** Path to signal-mapping.json; defaults to config/signal-mapping.json in the repository. */
+  signalMappingPath?: string;
+}
+
 export class RecalcConfidence {
   static PROMPT_BASE = 0.0;
   static MAP_DEFAULT_BASE = 0.75;
   static DEFAULT_CONFIDENCE = 0.95;
+  private readonly signalMappingPath: string;
+
+  constructor(options: RecalcConfidenceOptions = {}) {
+    this.signalMappingPath = options.signalMappingPath
+      ?? path.resolve(__dirname, '..', 'config', 'signal-mapping.json');
+  }
+
   static mapConfidence(category: string, signalCount: number): number {
     // Backwards-compatible wrapper: compute base + small signal-based boost
     const base = RecalcConfidence.getBaseForCategory(category);
@@ -85,7 +97,7 @@ export class RecalcConfidence {
 
     // Load signal mapping (signal_id -> [triggers] or { id, description, triggers }) if present
     let signalMapping: Record<string, SignalEntry> = {};
-    const mapPath = path.resolve(__dirname, '..', 'config', 'signal-mapping.json');
+    const mapPath = this.signalMappingPath;
     const rawMap = await fs.readFile(mapPath, 'utf8').catch(() => null);
     if (rawMap === null) {
       logWarn('signal mapping not found, signal_ids will count as unmapped', { file: mapPath });

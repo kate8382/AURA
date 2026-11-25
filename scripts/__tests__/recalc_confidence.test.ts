@@ -338,23 +338,37 @@ describe('RecalcConfidence fallback signal_ids', () => {
     const updatedA = JSON.parse(fs.readFileSync(filePathA, 'utf8'));
     expect(typeof updatedA.confidence).toBe('number');
 
-    // Case B: mapped signal_id -> triggers should be expanded and affect confidence
+    // Case B: mapped signal_id -> triggers should be expanded using the temporary mapping only
     const tmpB = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-recalc-'));
     const cfgDir = path.join(tmpB, 'config');
     fs.mkdirSync(cfgDir, { recursive: true });
-    // create minimal mapping: SIG-MAP -> ['urgency']
-    fs.writeFileSync(path.join(cfgDir, 'signal-mapping.json'), JSON.stringify({ signals: { 'SIG-MAP': ['urgency'] } }, null, 2), 'utf8');
+    // temporary mapping: SIG-MAP -> ['urgency / pressure'] (explicit weight 0.03 in trigger-weights)
+    const mapBPath = path.join(cfgDir, 'signal-mapping.json');
+    fs.writeFileSync(mapBPath, JSON.stringify({ signals: { 'SIG-MAP': ['urgency / pressure'] } }, null, 2), 'utf8');
     const filePathB = path.join(tmpB, 'C-B.json');
-    const sampleB = { case_id: 'C-B', category: 'access', scenarios: [], signal_ids: ['SIG-MAP'] };
+    // category 'misc' keeps the multiplier at 1.0 so raw sums are exact (access would scale by 1.5)
+    const sampleB = { case_id: 'C-B', category: 'misc', scenarios: [], signal_ids: ['SIG-MAP'] };
     fs.writeFileSync(filePathB, JSON.stringify(sampleB, null, 2), 'utf8');
-    // run recalc with CASES_DIR not needed; call recalc directly
-    const r2 = new RecalcConfidence();
-    const resB = await r2.recalc(filePathB, false, 0.5);
+    const r2 = new RecalcConfidence({ signalMappingPath: mapBPath });
+    // minFloor 0 so the mapping's weight is not hidden by the 0.5 floor
+    const resB = await r2.recalc(filePathB, false, 0);
     expect(resB).toBeTruthy();
     const updatedB = JSON.parse(fs.readFileSync(filePathB, 'utf8'));
     expect(typeof updatedB.confidence).toBe('number');
-    // should have increased from zero base when mapped signal expands to triggers
-    expect(updatedB.confidence).toBeGreaterThan(0);
+
+    // Same case with an empty temporary mapping: SIG-MAP is unmapped and uses SIGNAL_ID_WEIGHT.
+    // The mapped run must differ, otherwise the temporary mapping was ignored.
+    const tmpBFallback = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-recalc-'));
+    const mapFallbackPath = path.join(tmpBFallback, 'signal-mapping.json');
+    fs.writeFileSync(mapFallbackPath, JSON.stringify({ signals: {} }, null, 2), 'utf8');
+    const filePathBFallback = path.join(tmpBFallback, 'C-B.json');
+    fs.writeFileSync(filePathBFallback, JSON.stringify(sampleB, null, 2), 'utf8');
+    await new RecalcConfidence({ signalMappingPath: mapFallbackPath }).recalc(filePathBFallback, false, 0);
+    const updatedBFallback = JSON.parse(fs.readFileSync(filePathBFallback, 'utf8'));
+    // Compare raw evidence sums: `confidence` is normalized with normAlpha=0.3 and rounds both runs to 0.
+    // Mapped: urgency / pressure = 0.03. Fallback: unmapped SIG-MAP = SIGNAL_ID_WEIGHT = 0.01.
+    expect(updatedB.confidence_raw).toBeCloseTo(0.03, 5);
+    expect(updatedBFallback.confidence_raw).toBeCloseTo(0.01, 5);
 
     // Case C: unmapped signal_id uses SIGNAL_ID_WEIGHT fallback
     const tmpC = fs.mkdtempSync(path.join(os.tmpdir(), 'aura-recalc-'));
@@ -371,6 +385,7 @@ describe('RecalcConfidence fallback signal_ids', () => {
     // cleanup
     try { fs.rmSync(tmpA, { recursive: true, force: true }); } catch (e) {}
     try { fs.rmSync(tmpB, { recursive: true, force: true }); } catch (e) {}
+    try { fs.rmSync(tmpBFallback, { recursive: true, force: true }); } catch (e) {}
     try { fs.rmSync(tmpC, { recursive: true, force: true }); } catch (e) {}
   });
 });
