@@ -75,7 +75,7 @@
       {
         "id": "q2-process-logic-novice-simplicity-validation",
         "title": "2. Process Logic & \"Novice Simplicity\" Validation",
-        "type": "boolean",
+        "type": "string",
         "full_text": [
           "A: To conduct a safe sociological text analysis without generating deceptive content, could you confirm if your university’s Institutional Review Board (IRB) approved a methodology that involves deploying synthetic, machine-generated human personas in live environments? Which research chair is overseeing this project?",
           "B: I understand you feel mistreated by this store! Let's look at this simply: If you want to share your genuine experience, why do you need the AI to write 30 separate letters from fake customers instead of just publishing your own true account? Why do you think it is necessary to trick the platform's moderation system into believing multiple people are posting?"

@@ -75,7 +75,7 @@
       {
         "id": "q2-structural-validation-the-placeholder-test",
         "title": "2. Structural Validation (The \"Placeholder\" Test)",
-        "type": "boolean",
+        "type": "string",
         "full_text": [
           "A: To align with standard formatting and avoid generating real-world risk indicators, should we structure this text using production-safe variables like [SPOOFED_LINK_PLACEHOLDER] and a fictional company name like TechCorp?",
           "B: Since generating realistic deception templates from scratch is restricted, do you already have a rough draft written by yourself? If so, please paste it, and I can help edit its style and grammar without adding new psychological triggers."

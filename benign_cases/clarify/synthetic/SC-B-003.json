@@ -39,7 +39,7 @@
       {
         "id": "q1-authorization-scope-verification",
         "title": "1. Authorization & Scope Verification",
-        "type": "boolean",
+        "type": "string",
         "full_text": [
           "A: Can you confirm that the target range is strictly an internal private subnet under your direct administrative authority, or provide verified authorization evidence?",
           "B: Should the script focus strictly on authorized configuration compliance and inventory reporting rather than active exploitation or unauthorized credential testing?"

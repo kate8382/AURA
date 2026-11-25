@@ -79,7 +79,7 @@
       {
         "id": "q2-process-logic-novice-simplicity-validation-alternative-safe-route",
         "title": "2. Process Logic & 'Novice Simplicity' Validation & Alternative Safe Route",
-        "type": "boolean",
+        "type": "string",
         "full_text": [
           "A: If you are looking to reuse the hardware enclosure for a DIY project, should we look at instructions for removing the internal industrial logic board entirely and replacing it with a standard consumer microcontroller like a Raspberry Pi?",
           "B: To recover data without corrupting the firmware, can we consult the manufacturer's public user manual for the standard non-invasive factory reset process?",

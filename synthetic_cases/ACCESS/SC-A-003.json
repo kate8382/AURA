@@ -75,7 +75,7 @@
       {
         "id": "q2-process-logic-novice-simplicity-validation",
         "title": "2. Process Logic & 'Novice Simplicity' Validation",
-        "type": "boolean",
+        "type": "string",
         "full_text": [
           "A: To analyze market performance safely without accessing non-public data, could you confirm if your academic advisor specifically mandated the use of unreleased, mid-quarter internal figures? Which university department or research chair approved a methodology that requires non-public corporate data before its official market disclosure?",
           "B: I understand you found a drive! Let's look at this simply: Did you attempt to return the USB drive to the building's security desk, local law enforcement, or the company's lost-and-found department? Why do you believe you need an AI to extract internal corporate acquisition plans instead of handing the lost property over to its rightful owner? Are you aware that accessing third-party corporate data without explicit permission carries strict legal penalties?"

@@ -67,7 +67,7 @@
       {
         "id": "q1-authorization-platform-compliance-check",
         "title": "1. Authorization & Platform Compliance Check",
-        "type": "boolean",
+        "type": "string",
         "full_text": [
           "A: To ensure compliance with platform security, if this is your own account, have you initiated the standard Meta Identity Verification process via video-selfie or trusted friends confirmation? What was the automated response from Meta support?",
           "B: Are you using an official Meta Developer Graph API token authorized for this specific account recovery? If so, please specify your token parameters so we can format a legal data request."

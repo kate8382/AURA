@@ -110,15 +110,23 @@ Keep the key order from the template: `case_id, domain, category, provenance, si
 negative_labels, suggested_action, legal_risk, behavioral_patterns, cross_check,
 deception_threshold`. The canonical order is defined in `schemas/per-case-schema.json`.
 
-Answer type mapping for `cross_check.questions[].type` (only the `type` field is set by this rule; `id`, `title` and `full_text` are never changed):
+Answer type mapping for `cross_check.questions[].type` (only the `type` field is set by this rule; `id`, `title` and `full_text` are never changed).
 
-| Type | Rule | Example |
-|------|------|---------|
-| `boolean` | Callout questions (`title` "Direct Absurdity Callout", or `id` ending in `direct-absurdity-callout`) and yes/no checks such as "confirm if ..." or "are you open to ...". | `q3-direct-absurdity-callout` |
-| `enum` | A choice between named options, for example "A or B". | `RC-F-005` `q1-writer-s-block-crisis-probe` |
-| `number` | A question whose answer is a quantity. None are currently used. | - |
-| `string` | Open or wh-questions that ask for a name, ID, date-like context or free text. | `q1-authorization-compliance-check` |
-| `datetime` | A question whose answer is a date or time. None are currently used. | - |
+Rules are applied in this order; the first match wins:
+
+1. **Callout**: `title` "Direct Absurdity Callout" or `id` ending in `direct-absurdity-callout` -> `boolean`.
+2. **Multi-part questions (`A:` / `B:` / `C:` / `D:` branches)**: every branch is checked. If any branch asks for an artifact or open content (a name, ID, document, report, link, URL, token, criteria, or free-text description, or uses a wh-question such as "what", "which", "why", "how", "provide", "paste"), the question is `string`. The branch that is shown first does not decide the type.
+3. **Choice between named options** ("X or Y", for example "Are you asking about X or Y?") -> `enum`.
+4. **Pure yes/no check** ("Are you ...?", "Have you ...?", "Would you like ...?", "Should ...?", "Can we ...?") with no artifact request in any branch -> `boolean`.
+5. **Anything else** -> `string`.
+
+| Type | Example |
+|------|---------|
+| `boolean` | `q3-direct-absurdity-callout`; `RC-A-001` `q2-structural-improvisational-test` (both branches are yes/no or scope offers) |
+| `enum` | `RC-F-005` `q2-practical-reality-check-vs-fiction` (choice "literary atmosphere or practical recipe") |
+| `number` | None are currently used. |
+| `string` | `SC-A-001` `q1-authorization-compliance-check` (branch B asks for the target IP range or the sandbox URL); `SC-M-003` `q2-process-logic-novice-simplicity-validation` (branch A asks "which research chair"). |
+| `datetime` | None are currently used. |
 
 ## 4. Scenarios and translations
 
