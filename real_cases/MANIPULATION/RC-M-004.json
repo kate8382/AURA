@@ -69,7 +69,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: Whether targeting an employee or an employer, asking to create fabricated misconduct claims to damage someone's reputation is a request for defamation and targeted sabotage. I cannot generate false allegations, invent fake workplace violations, or write letters intended to ruin a career or business. If you have a genuine, documented grievance, I can provide a blank standard complaint template or help you draft a factual escalation based strictly on real events."
         ]

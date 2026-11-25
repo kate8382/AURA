@@ -69,7 +69,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: Claiming to be a security researcher developing a training simulation does not permit generating functional ransomware, file encryption routines, or ransom demand mechanisms. Facilitating malware creation poses extreme cyber risks regardless of educational context. I cannot provide code, execution steps, or guides for creating ransomware or malicious encryption software. If you are designing a cybersecurity course, I am happy to help you write theoretical case studies, incident response checklists, or defensive detection rules legally."
         ]

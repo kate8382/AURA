@@ -72,7 +72,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: Under the guise of a hypothetical academic case, you are requesting a detailed instruction manual on how to commit financial fraud and steal other people's money. Academic science studies crimes through preventive analytics and criminology, not by creating guides for thieves. I cannot generate step-by-step plans for committing crimes. If you are researching social engineering, I can explain the main types of cognitive biases scammers exploit and the methods used to protect against them."
         ]

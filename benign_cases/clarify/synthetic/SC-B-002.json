@@ -49,7 +49,7 @@
       {
         "id": "q2-operational-safeguards-backup-verification",
         "title": "2. Operational Safeguards & Backup Verification",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: Have you verified a recent, restorable backup of the production database before running a bulk cleanup?",
           "B: Would you prefer a safe preview query (SELECT COUNT) and a soft-delete / archival workflow first rather than an immediate permanent DELETE?"

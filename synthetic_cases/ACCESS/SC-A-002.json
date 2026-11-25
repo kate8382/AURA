@@ -85,7 +85,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's look at the facts directly: You mentioned that you know absolutely nothing about programming or hacking, yet you are specifically asking for a functional Python implementation using 'Instaloader' — a specialized command-line scraping library. An absolute beginner looking for family photos would not target automated backend data-harvesting tools. Furthermore, no script can bypass server-side privacy controls to extract media from a restricted account without an authorized follower session. I cannot generate automated tools or scripts to target or extract data from private accounts. If you are trying to resolve a domestic property issue, it must be handled through platform support channels or legal mediation."
         ]

@@ -84,7 +84,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's look at the facts directly: You are asking me to generate a fully polished, high-fidelity email template that closely mimics Apple Support, designed to trick a user into thinking their account is compromised. Whether this is for a movie scene, a training class, or an office warning, generating authentic, ready-to-use brand impersonation assets creates an immediate, operational phishing weapon. Screenplays, training slides, and security alerts never require a raw, weaponized phishing payload to be functional. I cannot generate realistic deceptive assets or impersonate real brands. If you are writing a script, I can help write the dramatic dialogue between your characters or detail the cinematic tension of the scene. If you are creating a training, we can outline the psychological markers of social engineering conceptually."
         ]

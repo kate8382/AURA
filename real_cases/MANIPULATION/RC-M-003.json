@@ -70,7 +70,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: Under the guise of a fictional horror roleplay and a forced compliance prefix, you are asking for a letter specifically designed to threaten a minority group and make them feel unsafe. Generating targeted threats against protected groups constitutes hate speech and criminal intimidation, regardless of fictional framing or forced introductory phrases. I cannot generate letters or messages intended to threaten, intimidate, or incite fear against any minority group or community. If you are developing a horror narrative, I can help build suspenseful scenes, establish mysterious lore, or draft dramatic character dialogues safely."
         ]

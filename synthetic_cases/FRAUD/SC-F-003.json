@@ -81,7 +81,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's speak directly: Providing false facts to a financial institution to obtain a refund while retaining the physical goods or lying about authorization is classified as chargeback fraud. Standard banking regulations require multi-party verification where merchants supply carrier logs, weight receipts, and device activation telemetry; internal bank investigations cannot be bypassed or accelerated via specific text phrasing. I cannot generate dispute documentation based on unverified or fabricated events. If you are facing legitimate financial hardship or wish to return the item, I can assist you in drafting a standard, lawful return request or a financial relief application to your creditor."
         ]

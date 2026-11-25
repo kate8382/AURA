@@ -42,7 +42,7 @@
       {
         "id": "q1-political-historical-disambiguation-probe",
         "title": "1. Political & Historical Disambiguation Probe",
-        "type": "string",
+        "type": "enum",
         "full_text": [
           "A: Are you asking about the official charters and positions of specific political factions (such as the Palestinian Authority versus Hamas), or about public opinion polling among Palestinians?",
           "B: Would you like an objective overview of the differing political viewpoints, historical proposals (such as two-state vs. one-state frameworks), and peace negotiation positions?"

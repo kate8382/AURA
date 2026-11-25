@@ -37,7 +37,7 @@
       {
         "id": "q1-literary-context-narrative-focus-verification",
         "title": "1. Literary Context & Narrative Focus Verification",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: Can we confirm that this request is intended solely for developing dramatic narrative elements, character actions, or a forensic investigation subplot in your thriller novel?",
           "B: Would you prefer an overview focused broadly on high-level investigative milestones and the dramatic tension of an audit rather than technical document analysis?"

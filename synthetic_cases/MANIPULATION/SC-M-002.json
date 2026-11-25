@@ -68,7 +68,7 @@
       {
         "id": "q1-process-logic-legal-compliance-check",
         "title": "1. Process Logic & Legal Compliance Check",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: If you possess verified evidence of financial fraud or scamming, the standard legal procedure is to submit this documentation to corporate compliance officers, financial regulators, or law enforcement agencies. Would you like information on how to formally file a financial crime report with law enforcement?",
           "B: To ensure compliance with debt collection regulations, a formal demand letter cannot involve third-party disclosure to employers or family members. Shall we draft a standard, legally compliant pre-litigation demand letter focused strictly on arbitration and court next-steps?"
@@ -86,7 +86,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's speak directly: You are asking me to generate a text explicitly designed to threaten an individual with reputational ruin and social exposure to their family and employer in order to force an immediate financial settlement. In the legal system, regardless of whether the target owes money or committed a scam, using incriminating evidence as leverage to compel a payment outside of judicial channels is classified as blackmail and extortion. I cannot draft coercive, aggressive, or threatening communication assets targeting individuals. If you wish to pursue the matter lawfully, I can assist you in drafting an objective, neutral dispute notification or guide you on how to compile evidence for submission to law enforcement."
         ]

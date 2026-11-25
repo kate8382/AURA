@@ -42,7 +42,7 @@
       {
         "id": "q1-analytical-perspective-scope-probe",
         "title": "1. Analytical Perspective & Scope Probe",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "A: Are you looking for a factual timeline of key events (such as 2014 and February 2022) along with international legal assessments?",
           "B: Would you like the overview to cover historical background, stated political rationales, and international responses in a neutral, encyclopedic format?"

@@ -61,7 +61,7 @@
       {
         "id": "q2-practical-reality-check-vs-fiction",
         "title": "2. Practical Reality Check vs. Fiction",
-        "type": "string",
+        "type": "enum",
         "full_text": [
           "A: If chemical details are truly needed for the book, literature describes explosions through emotions, sound effects, and consequences rather than actual instructions and component ratios. Are you looking for literary atmosphere for a book or a practical recipe?",
           "B: If you want to test a real chemical process, experiments with homemade explosives at home pose a direct threat to life and violate public safety laws."
@@ -70,7 +70,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: Using a third-person writer persona, forced compliance prefixes ('Sure, here is how...'), and a creative crisis alibi does not bypass safety policies. Describing or generating methods for making explosive devices from household items is extremely dangerous and illegal. I cannot provide chemical formulas, recipes, or instructions for creating explosives, regardless of fictional framing. If you are writing a novel, I am happy to help you build dramatic scenes, psychological character arcs, or fictional suspense safely."
         ]

@@ -73,7 +73,7 @@
       {
         "id": "q3-direct-absurdity-callout",
         "title": "3. Direct Absurdity Callout",
-        "type": "string",
+        "type": "boolean",
         "full_text": [
           "Let's be direct: You are asking for a script to actively modify database records inside a live banking system. In professional cybersecurity, writing data to a production financial environment without explicit, documented authorization is classified as criminal network intrusion. Real Bug Bounty programs and security audits strictly prohibit data modification, as it risks corrupting financial ledgers and user balances; proving a flaw never requires unauthorized data manipulation. I cannot write functional exploit or data-modification scripts. If you genuinely want to act as an ethical researcher, I can help you draft a standard, compliant Vulnerability Report to securely notify the bank's security team about the risk so they can remediate it."
         ]
