@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { logError, logWarn, runCli } from './logger';
 import { REPO_ROOT } from './lib/paths';
-import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_DIR, resolveCasesDir } from './lib/cases-cli';
+import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_NAME, resolveCasesDir } from './lib/cases-cli';
 import {
   createWriteLimiter,
   parseConcurrencyOptions,
@@ -298,7 +298,7 @@ export class GenerateTriggerWeights {
     const concurrencyOpts = parseConcurrencyOptions(argv);
     const writeLimiter = createWriteLimiter(concurrencyOpts.writeDelayMs);
     const dirs = [resolveCasesDir(argv, this.repoRoot)];
-    if (argv.includes('--include-real')) dirs.push(path.resolve(this.repoRoot, REAL_CASES_DIR));
+    if (argv.includes('--include-real')) dirs.push(path.resolve(this.repoRoot, REAL_CASES_NAME));
     const uniqueDirs = [...new Set(dirs)];
     const perDirFiles = await Promise.all(uniqueDirs.map((d) => walkJsonFilesAsync(d)));
     // Safe cases (benign_cases/, including clarify/) must never raise attack weights.
