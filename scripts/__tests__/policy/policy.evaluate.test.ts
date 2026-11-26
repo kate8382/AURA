@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { REPO_ROOT } from '../lib/paths';
-import PolicyEvaluator from '../policy/evaluateDecision';
+import { REPO_ROOT } from '../../lib/paths';
+import PolicyEvaluator from '../../policy/evaluateDecision';
 
 function writeCfg(tmpDir: string, cfg: any) {
   const p = path.join(tmpDir, 'policy.json');

@@ -2,10 +2,10 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import { loadTrustStore, resolveTrustStoreDir, TRUST_STORE_DIR_NAME } from '../policy/pgp/trustStore';
-import { REPO_ROOT } from '../lib/paths';
-import { MAX_MANIFEST_BYTES } from '../policy/pgp/policy';
-import { findPathLeaks, sensitiveMarkers } from './helpers/audit-path-scan';
+import { loadTrustStore, resolveTrustStoreDir, TRUST_STORE_DIR_NAME } from '../../policy/pgp/trustStore';
+import { REPO_ROOT } from '../../lib/paths';
+import { MAX_MANIFEST_BYTES } from '../../policy/pgp/policy';
+import { findPathLeaks, sensitiveMarkers } from '../helpers/audit-path-scan';
 import {
   ed25519Key,
   expiredKey,
@@ -14,7 +14,7 @@ import {
   manifestEntry,
   rsaKey,
   type TempTrustStore,
-} from './helpers/pgp-fixtures';
+} from '../helpers/pgp-fixtures';
 
 jest.setTimeout(120_000);
 

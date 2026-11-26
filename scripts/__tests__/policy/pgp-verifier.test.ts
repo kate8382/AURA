@@ -27,9 +27,9 @@ import {
   signatureWithIssuerKeyId,
   signatureWithType,
   type GeneratedTestKey,
-} from './helpers/pgp-fixtures';
-import { loadTrustStore, type TrustStore } from '../policy/pgp/trustStore';
-import { representativeSigner, verifyPgpSignature } from '../policy/pgp/verify';
+} from '../helpers/pgp-fixtures';
+import { loadTrustStore, type TrustStore } from '../../policy/pgp/trustStore';
+import { representativeSigner, verifyPgpSignature } from '../../policy/pgp/verify';
 
 jest.setTimeout(180_000);
 

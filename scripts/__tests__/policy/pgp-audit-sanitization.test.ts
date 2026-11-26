@@ -20,17 +20,17 @@
 import fs from 'fs';
 import path from 'path';
 
-import { createPgpVerifyAdapter } from '../policy/pgp/adapter';
-import { REDACTED_PATH, isSafeDetailToken, sanitizeDetail } from '../policy/pgp/manifest';
-import { loadTrustStore } from '../policy/pgp/trustStore';
+import { createPgpVerifyAdapter } from '../../policy/pgp/adapter';
+import { REDACTED_PATH, isSafeDetailToken, sanitizeDetail } from '../../policy/pgp/manifest';
+import { loadTrustStore } from '../../policy/pgp/trustStore';
 import {
   ed25519Key,
   keyFileName,
   makeTempTrustStore,
   manifestEntry,
   type TempTrustStore,
-} from './helpers/pgp-fixtures';
-import { containsPathLeak, findPathLeaks, sensitiveMarkers } from './helpers/audit-path-scan';
+} from '../helpers/pgp-fixtures';
+import { containsPathLeak, findPathLeaks, sensitiveMarkers } from '../helpers/audit-path-scan';
 
 jest.setTimeout(120_000);
 

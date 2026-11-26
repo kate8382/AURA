@@ -6,10 +6,10 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from '../policy/crossCheckAdapter';
-import { loadTriggerConfig } from '../core/config';
-import { RecalcConfidence } from '../recalc_confidence';
-import { CANONICAL_INPUT_FIELDS, createPgpVerifyAdapter, pgpVerifyAdapter } from '../policy/pgp/adapter';
+import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from '../../policy/crossCheckAdapter';
+import { loadTriggerConfig } from '../../core/config';
+import { RecalcConfidence } from '../../recalc_confidence';
+import { CANONICAL_INPUT_FIELDS, createPgpVerifyAdapter, pgpVerifyAdapter } from '../../policy/pgp/adapter';
 import {
   ed25519Key,
   keyFileName,
@@ -17,7 +17,7 @@ import {
   manifestEntry,
   signCleartext,
   signDetached,
-} from './helpers/pgp-fixtures';
+} from '../helpers/pgp-fixtures';
 
 jest.setTimeout(120_000);
 

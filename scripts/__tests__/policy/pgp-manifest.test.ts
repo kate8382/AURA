@@ -1,5 +1,5 @@
-import { findDuplicateKeyId, validateManifest } from '../policy/pgp/manifest';
-import { MAX_MANIFEST_ENTRIES } from '../policy/pgp/policy';
+import { findDuplicateKeyId, validateManifest } from '../../policy/pgp/manifest';
+import { MAX_MANIFEST_ENTRIES } from '../../policy/pgp/policy';
 
 const FINGERPRINT = 'A'.repeat(40);
 
