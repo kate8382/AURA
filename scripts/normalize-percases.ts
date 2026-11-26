@@ -5,7 +5,7 @@ import GenerateTriggerWeights from './generate-trigger-weights';
 import { DEFAULT_CONFIDENCE } from './recalc_confidence';
 import { getSharedExtractor, normalizeTriggerIdentity, defaultRepoRoot } from './extract-triggers';
 import { logError, runCli } from './core/logger';
-import { ValidatePerCases } from './validate-percases';
+import { ValidatePerCases } from './validators/validate-percases';
 import { assertRealWriteAllowed, DEFAULT_CASES_DIR, getDirOption } from './lib/cases-cli';
 import {
   BulkConcurrencyOptions,

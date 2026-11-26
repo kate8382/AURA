@@ -1,10 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
 import Ajv, { ValidateFunction } from 'ajv';
-import { SCHEMAS_DIR } from './lib/paths';
-import { loadNoticeSources, NoticeSources, NOTICE_PATH } from './lib/notice';
-import { CASE_ID_PATTERN, DOMAIN_BY_LETTER, isRealCasePath, parseCaseId } from './lib/case-id';
-import { BENIGN_CASES_DIR, BENIGN_CLARIFY_DIR } from './lib/cases-cli';
+import { SCHEMAS_DIR } from '../lib/paths';
+import { loadNoticeSources, NoticeSources, NOTICE_PATH } from '../lib/notice';
+import { CASE_ID_PATTERN, DOMAIN_BY_LETTER, isRealCasePath, parseCaseId } from '../lib/case-id';
+import { BENIGN_CASES_DIR, BENIGN_CLARIFY_DIR } from '../lib/cases-cli';
 
 interface CaseDoc {
   case_id?: unknown;

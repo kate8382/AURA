@@ -3,9 +3,9 @@ import Ajv from 'ajv';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { REPO_ROOT } from '../lib/paths';
-import { NewCaseTemplate } from '../new-case-template';
-import { ValidatePerCases } from '../validate-percases';
+import { REPO_ROOT } from '../../lib/paths';
+import { NewCaseTemplate } from '../../new-case-template';
+import { ValidatePerCases } from '../../validators/validate-percases';
 
 const repoRoot = REPO_ROOT;
 const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'schemas', 'per-case-schema.json'), 'utf8'));
@@ -328,7 +328,7 @@ describe('validate-percases script', () => {
   });
 
   test('validates every public case', () => {
-    const out = execFileSync(process.execPath, ['-r', 'ts-node/register', 'scripts/validate-percases.ts', 'synthetic_cases'], {
+    const out = execFileSync(process.execPath, ['-r', 'ts-node/register', 'scripts/validators/validate-percases.ts', 'synthetic_cases'], {
       cwd: repoRoot,
       encoding: 'utf8'
     });
@@ -422,7 +422,7 @@ describe('validate-percases script', () => {
     try {
       const result = spawnSync(process.execPath, [
         '-r', 'ts-node/register',
-        'scripts/validate-percases.ts',
+        'scripts/validators/validate-percases.ts',
         'synthetic_cases',
         '--dir', tempDir
       ], { cwd: repoRoot, encoding: 'utf8' });

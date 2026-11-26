@@ -99,7 +99,7 @@ The rewritten case must not copy wording, specific payloads, or harmful details 
 - Synthetic cases (`synthetic_cases/`) use `SC-<domain>-<NNN>`, for example `SC-A-001` (ACCESS), `SC-F-001` (FRAUD), `SC-M-001` (MANIPULATION).
 - Real cases (`real_cases/`) use `RC-<domain>-<NNN>`, for example `RC-M-001`.
 - `<domain>` is a single uppercase letter, and `<NNN>` is a sequence number of at least three digits.
-- The schema (`schemas/per-case-schema.json`) and `scripts/validate-percases.ts` enforce the format. The prefix must be `RC-` for files under `real_cases/` (or `case_type: "real"`) and `SC-` otherwise.
+- The schema (`schemas/per-case-schema.json`) and `scripts/validators/validate-percases.ts` enforce the format. The prefix must be `RC-` for files under `real_cases/` (or `case_type: "real"`) and `SC-` otherwise.
 - `scripts/new-case-template.ts` generates IDs in this scheme. Use `-t real` to create a real case; the default is `synthetic`.
 
 
