@@ -1,6 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { REPO_ROOT } from '../lib/paths';
 import Ajv from 'ajv';
 import { generateSignalHash, canonicalize } from '../tools/generate-signal-hash';
 import { getImpliedActions } from '../tools/signal-action-consumer';
@@ -10,7 +11,7 @@ import { NormalizePerCases } from '../normalize-percases';
 import { getErrorCount, resetErrorCount } from '../logger';
 
 describe('contract-stability', () => {
-  const repoRoot = path.resolve(__dirname, '..', '..');
+  const repoRoot = REPO_ROOT;
 
   test('decision-vocabulary.json is valid', () => {
     const vocabPath = path.join(repoRoot, 'config', 'decision-vocabulary.json');

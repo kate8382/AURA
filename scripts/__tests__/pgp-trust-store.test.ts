@@ -3,6 +3,7 @@ import os from 'os';
 import path from 'path';
 
 import { loadTrustStore, resolveTrustStoreDir, TRUST_STORE_DIR_NAME } from '../policy/pgp/trustStore';
+import { REPO_ROOT } from '../lib/paths';
 import { MAX_MANIFEST_BYTES } from '../policy/pgp/policy';
 import { findPathLeaks, sensitiveMarkers } from './helpers/audit-path-scan';
 import {
@@ -29,14 +30,14 @@ describe('resolveTrustStoreDir', () => {
   test('finds the repository trust store from the module location', () => {
     const resolved = resolveTrustStoreDir();
     expect(resolved).not.toBeNull();
-    expect(resolved as string).toBe(path.resolve(__dirname, '..', '..', TRUST_STORE_DIR_NAME));
+    expect(resolved as string).toBe(path.join(REPO_ROOT, TRUST_STORE_DIR_NAME));
   });
 
   test('does not consult the process working directory', () => {
     const originalCwd = process.cwd();
     try {
       process.chdir(path.parse(originalCwd).root);
-      expect(resolveTrustStoreDir()).toBe(path.resolve(__dirname, '..', '..', TRUST_STORE_DIR_NAME));
+      expect(resolveTrustStoreDir()).toBe(path.join(REPO_ROOT, TRUST_STORE_DIR_NAME));
     } finally {
       process.chdir(originalCwd);
     }

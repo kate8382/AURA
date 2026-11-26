@@ -9,6 +9,7 @@ import {
   normalizeStopwords,
   tokenize,
 } from '../extract-triggers';
+import { REPO_ROOT } from '../lib/paths';
 
 // Representative real repository scenario text (copied snippets from synthetic_cases).
 const MOVIE_SCRIPT_TEXT =
@@ -247,7 +248,7 @@ describe('extract-triggers: output contract', () => {
   test('every emitted label exists in the canonical vocabulary', () => {
     const canonical = new Set(loadCanonicalTriggers());
     const texts = [MOVIE_SCRIPT_TEXT, NAIVE_TEXT, NEUTRAL_TEXT];
-    const repoRoot = path.resolve(__dirname, '..', '..');
+    const repoRoot = REPO_ROOT;
     for (const f of walkJson(path.join(repoRoot, 'synthetic_cases'))) {
       const data = JSON.parse(fs.readFileSync(f, 'utf8'));
       for (const s of data.scenarios || []) {

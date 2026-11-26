@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { REAL_CASES_DIR } from './paths';
 
-export const NOTICE_PATH = path.join(__dirname, '..', '..', 'real_cases', 'NOTICE.md');
+export const NOTICE_PATH = path.join(REAL_CASES_DIR, 'NOTICE.md');
 
 export interface NoticeSources {
   // "Approved sources": may be used as Full Text, Excerpt, or Pointer Only.

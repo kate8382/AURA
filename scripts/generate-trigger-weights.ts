@@ -1,8 +1,8 @@
 import fsSync from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
-import { deriveSignalId } from './utils';
 import { logError, logWarn, runCli } from './logger';
+import { REPO_ROOT } from './lib/paths';
 import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_DIR, resolveCasesDir } from './lib/cases-cli';
 import {
   createWriteLimiter,
@@ -82,7 +82,7 @@ export class GenerateTriggerWeights {
     tfidfScale = 1.5;
 
   constructor(repoRoot?: string) {
-    this.repoRoot = repoRoot || path.resolve(__dirname, '..');
+    this.repoRoot = repoRoot || REPO_ROOT;
   }
   signalMap: Record<string, string> = {};
   private signalMapLoaded = false;
@@ -588,7 +588,7 @@ export class GenerateTriggerWeights {
  * Reuses a cached generator instance per repoRoot to avoid reloading signal-mapping.json.
  */
 export function generateSignalIds(scenarios: any[], repoRoot?: string): string[] {
-  const key = path.resolve(repoRoot || path.resolve(__dirname, '..'));
+  const key = path.resolve(repoRoot || REPO_ROOT);
   let generator = sharedGeneratorCache.get(key);
   if (!generator) {
     generator = new GenerateTriggerWeights(key);

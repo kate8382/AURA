@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
+import { REPO_ROOT } from '../lib/paths';
+import { logError, logInfo, runCli } from '../logger';
 import { normalizeTriggerIdentity } from '../extract-triggers';
-import { logError, logInfo, logWarn, runCli } from '../logger';
 
 // Validation utilities for trigger extraction and signal mapping
 export interface ValidationIssue {
@@ -74,7 +75,7 @@ export function getTokenSet(text: string, stopwords: Set<string>): Set<string> {
 
 // Main function to validate triggers based on extraction config and signal mapping
 export function validateTriggers(options: ValidateTriggersOptions = {}): ValidationReport {
-  const repoRoot = options.repoRoot || path.resolve(__dirname, '..', '..');
+  const repoRoot = options.repoRoot || REPO_ROOT;
   const overlapThreshold = typeof options.overlapThreshold === 'number' ? options.overlapThreshold : 0.85;
 
   const errors: ValidationIssue[] = [];

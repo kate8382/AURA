@@ -3,10 +3,11 @@ import Ajv from 'ajv';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { REPO_ROOT } from '../lib/paths';
 import { NewCaseTemplate } from '../new-case-template';
 import { ValidatePerCases } from '../validate-percases';
 
-const repoRoot = path.resolve(__dirname, '..', '..');
+const repoRoot = REPO_ROOT;
 const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'schemas', 'per-case-schema.json'), 'utf8'));
 const validateCase = new Ajv({ allErrors: true, strict: false }).compile(schema);
 

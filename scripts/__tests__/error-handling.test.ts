@@ -1,6 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { REPO_ROOT } from '../lib/paths';
 import { spawnSync } from 'child_process';
 import CrossCheckAdapter from '../policy/crossCheckAdapter';
 import GenerateTriggerWeights from '../generate-trigger-weights';
@@ -8,7 +9,7 @@ import { RecalcConfidence } from '../recalc_confidence';
 import { loadTriggerConfig } from '../config';
 import { MigrateCategories } from '../tools/migrate-categories';
 
-const repoRoot = path.resolve(__dirname, '..', '..');
+const repoRoot = REPO_ROOT;
 const tsNode = require.resolve('ts-node/register');
 const goodCase = { case_id: 'OK-1', category: 'access/example', scenarios: [{ name: 's', text: 't', triggers: ['urgency'] }] };
 

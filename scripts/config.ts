@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { CONFIG_DIR } from './lib/paths';
 import { logWarn } from './logger';
 
 export interface TriggerConfig {
@@ -30,7 +31,7 @@ const FALLBACK_CONFIG: TriggerConfig = {
 
 export function loadTriggerConfig(): TriggerConfig {
   const cfg: TriggerConfig = { ...FALLBACK_CONFIG };
-  const cfgPath = path.resolve(__dirname, '..', 'config', 'trigger-weights.json');
+  const cfgPath = path.join(CONFIG_DIR, 'trigger-weights.json');
   if (!fs.existsSync(cfgPath)) {
     logWarn('trigger weights config not found, using built-in defaults', { file: cfgPath });
   } else {
@@ -72,7 +73,7 @@ export function loadTriggerConfig(): TriggerConfig {
 export default loadTriggerConfig;
 
 export function loadPolicyConfig() {
-  const p = path.resolve(__dirname, '..', 'config', 'policy.json');
+  const p = path.join(CONFIG_DIR, 'policy.json');
   if (!fs.existsSync(p)) return null;
   try {
     return JSON.parse(fs.readFileSync(p, 'utf8'));

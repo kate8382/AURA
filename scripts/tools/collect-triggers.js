@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { logError, runCli } = require('../logger');
+const { REPO_ROOT } = require('../lib/paths');
 
 function walk(dir) {
   const res = [];
@@ -19,7 +20,7 @@ function normalize(t) {
 }
 
 function main() {
-  const root = path.resolve(__dirname, '..', '..', 'synthetic_cases');
+  const root = path.join(REPO_ROOT, 'synthetic_cases');
   const files = walk(root);
   const triggers = new Set();
   const failures = [];
