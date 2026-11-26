@@ -1,4 +1,4 @@
-import { reorderCaseKeys } from '../utils';
+import { reorderCaseKeys } from '../../core/utils';
 
 describe('reorderCaseKeys', () => {
   test('keeps provenance and negative_labels in schema order', () => {

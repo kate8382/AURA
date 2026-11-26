@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '../lib/paths';
-import { logError, runCli } from '../logger';
+import { logError, runCli } from '../core/logger';
 
 /**
  * MigrateCategories - class that migrates legacy `category` into

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { logError, runCli } from '../logger';
+import { logError, runCli } from '../core/logger';
 
 function walk(dir: string, cb: (file: string) => void) {
   if (!fs.existsSync(dir)) return;

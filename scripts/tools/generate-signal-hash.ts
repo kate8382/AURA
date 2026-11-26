@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { runCli, logInfo } from '../logger';
+import { runCli, logInfo } from '../core/logger';
 import { REPO_ROOT } from '../lib/paths';
 
 export function canonicalize(obj: any): string {

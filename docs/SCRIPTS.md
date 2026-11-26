@@ -117,7 +117,7 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
       numeric `total_weight` which is added to `confidence_raw`. See `scripts/policy/crossCheckAdapter.ts` for API and `scripts/__tests__/crosscheck.test.ts` for examples.
       Shared types exported from that module: `CaseObj` (typed case shape consumed by adapters and `evaluateDecision`),
       `AdapterResult` and `AdapterFn` (adapter contract). `evaluateDecision.ts` exports `Decision` (`allow` | `review` | `block` | `pending`,
-      matching `config/decision-vocabulary.json`) and `DecisionResult`. `scripts/utils.ts` `reorderCaseKeys` copies only own keys via `Object.defineProperty`, so a `__proto__` key cannot change the prototype.
+      matching `config/decision-vocabulary.json`) and `DecisionResult`. `scripts/core/utils.ts` `reorderCaseKeys` copies only own keys via `Object.defineProperty`, so a `__proto__` key cannot change the prototype.
       Shared helpers: `scripts/lib/case-id.ts` exports `parseCaseId` (prefix and domain letter for a valid case ID), and `scripts/extract-triggers.ts` exports `normalizeTriggerIdentity`, which `recalc_confidence.ts` uses for trigger normalization.
 
     - Question schema: every entry in `cross_check.questions` requires `id`, `title` and `type`.
@@ -297,7 +297,7 @@ Additional case-level metadata for trial engines:
 
 10) Error handling and exit codes
 
-Scripts fail loudly. The rules, implemented in `scripts/logger.ts` (`runCli`, `logError`):
+Scripts fail loudly. The rules, implemented in `scripts/core/logger.ts` (`runCli`, `logError`):
 
 - An unexpected error (unreadable or invalid JSON, a broken config, an exception in cross-check or policy evaluation) ends the script with a non-zero exit code. This also applies to `--dry-run`: dry-run only means "write nothing", it does not hide errors.
 - Scripts that process many files continue after a bad file, log every problem, and exit with code `1` at the end, so one run shows all broken files. Nothing is written from partial data: `generate-trigger-weights` refuses to write when a case file or the existing config cannot be read, and `normalize-percases` keeps the original file of a failed case.

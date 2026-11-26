@@ -3,7 +3,7 @@ import os from 'os';
 import path from 'path';
 import { execSync } from 'child_process';
 import { NormalizePerCases } from '../normalize-percases';
-import { deriveSignalId } from '../utils';
+import { deriveSignalId } from '../core/utils';
 import GenerateTriggerWeights from '../generate-trigger-weights';
 
 describe('normalize-percases (unit)', () => {
