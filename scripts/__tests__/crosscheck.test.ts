@@ -4,7 +4,7 @@ import path from 'path';
 import Ajv from 'ajv';
 import { REPO_ROOT } from '../lib/paths';
 import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from '../policy/crossCheckAdapter';
-import { ValidatePerCases } from '../validate-percases';
+import { ValidatePerCases } from '../validators/validate-percases';
 
 const repoRoot = REPO_ROOT;
 const validateCase = new Ajv({ allErrors: true, strict: false })

@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import Ajv from 'ajv';
-import { ValidatePerCases } from '../validate-percases';
-import { loadNoticeSources, parseNoticeSources, NOTICE_PATH } from '../lib/notice';
+import { ValidatePerCases } from '../../validators/validate-percases';
+import { loadNoticeSources, parseNoticeSources, NOTICE_PATH } from '../../lib/notice';
 
 const baseCase = {
   case_id: 'RC-M-001',

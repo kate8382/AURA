@@ -35,7 +35,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "validate": "node -r ts-node/register scripts/validate-percases.ts synthetic_cases",
+    "validate": "node -r ts-node/register scripts/validators/validate-percases.ts synthetic_cases",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:integration": "jest scripts/__tests__/pipeline-integration.test.ts",
@@ -75,9 +75,9 @@
     "normalize:percases:clarify:synthetic:extract:dry": "node -r ts-node/register scripts/normalize-percases.ts benign_cases/clarify/synthetic --dry-run --extract-triggers",
     "normalize:percases:clarify:synthetic:extract": "node -r ts-node/register scripts/normalize-percases.ts benign_cases/clarify/synthetic --extract-triggers --apply-signal-ids",
     "normalize:percases:clarify:real:extract": "node -r ts-node/register scripts/normalize-percases.ts --dir benign_cases/clarify/real --allow-real-write --extract-triggers --apply-signal-ids",
-    "validate:percases": "node -r ts-node/register scripts/validate-percases.ts synthetic_cases",
-    "validate:real": "node -r ts-node/register scripts/validate-percases.ts real_cases",
-    "validate:benign": "node -r ts-node/register scripts/validate-percases.ts benign_cases",
+    "validate:percases": "node -r ts-node/register scripts/validators/validate-percases.ts synthetic_cases",
+    "validate:real": "node -r ts-node/register scripts/validators/validate-percases.ts real_cases",
+    "validate:benign": "node -r ts-node/register scripts/validators/validate-percases.ts benign_cases",
     "validate:triggers": "node -r ts-node/register scripts/tools/validate-triggers.ts",
     "validate:keys": "node -r ts-node/register scripts/tools/validate-trusted-keys.ts",
     "clean:synthetic_cases": "node -r ts-node/register scripts/tools/clean-cases.ts",
