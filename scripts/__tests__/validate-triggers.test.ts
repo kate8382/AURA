@@ -1,5 +1,6 @@
 import path from 'path';
 import { spawnSync } from 'child_process';
+import { REPO_ROOT } from '../lib/paths';
 import {
   validateTriggers,
   jaccardSimilarity,
@@ -10,7 +11,7 @@ import {
 } from '../tools/validate-triggers';
 
 describe('validate-triggers', () => {
-  const repoRoot = path.resolve(__dirname, '..', '..');
+  const repoRoot = REPO_ROOT;
 
   describe('production configs', () => {
     test('passes on current production configuration files with zero critical errors', () => {

@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import Ajv, { ValidateFunction } from 'ajv';
+import { SCHEMAS_DIR } from './lib/paths';
 import { loadNoticeSources, NoticeSources, NOTICE_PATH } from './lib/notice';
 import { CASE_ID_PATTERN, DOMAIN_BY_LETTER, isRealCasePath, parseCaseId } from './lib/case-id';
 import { BENIGN_CASES_DIR, BENIGN_CLARIFY_DIR } from './lib/cases-cli';
@@ -216,7 +217,7 @@ export class ValidatePerCases {
 
   // Load the JSON Schema for per-case validation
   async loadSchema() {
-    const s = await fs.readFile(path.join(__dirname, '..', 'schemas', 'per-case-schema.json'), 'utf8');
+    const s = await fs.readFile(path.join(SCHEMAS_DIR, 'per-case-schema.json'), 'utf8');
     return JSON.parse(s);
   }
 

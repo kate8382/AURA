@@ -1,10 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { CONFIG_DIR } from '../lib/paths';
 
 import { loadTriggerConfig } from '../config';
 
 describe('loadTriggerConfig', () => {
-  const cfgPath = path.resolve(__dirname, '..', '..', 'config', 'trigger-weights.json');
+  const cfgPath = path.join(CONFIG_DIR, 'trigger-weights.json');
   it('loads values from config file', () => {
     const cfg = loadTriggerConfig();
     expect(cfg).toBeDefined();

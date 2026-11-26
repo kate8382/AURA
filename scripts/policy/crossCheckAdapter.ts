@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { pgpVerifyAdapter } from './pgp/adapter';
+import { CONFIG_DIR } from '../lib/paths';
 
 export type CrossCheckRequirement = {
   id: string;
@@ -63,7 +64,7 @@ let _bountySnapshotCache: BountyProgram[] | null = null;
 function loadBountySnapshot(): BountyProgram[] {
   if (_bountySnapshotCache !== null) return _bountySnapshotCache;
   const candidates = [
-    path.resolve(__dirname, '..', '..', 'config', 'snapshots', 'bounty-programs.json'),
+    path.join(CONFIG_DIR, 'snapshots', 'bounty-programs.json'),
     path.resolve(process.cwd(), 'config', 'snapshots', 'bounty-programs.json'),
   ];
   for (const p of candidates) {

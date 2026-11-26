@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
+import { REPO_ROOT } from '../lib/paths';
 
-const repoRoot = path.resolve(__dirname, '..', '..');
+const repoRoot = REPO_ROOT;
 const signalMappingPath = path.join(repoRoot, 'config', 'signal-mapping.json');
 
 // Retrieves the implied actions for a given signal ID, optionally filtering by known action classes.

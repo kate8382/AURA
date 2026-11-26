@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import GenerateTriggerWeights from './generate-trigger-weights';
+import { REPO_ROOT } from './lib/paths';
 
 /**
  * extract-triggers
@@ -110,7 +111,7 @@ export function defaultRepoRoot(): string {
   } catch (e) {
     // fallthrough to __dirname-based resolution
   }
-  return path.resolve(__dirname, '..');
+  return REPO_ROOT;
 }
 
 /** Shared normalizer instance so trigger identity matches downstream tooling. */

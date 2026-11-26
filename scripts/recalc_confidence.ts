@@ -9,6 +9,7 @@ import { generateSignalIds } from './generate-trigger-weights';
 import { normalizeTriggerIdentity } from './extract-triggers';
 import { logError, logWarn, runCli } from './logger';
 import { assertRealWriteAllowed } from './lib/cases-cli';
+import { CONFIG_DIR, REPO_ROOT } from './lib/paths';
 
 // A case as stored on disk. Fields written by recalc are typed; the rest stay open.
 type Entry = CaseObj & {
@@ -51,7 +52,7 @@ export class RecalcConfidence {
 
   constructor(options: RecalcConfidenceOptions = {}) {
     this.signalMappingPath = options.signalMappingPath
-      ?? path.resolve(__dirname, '..', 'config', 'signal-mapping.json');
+      ?? path.join(CONFIG_DIR, 'signal-mapping.json');
   }
 
   static mapConfidence(category: string, signalCount: number): number {
@@ -322,8 +323,7 @@ export class RecalcConfidence {
         })())
       : (typeof envMin === 'number' && !Number.isNaN(envMin) ? envMin : 0.0);
     if (!path.isAbsolute(filePath)) {
-      const repoRoot = path.resolve(__dirname, '..');
-      filePath = path.resolve(repoRoot, filePath);
+      filePath = path.resolve(REPO_ROOT, filePath);
     }
 
     const stats = await fs.stat(filePath).catch(() => null);

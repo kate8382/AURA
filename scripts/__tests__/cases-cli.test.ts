@@ -1,8 +1,9 @@
 import path from 'path';
+import { REPO_ROOT } from '../lib/paths';
 import { spawnSync } from 'child_process';
 import { assertRealWriteAllowed, getDirOption, isRealCasesPath, resolveCasesDir } from '../lib/cases-cli';
 
-const base = path.resolve(__dirname, '..', '..');
+const base = REPO_ROOT;
 
 const runTemplateCli = (args: string[]) =>
   spawnSync(process.execPath, ['-r', 'ts-node/register', path.join(base, 'scripts', 'new-case-template.ts'), ...args], {

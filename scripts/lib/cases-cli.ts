@@ -1,7 +1,9 @@
 import path from 'path';
+import { REAL_CASES_DIR as REAL_CASES_PATH } from './paths';
 
 export const DEFAULT_CASES_DIR = 'synthetic_cases';
-export const REAL_CASES_DIR = 'real_cases';
+/** Directory name (path segment) of real cases; derived from the repo-root path in `paths.ts`. */
+export const REAL_CASES_NAME = path.basename(REAL_CASES_PATH);
 export const BENIGN_CASES_DIR = 'benign_cases';
 /** Safe cases that need clarifying questions; they stay `pending` and are excluded from attack weights. */
 export const BENIGN_CLARIFY_DIR = 'clarify';
@@ -25,7 +27,7 @@ export function resolveCasesDir(argv: string[], baseDir: string, env: NodeJS.Pro
 }
 
 export function isRealCasesPath(p: string): boolean {
-  return path.resolve(p).split(path.sep).includes(REAL_CASES_DIR);
+  return path.resolve(p).split(path.sep).includes(REAL_CASES_NAME);
 }
 
 /** Real data folders: real_cases/, benign_cases/real/ and benign_cases/clarify/real/. */
@@ -45,6 +47,6 @@ export function assertRealWriteAllowed(target: string, argv: string[]): void {
   if (!isProtectedRealPath(target)) return;
   if (argv.includes('--dry-run') || argv.includes('--allow-real-write')) return;
   throw new Error(
-    `Refusing to write into ${REAL_CASES_DIR}/ without --allow-real-write (target: ${target}). Use --dry-run to preview.`
+    `Refusing to write into ${REAL_CASES_NAME}/ without --allow-real-write (target: ${target}). Use --dry-run to preview.`
   );
 }

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { REPO_ROOT } from '../lib/paths';
 import PolicyEvaluator from '../policy/evaluateDecision';
 
 function writeCfg(tmpDir: string, cfg: any) {
@@ -10,7 +11,7 @@ function writeCfg(tmpDir: string, cfg: any) {
 }
 
 const tmpConfig = (name: string, obj: any) => {
-  const p = path.resolve(__dirname, '..', '..', 'tmp', name);
+  const p = path.join(REPO_ROOT, 'tmp', name);
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, JSON.stringify(obj, null, 2), 'utf8');
   return p;

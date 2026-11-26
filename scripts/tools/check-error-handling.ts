@@ -1,8 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
+import { REPO_ROOT } from '../lib/paths';
 
-const repoRoot = path.resolve(__dirname, '..', '..');
+const repoRoot = REPO_ROOT;
 const BEST_EFFORT = /best-effort|cleanup only|fall ?back|fallthrough/i;
 
 export interface SilentCatch { line: number; text: string }

@@ -20,6 +20,8 @@ npm run gen:triggers:real    # include real_cases/ in trigger statistics (--incl
 node -r ts-node/register scripts/generate-trigger-weights.ts --dir real_cases   # only real_cases/
 ```
 
+**Repo paths:** the repository root and the `config/`, `schemas/`, `synthetic_cases/` and `real_cases/` directories are defined once in `scripts/lib/paths.ts` (`REPO_ROOT`, `CONFIG_DIR`, `SCHEMAS_DIR`, `SYNTHETIC_CASES_DIR`, `REAL_CASES_DIR`). Scripts and tests import these constants instead of computing paths from their own `__dirname`. `REPO_ROOT` assumes `paths.ts` stays in `scripts/lib/`. Paths taken from CLI arguments still resolve against `process.cwd()`. `resolveTrustStoreDir` (`scripts/policy/pgp/trustStore.ts`) walks up from its `startDir` and is intentionally unchanged.
+
 **Directory selection (all case scripts):** `--dir <path>` > `CASES_DIR` env var > `synthetic_cases/` (default).
 For `normalize-percases.ts` a positional directory argument is also accepted; the order is `--dir` > `CASES_DIR` > positional > `synthetic_cases/`.
 Existing calls without `--dir` keep working unchanged.

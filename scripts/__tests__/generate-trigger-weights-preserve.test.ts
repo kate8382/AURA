@@ -10,6 +10,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { CONFIG_DIR } from '../lib/paths';
 
 import GenerateTriggerWeights from '../generate-trigger-weights';
 
@@ -83,7 +84,7 @@ describe('generate-trigger-weights preserves adapter routing', () => {
 
   test('the repository config routes cc-pgp-signature to the pgp-verify adapter', () => {
     const realConfig = JSON.parse(
-      fs.readFileSync(path.resolve(__dirname, '..', '..', 'config', 'trigger-weights.json'), 'utf8')
+      fs.readFileSync(path.join(CONFIG_DIR, 'trigger-weights.json'), 'utf8')
     );
     expect(realConfig.crossCheckAdapters).toEqual({ 'cc-pgp-signature': 'pgp-verify' });
   });

@@ -2,10 +2,11 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import Ajv from 'ajv';
+import { REPO_ROOT } from '../lib/paths';
 import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from '../policy/crossCheckAdapter';
 import { ValidatePerCases } from '../validate-percases';
 
-const repoRoot = path.resolve(__dirname, '..', '..');
+const repoRoot = REPO_ROOT;
 const validateCase = new Ajv({ allErrors: true, strict: false })
   .compile(JSON.parse(fs.readFileSync(path.join(repoRoot, 'schemas', 'per-case-schema.json'), 'utf8')));
 

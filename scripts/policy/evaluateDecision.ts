@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { CaseObj } from './crossCheckAdapter';
+import { CONFIG_DIR } from '../lib/paths';
 
 // Policy evaluation logic for determining decisions based on configured thresholds and triggers.
 export type Decision = 'allow' | 'review' | 'block' | 'pending';
@@ -26,7 +27,7 @@ type PolicyConfig = {
 export class PolicyEvaluator {
   cfg: PolicyConfig;
   constructor(cfgPath?: string) {
-    const defaultPath = path.resolve(__dirname, '..', '..', 'config', 'policy.json');
+    const defaultPath = path.join(CONFIG_DIR, 'policy.json');
     const p = cfgPath || defaultPath;
     try {
       const raw = fs.readFileSync(p, 'utf8');

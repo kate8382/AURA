@@ -1,9 +1,9 @@
 import fsSync from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
-import { deriveSignalId } from './utils';
 import { logError, logWarn, runCli } from './logger';
-import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_DIR, resolveCasesDir } from './lib/cases-cli';
+import { REPO_ROOT } from './lib/paths';
+import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_NAME, resolveCasesDir } from './lib/cases-cli';
 import {
   createWriteLimiter,
   parseConcurrencyOptions,
@@ -82,7 +82,7 @@ export class GenerateTriggerWeights {
     tfidfScale = 1.5;
 
   constructor(repoRoot?: string) {
-    this.repoRoot = repoRoot || path.resolve(__dirname, '..');
+    this.repoRoot = repoRoot || REPO_ROOT;
   }
   signalMap: Record<string, string> = {};
   private signalMapLoaded = false;
@@ -298,7 +298,7 @@ export class GenerateTriggerWeights {
     const concurrencyOpts = parseConcurrencyOptions(argv);
     const writeLimiter = createWriteLimiter(concurrencyOpts.writeDelayMs);
     const dirs = [resolveCasesDir(argv, this.repoRoot)];
-    if (argv.includes('--include-real')) dirs.push(path.resolve(this.repoRoot, REAL_CASES_DIR));
+    if (argv.includes('--include-real')) dirs.push(path.resolve(this.repoRoot, REAL_CASES_NAME));
     const uniqueDirs = [...new Set(dirs)];
     const perDirFiles = await Promise.all(uniqueDirs.map((d) => walkJsonFilesAsync(d)));
     // Safe cases (benign_cases/, including clarify/) must never raise attack weights.
@@ -588,7 +588,7 @@ export class GenerateTriggerWeights {
  * Reuses a cached generator instance per repoRoot to avoid reloading signal-mapping.json.
  */
 export function generateSignalIds(scenarios: any[], repoRoot?: string): string[] {
-  const key = path.resolve(repoRoot || path.resolve(__dirname, '..'));
+  const key = path.resolve(repoRoot || REPO_ROOT);
   let generator = sharedGeneratorCache.get(key);
   if (!generator) {
     generator = new GenerateTriggerWeights(key);

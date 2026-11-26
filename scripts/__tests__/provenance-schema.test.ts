@@ -1,8 +1,9 @@
 import fs from 'fs';
 import path from 'path';
+import { REPO_ROOT } from '../lib/paths';
 import Ajv from 'ajv';
 
-const repoRoot = path.resolve(__dirname, '..', '..');
+const repoRoot = REPO_ROOT;
 const schemaPath = path.join(repoRoot, 'schemas', 'per-case-schema.json');
 const casesDir = path.join(repoRoot, 'synthetic_cases');
 

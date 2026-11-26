@@ -1,12 +1,13 @@
 import { execSync, spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { REPO_ROOT } from '../lib/paths';
 
 describe('examples/simple-recalc smoke test', () => {
   test('runs simple-recalc.ts on sample_case.json and outputs valid JSON', () => {
     const bin = 'node';
     const args = ['-r', 'ts-node/register', 'examples/simple-recalc.ts', 'examples/sample_case.json', '--out', 'json'];
-    const cwd = path.resolve(__dirname, '..', '..');
+    const cwd = REPO_ROOT;
     const out = execSync([bin, ...args].join(' '), { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
     expect(out).toBeTruthy();
     const parsed = JSON.parse(out);
@@ -15,7 +16,7 @@ describe('examples/simple-recalc smoke test', () => {
   }, 20000);
 
   test('extracts triggers and keeps JSON output clean', () => {
-    const cwd = path.resolve(__dirname, '..', '..');
+    const cwd = REPO_ROOT;
     const samplePath = path.join(cwd, 'examples', 'sample_case.json');
     const originalCase = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
     const result = spawnSync('node', [

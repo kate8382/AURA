@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { runCli, logInfo } from '../logger';
+import { REPO_ROOT } from '../lib/paths';
 
 export function canonicalize(obj: any): string {
   if (obj === null || typeof obj !== 'object') {
@@ -28,7 +29,7 @@ export function generateSignalHash(mappingPath: string) {
 
 if (require.main === module) {
   runCli(() => {
-    const repoRoot = path.resolve(__dirname, '..', '..');
+    const repoRoot = REPO_ROOT;
     const mappingPath = path.join(repoRoot, 'config', 'signal-mapping.json');
     const metaPath = path.join(repoRoot, 'config', 'signal-catalog-meta.json');
 

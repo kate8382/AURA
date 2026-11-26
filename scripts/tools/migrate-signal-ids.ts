@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { REPO_ROOT } from '../lib/paths';
 import { logError, runCli } from '../logger';
 
 type OldMap = Record<string, string[]>;
@@ -47,9 +48,8 @@ async function walkJsonFiles(dir: string): Promise<string[]> {
 
 async function main() {
   const dry = process.argv.includes('--dry-run');
-  const repoRoot = path.resolve(__dirname, '..', '..');
-  const mappingPath = path.join(repoRoot, 'config', 'signal-mapping.json');
-  const casesDir = path.join(repoRoot, 'synthetic_cases');
+  const mappingPath = path.join(REPO_ROOT, 'config', 'signal-mapping.json');
+  const casesDir = path.join(REPO_ROOT, 'synthetic_cases');
 
   const mapping = await readJson(mappingPath).catch(() => null);
   if (!mapping || !mapping.signals) {
