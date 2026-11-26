@@ -7,7 +7,7 @@ import os from 'os';
 import path from 'path';
 
 import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from '../policy/crossCheckAdapter';
-import { loadTriggerConfig } from '../config';
+import { loadTriggerConfig } from '../core/config';
 import { RecalcConfidence } from '../recalc_confidence';
 import { CANONICAL_INPUT_FIELDS, createPgpVerifyAdapter, pgpVerifyAdapter } from '../policy/pgp/adapter';
 import {

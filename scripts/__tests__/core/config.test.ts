@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { CONFIG_DIR } from '../lib/paths';
+import { CONFIG_DIR } from '../../lib/paths';
 
-import { loadTriggerConfig } from '../config';
+import { loadTriggerConfig } from '../../core/config';
 
 describe('loadTriggerConfig', () => {
   const cfgPath = path.join(CONFIG_DIR, 'trigger-weights.json');

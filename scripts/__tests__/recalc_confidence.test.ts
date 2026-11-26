@@ -1,6 +1,6 @@
 import { mapConfidence, RecalcConfidence } from '../recalc_confidence';
 import CrossCheckAdapter from '../policy/crossCheckAdapter';
-import * as configModule from '../config';
+import * as configModule from '../core/config';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';

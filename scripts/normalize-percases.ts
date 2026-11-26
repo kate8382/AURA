@@ -1,10 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { reorderCaseKeys, deriveSignalId } from './utils';
+import { reorderCaseKeys, deriveSignalId } from './core/utils';
 import GenerateTriggerWeights from './generate-trigger-weights';
 import { DEFAULT_CONFIDENCE } from './recalc_confidence';
 import { getSharedExtractor, normalizeTriggerIdentity, defaultRepoRoot } from './extract-triggers';
-import { logError, runCli } from './logger';
+import { logError, runCli } from './core/logger';
 import { ValidatePerCases } from './validate-percases';
 import { assertRealWriteAllowed, DEFAULT_CASES_DIR, getDirOption } from './lib/cases-cli';
 import {
@@ -81,7 +81,7 @@ export class NormalizePerCases {
     );
   }
 
-  // Canonical ordering is provided by `reorderCaseKeys` from scripts/utils.ts
+  // Canonical ordering is provided by `reorderCaseKeys` from scripts/core/utils.ts
 
   /**
    * maybeExtractTriggers (opt-in via `--extract-triggers`)

@@ -6,7 +6,7 @@ import { spawnSync } from 'child_process';
 import CrossCheckAdapter from '../policy/crossCheckAdapter';
 import GenerateTriggerWeights from '../generate-trigger-weights';
 import { RecalcConfidence } from '../recalc_confidence';
-import { loadTriggerConfig } from '../config';
+import { loadTriggerConfig } from '../core/config';
 import { MigrateCategories } from '../tools/migrate-categories';
 
 const repoRoot = REPO_ROOT;

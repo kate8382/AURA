@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { logError, runCli } = require('../logger');
+const { logError, runCli } = require('../core/logger');
 const { REPO_ROOT } = require('../lib/paths');
 
 function walk(dir) {

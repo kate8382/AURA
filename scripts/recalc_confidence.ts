@@ -4,10 +4,10 @@ import PolicyEvaluator from './policy/evaluateDecision';
 import CrossCheckAdapter, { CrossCheckAdapter as CrossCheckAdapterClass } from './policy/crossCheckAdapter';
 import type { CaseObj, CrossCheckRunResult } from './policy/crossCheckAdapter';
 import type { Decision } from './policy/evaluateDecision';
-import { reorderCaseKeys } from './utils';
+import { reorderCaseKeys } from './core/utils';
 import { generateSignalIds } from './generate-trigger-weights';
 import { normalizeTriggerIdentity } from './extract-triggers';
-import { logError, logWarn, runCli } from './logger';
+import { logError, logWarn, runCli } from './core/logger';
 import { assertRealWriteAllowed } from './lib/cases-cli';
 import { CONFIG_DIR, REPO_ROOT } from './lib/paths';
 
@@ -93,7 +93,7 @@ export class RecalcConfidence {
     let count = 0;
 
     // Load config via helper (file + ENV)
-    const { loadTriggerConfig } = await import('./config');
+    const { loadTriggerConfig } = await import('./core/config');
     const cfg = loadTriggerConfig();
 
     // Load signal mapping (signal_id -> [triggers] or { id, description, triggers }) if present

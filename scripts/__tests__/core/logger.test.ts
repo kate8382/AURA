@@ -1,4 +1,4 @@
-import { getErrorCount, logError, logInfo, logWarn, resetErrorCount, runCli } from '../logger';
+import { getErrorCount, logError, logInfo, logWarn, resetErrorCount, runCli } from '../../core/logger';
 
 describe('logger', () => {
   const env = { ...process.env };

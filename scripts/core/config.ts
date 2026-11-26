@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { CONFIG_DIR } from './lib/paths';
+import { CONFIG_DIR } from '../lib/paths';
 import { logWarn } from './logger';
 
 export interface TriggerConfig {

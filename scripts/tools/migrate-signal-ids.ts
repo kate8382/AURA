@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { REPO_ROOT } from '../lib/paths';
-import { logError, runCli } from '../logger';
+import { logError, runCli } from '../core/logger';
 
 type OldMap = Record<string, string[]>;
 

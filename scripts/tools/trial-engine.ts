@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { logError, logWarn, runCli } from '../logger';
+import { logError, logWarn, runCli } from '../core/logger';
 
 type TrialCase = {
   domain?: string;

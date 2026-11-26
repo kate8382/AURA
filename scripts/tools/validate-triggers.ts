@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '../lib/paths';
-import { logError, logInfo, runCli } from '../logger';
+import { logError, logInfo, runCli } from '../core/logger';
 import { normalizeTriggerIdentity } from '../extract-triggers';
 
 // Validation utilities for trigger extraction and signal mapping

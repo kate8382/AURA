@@ -8,7 +8,7 @@ import { getImpliedActions } from '../tools/signal-action-consumer';
 import { getNegativeLabel } from '../tools/shape-metadata-consumer';
 import { sameShape, calculateFalsePositiveRate } from '../tools/trial-engine';
 import { NormalizePerCases } from '../normalize-percases';
-import { getErrorCount, resetErrorCount } from '../logger';
+import { getErrorCount, resetErrorCount } from '../core/logger';
 
 describe('contract-stability', () => {
   const repoRoot = REPO_ROOT;
