@@ -1,13 +1,13 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { REPO_ROOT } from '../lib/paths';
+import { REPO_ROOT } from '../../lib/paths';
 import { spawnSync } from 'child_process';
-import CrossCheckAdapter from '../policy/crossCheckAdapter';
-import GenerateTriggerWeights from '../generators/generate-trigger-weights';
-import { RecalcConfidence } from '../generators/recalc_confidence';
-import { loadTriggerConfig } from '../core/config';
-import { MigrateCategories } from '../tools/migrate-categories';
+import CrossCheckAdapter from '../../policy/crossCheckAdapter';
+import GenerateTriggerWeights from '../../generators/generate-trigger-weights';
+import { RecalcConfidence } from '../../generators/recalc_confidence';
+import { loadTriggerConfig } from '../../core/config';
+import { MigrateCategories } from '../../tools/migrate-categories';
 
 const repoRoot = REPO_ROOT;
 const tsNode = require.resolve('ts-node/register');

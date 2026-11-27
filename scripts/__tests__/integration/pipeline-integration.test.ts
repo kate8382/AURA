@@ -1,13 +1,13 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { REPO_ROOT } from '../lib/paths';
+import { REPO_ROOT } from '../../lib/paths';
 import { spawnSync } from 'child_process';
 import Ajv from 'ajv';
-import CrossCheckAdapter from '../policy/crossCheckAdapter';
-import GenerateTriggerWeights from '../generators/generate-trigger-weights';
-import { NormalizePerCases } from '../generators/normalize-percases';
-import { RecalcConfidence } from '../generators/recalc_confidence';
+import CrossCheckAdapter from '../../policy/crossCheckAdapter';
+import GenerateTriggerWeights from '../../generators/generate-trigger-weights';
+import { NormalizePerCases } from '../../generators/normalize-percases';
+import { RecalcConfidence } from '../../generators/recalc_confidence';
 
 const repoRoot = REPO_ROOT;
 const readJson = (p: string) => JSON.parse(fs.readFileSync(p, 'utf8'));

@@ -38,7 +38,7 @@
     "validate": "node -r ts-node/register scripts/validators/validate-percases.ts synthetic_cases",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:integration": "jest scripts/__tests__/pipeline-integration.test.ts",
+    "test:integration": "jest scripts/__tests__/integration/pipeline-integration.test.ts",
     "check:errors": "node -r ts-node/register scripts/tools/check-error-handling.ts",
     "recalc:confidence": "node -r ts-node/register scripts/generators/recalc_confidence.ts",
     "recalc:confidence:real": "node -r ts-node/register scripts/generators/recalc_confidence.ts --dir real_cases --dry-run",

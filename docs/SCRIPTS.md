@@ -322,15 +322,8 @@ Log format and verbosity:
 Unit tests for the scripts are located in `scripts/__tests__/` and include:
 
 - `scripts/__tests__/core/config.test.ts`
-- `scripts/__tests__/error-handling.test.ts`
 - `scripts/__tests__/core/logger.test.ts`
-- `scripts/__tests__/lib/paths.test.ts`
-- `scripts/__tests__/lib/case-id.test.ts`
-- `scripts/__tests__/lib/cases-cli.test.ts`
-- `scripts/__tests__/lib/bulk-io.test.ts`
-- `scripts/__tests__/lib/notice.test.ts`
-- `scripts/__tests__/check-error-handling.test.ts`
-- `scripts/__tests__/tools/contract-stability.test.ts`
+- `scripts/__tests__/core/reorder-case-keys.test.ts`
 - `scripts/__tests__/generators/extract-triggers.test.ts`
 - `scripts/__tests__/generators/generate-trigger-weights.test.ts`
 - `scripts/__tests__/generators/new-case-template.test.ts`
@@ -338,9 +331,77 @@ Unit tests for the scripts are located in `scripts/__tests__/` and include:
 - `scripts/__tests__/generators/normalize-percases.unit.test.ts`
 - `scripts/__tests__/generators/normalize-percases-extract.test.ts`
 - `scripts/__tests__/generators/recalc_confidence.test.ts`
+- `scripts/__tests__/integration/pipeline-integration.test.ts`
+- `scripts/__tests__/integration/error-handling.test.ts`
+- `scripts/__tests__/integration/examples-smoke.test.ts`
+- `scripts/__tests__/integration/provenance-schema.test.ts`
+- `scripts/__tests__/lib/paths.test.ts`
+- `scripts/__tests__/lib/case-id.test.ts`
+- `scripts/__tests__/lib/cases-cli.test.ts`
+- `scripts/__tests__/lib/bulk-io.test.ts`
+- `scripts/__tests__/lib/notice.test.ts`
+- `scripts/__tests__/policy/` (crosscheck, pgp-adapter, pgp-audit-sanitization, pgp-manifest, pgp-trust-store, pgp-verifier, policy.evaluate)
+- `scripts/__tests__/tools/check-error-handling.test.ts`
+- `scripts/__tests__/tools/contract-stability.test.ts`
+- `scripts/__tests__/tools/validate-triggers.test.ts`
+- `scripts/__tests__/tools/validate-trusted-keys.test.ts`
 - `scripts/__tests__/validators/validate-percases.test.ts`
-- `scripts/__tests__/validate-triggers.test.ts`
+
 
 Run the full test suite with `npm test`.
 
 Coverage thresholds are set per file in `jest.config.cjs` (no global threshold): `scripts/validators/validate-percases.ts` and `scripts/generators/recalc_confidence.ts` must reach at least 85% statements and 75% branches. They are covered by `scripts/__tests__/validators/validate-percases.test.ts` and `scripts/__tests__/generators/recalc_confidence.test.ts`. Check with `npx jest --coverage`.
+
+Layout
+
+Migration map for the Epic 2 refactor (old path → new path). Files not listed kept their path.
+
+| Old path | New path |
+|---|---|
+| `scripts/config.ts` | `scripts/core/config.ts` |
+| `scripts/logger.ts` | `scripts/core/logger.ts` |
+| `scripts/utils.ts` | `scripts/core/utils.ts` |
+| `scripts/validate-percases.ts` | `scripts/validators/validate-percases.ts` |
+| `scripts/extract-triggers.ts` | `scripts/generators/extract-triggers.ts` |
+| `scripts/generate-trigger-weights.ts` | `scripts/generators/generate-trigger-weights.ts` |
+| `scripts/new-case-template.ts` | `scripts/generators/new-case-template.ts` |
+| `scripts/normalize-percases.ts` | `scripts/generators/normalize-percases.ts` |
+| `scripts/recalc_confidence.ts` | `scripts/generators/recalc_confidence.ts` |
+| `scripts/tools/clean-public-cases.ts` | `scripts/tools/clean-cases.ts` |
+| `scripts/tools/shape-metadata-consumer.ts` | `scripts/tools/consumers/shape-metadata-consumer.ts` |
+| `scripts/tools/signal-action-consumer.ts` | `scripts/tools/consumers/signal-action-consumer.ts` |
+| `scripts/__tests__/config.test.ts` | `scripts/__tests__/core/config.test.ts` |
+| `scripts/__tests__/logger.test.ts` | `scripts/__tests__/core/logger.test.ts` |
+| `scripts/__tests__/reorder-case-keys.test.ts` | `scripts/__tests__/core/reorder-case-keys.test.ts` |
+| `scripts/__tests__/extract-triggers.test.ts` | `scripts/__tests__/generators/extract-triggers.test.ts` |
+| `scripts/__tests__/extract-triggers.golden.test.ts` | `scripts/__tests__/generators/extract-triggers.golden.test.ts` |
+| `scripts/__tests__/generate-trigger-weights.test.ts` | `scripts/__tests__/generators/generate-trigger-weights.test.ts` |
+| `scripts/__tests__/generate-trigger-weights-preserve.test.ts` | `scripts/__tests__/generators/generate-trigger-weights-preserve.test.ts` |
+| `scripts/__tests__/new-case-template.test.ts` | `scripts/__tests__/generators/new-case-template.test.ts` |
+| `scripts/__tests__/new-case-template.stdin.test.ts` | `scripts/__tests__/generators/new-case-template.stdin.test.ts` |
+| `scripts/__tests__/normalize-percases.unit.test.ts` | `scripts/__tests__/generators/normalize-percases.unit.test.ts` |
+| `scripts/__tests__/normalize-percases-extract.test.ts` | `scripts/__tests__/generators/normalize-percases-extract.test.ts` |
+| `scripts/__tests__/recalc_confidence.test.ts` | `scripts/__tests__/generators/recalc_confidence.test.ts` |
+| `scripts/__tests__/validators/notice-source-id.test.ts` | `scripts/__tests__/lib/notice.test.ts` |
+| `scripts/__tests__/bulk-io.test.ts` | `scripts/__tests__/lib/bulk-io.test.ts` |
+| `scripts/__tests__/cases-cli.test.ts` | `scripts/__tests__/lib/cases-cli.test.ts` |
+| `scripts/__tests__/crosscheck.test.ts` | `scripts/__tests__/policy/crosscheck.test.ts` |
+| `scripts/__tests__/pgp-adapter.test.ts` | `scripts/__tests__/policy/pgp-adapter.test.ts` |
+| `scripts/__tests__/pgp-audit-sanitization.test.ts` | `scripts/__tests__/policy/pgp-audit-sanitization.test.ts` |
+| `scripts/__tests__/pgp-manifest.test.ts` | `scripts/__tests__/policy/pgp-manifest.test.ts` |
+| `scripts/__tests__/pgp-trust-store.test.ts` | `scripts/__tests__/policy/pgp-trust-store.test.ts` |
+| `scripts/__tests__/pgp-verifier.test.ts` | `scripts/__tests__/policy/pgp-verifier.test.ts` |
+| `scripts/__tests__/policy.evaluate.test.ts` | `scripts/__tests__/policy/policy.evaluate.test.ts` |
+| `scripts/__tests__/validate-percases.test.ts` | `scripts/__tests__/validators/validate-percases.test.ts` |
+| `scripts/__tests__/contract-stability.test.ts` | `scripts/__tests__/tools/contract-stability.test.ts` |
+| `scripts/__tests__/check-error-handling.test.ts` | `scripts/__tests__/tools/check-error-handling.test.ts` |
+| `scripts/__tests__/validate-triggers.test.ts` | `scripts/__tests__/tools/validate-triggers.test.ts` |
+| `scripts/__tests__/validate-trusted-keys.test.ts` | `scripts/__tests__/tools/validate-trusted-keys.test.ts` |
+| `scripts/__tests__/error-handling.test.ts` | `scripts/__tests__/integration/error-handling.test.ts` |
+| `scripts/__tests__/pipeline-integration.test.ts` | `scripts/__tests__/integration/pipeline-integration.test.ts` |
+| `scripts/__tests__/examples-smoke.test.ts` | `scripts/__tests__/integration/examples-smoke.test.ts` |
+| `scripts/__tests__/provenance-schema.test.ts` | `scripts/__tests__/integration/provenance-schema.test.ts` |
+
+New tests (no predecessor): `scripts/__tests__/lib/paths.test.ts`, `scripts/__tests__/lib/case-id.test.ts`.
+
+Unchanged: `scripts/__tests__/helpers/` (`audit-path-scan.ts`, `pgp-fixtures.ts`) and the module folders `scripts/core/`, `scripts/lib/`, `scripts/policy/`, `scripts/validators/`, `scripts/generators/`, `scripts/tools/` (apart from the consumer move above).

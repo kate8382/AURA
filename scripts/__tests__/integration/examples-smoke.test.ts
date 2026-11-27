@@ -1,7 +1,7 @@
 import { execSync, spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { REPO_ROOT } from '../lib/paths';
+import { REPO_ROOT } from '../../lib/paths';
 
 describe('examples/simple-recalc smoke test', () => {
   test('runs simple-recalc.ts on sample_case.json and outputs valid JSON', () => {

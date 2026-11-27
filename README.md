@@ -2,7 +2,7 @@
 
 **AURA** (AI User Risk Assessment) is an open-source library of structured behavioral matrices, heuristics, and validation tooling designed to detect manipulation, deception, and grey-zone threats in human–AI interactions.
 
-**AURA** provides behavioral datasets (`synthetic_cases/` and `real_cases/`), signal mappings, and deterministic scoring scripts that run locally on case data. Because the scoring is deterministic and does not rely on an external LLM call, detectors built on these matrices can evaluate requests locally without incurring additional LLM inference costs or latency.
+**AURA** provides behavioral datasets (`synthetic_cases/` and `real_cases/`), signal mappings, and a rule-based, deterministic scoring engine that runs locally on case data. Because the scoring engine does not rely on an external LLM call, detectors built on these matrices can evaluate requests locally without incurring additional LLM inference costs or latency.
 
 The repository currently focuses on dataset structure, heuristics, and offline evaluation tooling (not a live proxy gateway).
 
@@ -75,7 +75,7 @@ _Found this project useful or interesting? Drop a ⭐ — plus to your developer
     ├── validators/          # Case validators (validate-percases)
     ├── tools/               # Helper and one-off tools (trigger collection, migrations, trial engine)
     │   └── consumers/       # Contract consumer helpers (signal action, shape metadata)
-    └── __tests__/           # Jest test suites (helpers in __tests__/helpers/, grouped into core/, policy/, validators/, tools/)
+    └── __tests__/           # Jest test suites, grouped by module: core/, generators/, integration/, lib/, policy/, tools/, validators/ (shared fixtures in helpers/)
 ```
 
 ### Case IDs

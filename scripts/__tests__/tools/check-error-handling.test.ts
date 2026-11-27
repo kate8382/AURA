@@ -1,4 +1,4 @@
-import { findSilentCatches, outputHasError } from '../tools/check-error-handling';
+import { findSilentCatches, outputHasError } from '../../tools/check-error-handling';
 
 describe('check-error-handling', () => {
   test('flags empty and comment-only catch blocks', () => {
