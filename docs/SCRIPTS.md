@@ -131,7 +131,7 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
 
     - Real data only: production adapters never accept test flags from the case. `ip-geolocate` reads `meta.ip_country`,
       `email-verify` reads `meta.email_verified`, and `bounty-scope` reads the program and target fields and checks them against the bounty snapshot.
-      Missing data yields `ok: false` with a reason. `validate-percases.ts` (`validateNoMockKeys`) rejects any key starting with `mock_` at any depth,
+      Missing data yields `ok: false` with a reason. `scripts/validators/validate-percases.ts` (`validateNoMockKeys`) rejects any key starting with `mock_` at any depth,
       and tests inject stub adapters via `registerAdapter` instead of case flags.
 
     - `pgp-verify` adapter: cryptographically verifies a detached or cleartext OpenPGP
@@ -321,16 +321,16 @@ Log format and verbosity:
 
 Unit tests for the scripts are located in `scripts/__tests__/` and include:
 
-- `scripts/__tests__/config.test.ts`
+- `scripts/__tests__/core/config.test.ts`
 - `scripts/__tests__/error-handling.test.ts`
-- `scripts/__tests__/logger.test.ts`
+- `scripts/__tests__/core/logger.test.ts`
 - `scripts/__tests__/check-error-handling.test.ts`
 - `scripts/__tests__/tools/contract-stability.test.ts`
 - `scripts/__tests__/extract-triggers.test.ts`
 - `scripts/__tests__/generate-trigger-weights.test.ts`
 - `scripts/__tests__/new-case-template.test.ts`
 - `scripts/__tests__/new-case-template.stdin.test.ts`
-- `scripts/__tests__/normalize-percases.test.ts`
+- `scripts/__tests__/normalize-percases.unit.test.ts`
 - `scripts/__tests__/normalize-percases-extract.test.ts`
 - `scripts/__tests__/recalc_confidence.test.ts`
 - `scripts/__tests__/validators/validate-percases.test.ts`
