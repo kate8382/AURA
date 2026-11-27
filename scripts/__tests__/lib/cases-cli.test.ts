@@ -1,7 +1,7 @@
 import path from 'path';
-import { REPO_ROOT } from '../lib/paths';
+import { REPO_ROOT } from '../../lib/paths';
 import { spawnSync } from 'child_process';
-import { assertRealWriteAllowed, getDirOption, isRealCasesPath, resolveCasesDir } from '../lib/cases-cli';
+import { assertRealWriteAllowed, getDirOption, isRealCasesPath, resolveCasesDir } from '../../lib/cases-cli';
 
 const base = REPO_ROOT;
 

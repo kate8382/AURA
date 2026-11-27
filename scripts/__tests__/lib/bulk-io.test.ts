@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import GenerateTriggerWeights, { clearSignalMapCache } from '../generators/generate-trigger-weights';
+import GenerateTriggerWeights, { clearSignalMapCache } from '../../generators/generate-trigger-weights';
 import {
   createWriteLimiter,
   MAX_CONCURRENCY,
@@ -9,7 +9,7 @@ import {
   runWithConcurrency,
   walkJsonFilesAsync,
   writeFileWithBackup,
-} from '../lib/bulk-io';
+} from '../../lib/bulk-io';
 
 describe('bulk-io utilities and parallel-worker smoke tests', () => {
   let tmpRoot: string;
