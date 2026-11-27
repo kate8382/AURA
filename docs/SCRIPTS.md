@@ -131,7 +131,7 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
 
     - Real data only: production adapters never accept test flags from the case. `ip-geolocate` reads `meta.ip_country`,
       `email-verify` reads `meta.email_verified`, and `bounty-scope` reads the program and target fields and checks them against the bounty snapshot.
-      Missing data yields `ok: false` with a reason. `validate-percases.ts` (`validateNoMockKeys`) rejects any key starting with `mock_` at any depth,
+      Missing data yields `ok: false` with a reason. `scripts/validators/validate-percases.ts` (`validateNoMockKeys`) rejects any key starting with `mock_` at any depth,
       and tests inject stub adapters via `registerAdapter` instead of case flags.
 
     - `pgp-verify` adapter: cryptographically verifies a detached or cleartext OpenPGP
@@ -289,6 +289,7 @@ Additional case-level metadata for trial engines:
 - One-off migration helpers live in `scripts/tools/`. Relevant npm shortcuts were added:
   - `npm run migrate:categories` — migrate legacy `category` field into `domain` + human `category` label in `synthetic_cases/`.
   - `npm run migrate:signals` — preview and apply signal ID compaction and update `synthetic_cases.signal_ids`.
+- Contract consumer helpers that read published contracts (`config/signal-mapping.json`, declared-shape and negative-label metadata) live in `scripts/tools/consumers/`: `signal-action-consumer.ts` (`getImpliedActions`) and `shape-metadata-consumer.ts` (`getNegativeLabel`). They are covered by `scripts/__tests__/tools/contract-stability.test.ts`.
 
 9) Automation suggestions
 
@@ -320,16 +321,16 @@ Log format and verbosity:
 
 Unit tests for the scripts are located in `scripts/__tests__/` and include:
 
-- `scripts/__tests__/config.test.ts`
+- `scripts/__tests__/core/config.test.ts`
 - `scripts/__tests__/error-handling.test.ts`
-- `scripts/__tests__/logger.test.ts`
+- `scripts/__tests__/core/logger.test.ts`
 - `scripts/__tests__/check-error-handling.test.ts`
-- `scripts/__tests__/contract-stability.test.ts`
+- `scripts/__tests__/tools/contract-stability.test.ts`
 - `scripts/__tests__/extract-triggers.test.ts`
 - `scripts/__tests__/generate-trigger-weights.test.ts`
 - `scripts/__tests__/new-case-template.test.ts`
 - `scripts/__tests__/new-case-template.stdin.test.ts`
-- `scripts/__tests__/normalize-percases.test.ts`
+- `scripts/__tests__/normalize-percases.unit.test.ts`
 - `scripts/__tests__/normalize-percases-extract.test.ts`
 - `scripts/__tests__/recalc_confidence.test.ts`
 - `scripts/__tests__/validators/validate-percases.test.ts`

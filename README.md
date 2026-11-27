@@ -68,11 +68,14 @@ _Found this project useful or interesting? Drop a ⭐ — plus to your developer
 │       └── real/            # Provenance required
 ├── schemas/                 # JSON Schemas for cases and config
 └── scripts/                 # Validation, normalization, confidence recalculation
-    ├── lib/                 # Shared helpers: case IDs, CLI parsing, NOTICE.md reader
+    ├── core/                # Shared runtime modules: logger, config, utils
+    ├── lib/                 # Shared helpers: repo paths, case IDs, CLI parsing, bulk I/O, NOTICE.md reader
     ├── policy/              # Decision logic and cross-check adapters
     │   └── pgp/             # pgp-verify adapter: offline OpenPGP verification, trust store, manifest checks
+    ├── validators/          # Case validators (validate-percases)
     ├── tools/               # Helper and one-off tools (trigger collection, migrations, trial engine)
-    └── __tests__/           # Jest test suites (helpers in __tests__/helpers/)
+    │   └── consumers/       # Contract consumer helpers (signal action, shape metadata)
+    └── __tests__/           # Jest test suites (helpers in __tests__/helpers/, grouped into core/, policy/, validators/, tools/)
 ```
 
 ### Case IDs

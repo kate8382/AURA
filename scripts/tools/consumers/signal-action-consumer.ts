@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { REPO_ROOT } from '../lib/paths';
+import { REPO_ROOT } from '../../lib/paths';
 
 const repoRoot = REPO_ROOT;
 const signalMappingPath = path.join(repoRoot, 'config', 'signal-mapping.json');

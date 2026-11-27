@@ -1,14 +1,14 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { REPO_ROOT } from '../lib/paths';
+import { REPO_ROOT } from '../../lib/paths';
 import Ajv from 'ajv';
-import { generateSignalHash, canonicalize } from '../tools/generate-signal-hash';
-import { getImpliedActions } from '../tools/signal-action-consumer';
-import { getNegativeLabel } from '../tools/shape-metadata-consumer';
-import { sameShape, calculateFalsePositiveRate } from '../tools/trial-engine';
-import { NormalizePerCases } from '../normalize-percases';
-import { getErrorCount, resetErrorCount } from '../core/logger';
+import { generateSignalHash, canonicalize } from '../../tools/generate-signal-hash';
+import { getImpliedActions } from '../../tools/consumers/signal-action-consumer';
+import { getNegativeLabel } from '../../tools/consumers/shape-metadata-consumer';
+import { sameShape, calculateFalsePositiveRate } from '../../tools/trial-engine';
+import { NormalizePerCases } from '../../normalize-percases';
+import { getErrorCount, resetErrorCount } from '../../core/logger';
 
 describe('contract-stability', () => {
   const repoRoot = REPO_ROOT;

@@ -48,7 +48,7 @@ Each signal entry may optionally include an `implied_action` field as a `string[
 Consumer helper example:
 
 ```ts
-import { getImpliedActions } from './scripts/tools/signal-action-consumer';
+import { getImpliedActions } from './scripts/tools/consumers/signal-action-consumer';
 
 const actions = getImpliedActions('exploit:actionable', ['execute:command', 'egress:outbound']);
 // => ['execute:command', 'egress:outbound']
