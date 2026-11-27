@@ -347,12 +347,11 @@ Unit tests for the scripts are located in `scripts/__tests__/` and include:
 - `scripts/__tests__/tools/validate-trusted-keys.test.ts`
 - `scripts/__tests__/validators/validate-percases.test.ts`
 
-
 Run the full test suite with `npm test`.
 
 Coverage thresholds are set per file in `jest.config.cjs` (no global threshold): `scripts/validators/validate-percases.ts` and `scripts/generators/recalc_confidence.ts` must reach at least 85% statements and 75% branches. They are covered by `scripts/__tests__/validators/validate-percases.test.ts` and `scripts/__tests__/generators/recalc_confidence.test.ts`. Check with `npx jest --coverage`.
 
-Layout
+## Layout
 
 Migration map for the Epic 2 refactor (old path → new path). Files not listed kept their path.
 
