@@ -32,6 +32,7 @@ Use the templates in [.github/ISSUE_TEMPLATE/](./.github/ISSUE_TEMPLATE/) and pr
 
 - Synthetic cases live in `synthetic_cases/` with the `SC-` prefix.
 - Real cases live in `real_cases/` with the `RC-` prefix. Each needs complete `provenance` (source, license, redaction status). Create them with `npm run new-case:real`.
+- Benign (safe and clarify) cases live in `benign_cases/` with the `SC-B-` (synthetic) or `RC-B-` (real) prefix. See [docs/REAL_CASES_PIPELINE.md](./docs/REAL_CASES_PIPELINE.md) §1a.
 - Do not include real personal data or PII in Issues, PRs, or case files.
 
 ## 5. Security
@@ -41,7 +42,7 @@ Do not report vulnerabilities in public Issues. Follow [security.md](./.github/I
 ## 6. Licensing
 
 - **Code & tooling:** Business Source License 1.1 (BSL 1.1). See [LICENSE](./LICENSE). Commercial production use requires a separate commercial license.
-- **Public cases (`synthetic_cases/`):** CC BY-NC 4.0. See [DATA_LICENSE](./DATA_LICENSE).
+- **Public cases (`synthetic_cases/`, `benign_cases/synthetic/`, `benign_cases/clarify/synthetic/`):** CC BY-NC 4.0. Real subsets (`real_cases/`, `benign_cases/real/`, `benign_cases/clarify/real/`) are hybrid, see [DATA_LICENSE](./DATA_LICENSE).
 - By contributing, you agree that your contributions are released under these licenses.
 
 ## 7. Commercial and private requests

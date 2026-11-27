@@ -1,4 +1,4 @@
-AURA data license (synthetic_cases and real_cases)
+AURA data license (synthetic_cases, real_cases and benign_cases)
 
 The following parts of this repository are licensed under Creative Commons
 Attribution-NonCommercial 4.0 International (CC BY-NC 4.0):
@@ -6,12 +6,17 @@ Attribution-NonCommercial 4.0 International (CC BY-NC 4.0):
 - `synthetic_cases/`: all case data.
 - `real_cases/`: our analysis, annotations, and case structure (the metadata,
   classification, signal mapping, and explanations we write).
+- `benign_cases/synthetic/` and `benign_cases/clarify/synthetic/`: all case data.
+- `benign_cases/real/` and `benign_cases/clarify/real/`: our analysis,
+  annotations, and case structure (the same rules as `real_cases/`).
 
 Third-party text is NOT relicensed. Prompts or other text quoted from external
-sources in `real_cases/` remain under the license of their original authors or
-sources (for example MIT or Apache-2.0). Those licenses apply to the quoted text
-only. Attribution and license terms for every source are listed in
-[real_cases/NOTICE](real_cases/NOTICE.md).
+sources in `real_cases/`, `benign_cases/real/`, and `benign_cases/clarify/real/`
+remain under the license of their original authors or sources (for example MIT
+or Apache-2.0). Those licenses apply to the quoted text only. Attribution and
+license terms for every source are listed in
+[real_cases/NOTICE](real_cases/NOTICE.md), and each real case's
+`provenance.source_id` points to its entry there.
 
 Summary:
 - Allows others to share (copy and redistribute) and adapt (remix, transform, and build upon) the material for non-commercial purposes,
@@ -20,4 +25,4 @@ Summary:
 
 Full license text and legal code: https://creativecommons.org/licenses/by-nc/4.0/legalcode
 
-If you want to use the `synthetic_cases/` dataset for commercial purposes, contact the project maintainers to obtain a commercial license.
+If you want to use the `synthetic_cases/`, `real_cases/`, or `benign_cases/` datasets for commercial purposes, contact the project maintainers to obtain a commercial license.
