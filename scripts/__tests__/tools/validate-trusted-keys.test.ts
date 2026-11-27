@@ -3,7 +3,7 @@ import path from 'path';
 
 import * as openpgp from 'openpgp';
 
-import { checkCertificatePolicy, validateTrustedKeys } from '../tools/validate-trusted-keys';
+import { checkCertificatePolicy, validateTrustedKeys } from '../../tools/validate-trusted-keys';
 import {
   ed25519Key,
   expiredKey,
@@ -13,7 +13,7 @@ import {
   rsaKey,
   shortLivedKey,
   type TempTrustStore,
-} from './helpers/pgp-fixtures';
+} from '../helpers/pgp-fixtures';
 
 jest.setTimeout(180_000);
 

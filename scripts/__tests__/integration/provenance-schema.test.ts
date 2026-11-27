@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { REPO_ROOT } from '../lib/paths';
+import { REPO_ROOT } from '../../lib/paths';
 import Ajv from 'ajv';
 
 const repoRoot = REPO_ROOT;

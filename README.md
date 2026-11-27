@@ -2,7 +2,7 @@
 
 **AURA** (AI User Risk Assessment) is an open-source library of structured behavioral matrices, heuristics, and validation tooling designed to detect manipulation, deception, and grey-zone threats in human–AI interactions.
 
-**AURA** provides behavioral datasets (`synthetic_cases/` and `real_cases/`), signal mappings, and deterministic scoring scripts that run locally on case data. Because the scoring is deterministic and does not rely on an external LLM call, detectors built on these matrices can evaluate requests locally without incurring additional LLM inference costs or latency.
+**AURA** provides behavioral datasets (`synthetic_cases/`, `real_cases/`, and `benign_cases/`), signal mappings, and a rule-based, deterministic scoring engine that runs locally on case data. Because the scoring engine does not rely on an external LLM call, detectors built on these matrices can evaluate requests locally without incurring additional LLM inference costs or latency.
 
 The repository currently focuses on dataset structure, heuristics, and offline evaluation tooling (not a live proxy gateway).
 
@@ -75,13 +75,14 @@ _Found this project useful or interesting? Drop a ⭐ — plus to your developer
     ├── validators/          # Case validators (validate-percases)
     ├── tools/               # Helper and one-off tools (trigger collection, migrations, trial engine)
     │   └── consumers/       # Contract consumer helpers (signal action, shape metadata)
-    └── __tests__/           # Jest test suites (helpers in __tests__/helpers/, grouped into core/, policy/, validators/, tools/)
+    └── __tests__/           # Jest test suites, grouped by module: core/, generators/, integration/, lib/, policy/, tools/, validators/ (shared fixtures in helpers/)
 ```
 
 ### Case IDs
 
 - `SC-<domain>-NNN` (for example `SC-M-001`) — synthetic cases in `synthetic_cases/`.
 - `RC-<domain>-NNN` (for example `RC-M-001`) — real cases in `real_cases/`, each with a `provenance` block.
+- `SC-B-NNN` / `RC-B-NNN` — benign (safe and clarify) cases in `benign_cases/`; one ID sequence per prefix across the whole `benign_cases/` tree.
 
 How the two differ and how to add a real case: [docs/REAL_CASES_PIPELINE.md](docs/REAL_CASES_PIPELINE.md); sources and licenses: [real_cases/NOTICE.md](real_cases/NOTICE.md).
 
@@ -142,7 +143,7 @@ Full command reference, flags, exit codes: [docs/SCRIPTS.md](docs/SCRIPTS.md).
 
 - Real-case workflow (template → provenance → normalize → recalc → validate): [docs/REAL_CASES_PIPELINE.md](docs/REAL_CASES_PIPELINE.md).
 - Signal IDs and trigger mapping (`config/signal-mapping.json`): [docs/SIGNAL_IDS.md](docs/SIGNAL_IDS.md).
-- Trigger weights in `config/trigger-weights.json` are generated from case triggers; `real_cases/` is included only with `--include-real`.
+- Trigger weights in `config/trigger-weights.json` are generated from case triggers; `real_cases/` is included only with `--include-real`; `benign_cases/` is always excluded.
 - Published contracts for downstream consumers live in `config/` (`decision-vocabulary.json`, `signal-catalog-meta.json`, `signal-mapping.json`); details in [docs/SCRIPTS.md](docs/SCRIPTS.md).
 
 ### Error handling
@@ -205,11 +206,11 @@ Minimal synthetic example (fields annotated by origin in the list above):
 
 ## Integration & Partnerships
 
-If you are building an LLM, guardrail engine, or safety pipeline, you may use `synthetic_cases/` and `real_cases/` under the CC BY‑NC 4.0 license for non‑commercial evaluation, benchmarking, and research. Third-party text in `real_cases/` keeps its original license (see [real_cases/NOTICE.md](real_cases/NOTICE.md)).
+If you are building an LLM, guardrail engine, or safety pipeline, you may use `synthetic_cases/`, `real_cases/`, and `benign_cases/` under the CC BY‑NC 4.0 license for non‑commercial evaluation, benchmarking, and research. Third-party text in `real_cases/`, `benign_cases/real/`, and `benign_cases/clarify/real/` keeps its original license (see [real_cases/NOTICE.md](real_cases/NOTICE.md)).
 
 Partnership & Access Options:
 
-- **Public cases (self‑serve):** Download `synthetic_cases/` and run validations locally with `npm run validate` and tests with `npm test`.
+- **Public cases (self‑serve):** Download `synthetic_cases/` (or `benign_cases/synthetic/`, `benign_cases/clarify/synthetic/`) and run validations locally with `npm run validate` and tests with `npm test`.
 - **Non‑commercial private testing:** For researchers requiring private evaluation, we offer a sandboxed evaluation pipeline where private cases are run locally without publishing sensitive content.
 - **Commercial licensing & enterprise access:** NDA, commercial licensing, dataset exports, and private API access options are available upon request.
 
@@ -228,6 +229,8 @@ This project operates under a dual/hybrid licensing model:
   * **Note:** Prior releases that were published under Apache‑2.0 remain licensed under Apache‑2.0; the Change Date applies prospectively to this code base as maintained by the Licensor.
 * **Cases & Data:** [Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](./DATA_LICENSE)
   * **`synthetic_cases/`:** all data is CC BY-NC 4.0.
+  * **`benign_cases/synthetic/` and `benign_cases/clarify/synthetic/`:** all data is CC BY-NC 4.0.
+  * **`benign_cases/real/` and `benign_cases/clarify/real/` (hybrid):** same rules as `real_cases/`. Our analysis, annotations, and case structure are CC BY-NC 4.0. Quoted third-party prompts are **not** relicensed; each real case's `provenance.source_id` links to its source and license in [real_cases/NOTICE.md](real_cases/NOTICE.md).
   * **`real_cases/` (hybrid):** our analysis, annotations, and case structure are CC BY-NC 4.0. Prompt text quoted from third-party sources is **not** relicensed. It stays under the original license (for example MIT or Apache-2.0). Sources, licenses, and required attribution are listed in [real_cases/NOTICE.md](real_cases/NOTICE.md). Each real case links to its entry through `provenance.source_id`.
 * **Third-party software:** licenses of runtime dependencies are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 * **Data handling:** dataset sourcing, redaction, and licensing rules are in [docs/DATA_HANDLING_POLICY.md](docs/DATA_HANDLING_POLICY.md).

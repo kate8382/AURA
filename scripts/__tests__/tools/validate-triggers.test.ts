@@ -1,6 +1,6 @@
 import path from 'path';
 import { spawnSync } from 'child_process';
-import { REPO_ROOT } from '../lib/paths';
+import { REPO_ROOT } from '../../lib/paths';
 import {
   validateTriggers,
   jaccardSimilarity,
@@ -8,7 +8,7 @@ import {
   getTokenSet,
   formatValidationReport,
   ValidationReport,
-} from '../tools/validate-triggers';
+} from '../../tools/validate-triggers';
 
 describe('validate-triggers', () => {
   const repoRoot = REPO_ROOT;
