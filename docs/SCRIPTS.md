@@ -289,6 +289,7 @@ Additional case-level metadata for trial engines:
 - One-off migration helpers live in `scripts/tools/`. Relevant npm shortcuts were added:
   - `npm run migrate:categories` — migrate legacy `category` field into `domain` + human `category` label in `synthetic_cases/`.
   - `npm run migrate:signals` — preview and apply signal ID compaction and update `synthetic_cases.signal_ids`.
+- Contract consumer helpers that read published contracts (`config/signal-mapping.json`, declared-shape and negative-label metadata) live in `scripts/tools/consumers/`: `signal-action-consumer.ts` (`getImpliedActions`) and `shape-metadata-consumer.ts` (`getNegativeLabel`). They are covered by `scripts/__tests__/tools/contract-stability.test.ts`.
 
 9) Automation suggestions
 
@@ -324,7 +325,7 @@ Unit tests for the scripts are located in `scripts/__tests__/` and include:
 - `scripts/__tests__/error-handling.test.ts`
 - `scripts/__tests__/logger.test.ts`
 - `scripts/__tests__/check-error-handling.test.ts`
-- `scripts/__tests__/contract-stability.test.ts`
+- `scripts/__tests__/tools/contract-stability.test.ts`
 - `scripts/__tests__/extract-triggers.test.ts`
 - `scripts/__tests__/generate-trigger-weights.test.ts`
 - `scripts/__tests__/new-case-template.test.ts`
