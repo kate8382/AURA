@@ -9,7 +9,7 @@ This document explains how AURA maps human-friendly `triggers` (from `scenarios[
 
 ### How the new mapping is used
 - The canonical mapping lives in `config/signal-mapping.json`.
-- At runtime `scripts/recalc_confidence.ts` and `scripts/generate-trigger-weights.ts` load this mapping and expand mapped signal keys into normalized triggers when computing weights and boosts. If a case contains explicit `signal_ids`, those are respected; unmapped triggers get a deterministic fallback ID.
+- At runtime `scripts/generators/recalc_confidence.ts` and `scripts/generators/generate-trigger-weights.ts` load this mapping and expand mapped signal keys into normalized triggers when computing weights and boosts. If a case contains explicit `signal_ids`, those are respected; unmapped triggers get a deterministic fallback ID.
 
 **Note** about `confidence_raw` and `confidence`
 - The recalculation pipeline now writes two separate fields for traceability:

@@ -9,7 +9,7 @@ describe('new-case CLI (non-interactive flows)', () => {
     const outDir = path.join(tmp, 'synthetic_cases');
     await fs.mkdir(outDir, { recursive: true });
 
-    const cmd = `node -r ts-node/register scripts/new-case-template.ts -o "${outDir}" -l Q -n 5`;
+    const cmd = `node -r ts-node/register scripts/generators/new-case-template.ts -o "${outDir}" -l Q -n 5`;
     execSync(cmd, { stdio: 'inherit' });
 
     const expected = path.join(outDir, 'Q', 'SC-Q-005.json');
@@ -24,7 +24,7 @@ describe('new-case CLI (non-interactive flows)', () => {
     const outDir = path.join(tmp, 'cases');
     await fs.mkdir(outDir, { recursive: true });
 
-    execSync(`node -r ts-node/register scripts/new-case-template.ts -o "${outDir}" -l M -n 7 -t real`, { stdio: 'inherit' });
+    execSync(`node -r ts-node/register scripts/generators/new-case-template.ts -o "${outDir}" -l M -n 7 -t real`, { stdio: 'inherit' });
 
     const stat = await fs.stat(path.join(outDir, 'M', 'RC-M-007.json'));
     expect(stat.isFile()).toBe(true);
@@ -40,7 +40,7 @@ describe('new-case CLI (non-interactive flows)', () => {
     await fs.writeFile(path.join(rdir, 'SC-R-001.json'), '{}');
     await fs.writeFile(path.join(rdir, 'SC-R-002.json'), '{}');
 
-    const cmd = `node -r ts-node/register scripts/new-case-template.ts -o "${outDir}" -l R -a`;
+    const cmd = `node -r ts-node/register scripts/generators/new-case-template.ts -o "${outDir}" -l R -a`;
     execSync(cmd, { stdio: 'inherit' });
 
     const expected = path.join(rdir, 'SC-R-003.json');

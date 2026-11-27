@@ -12,7 +12,7 @@ options control it. The shared helpers live in `scripts/lib/bulk-io.ts`.
 | `createWriteLimiter` | `scripts/lib/bulk-io.ts` | Spaces file writes at least `--write-delay-ms` apart. |
 | `writeFileWithBackup` | `scripts/lib/bulk-io.ts` | Writes a file and, when `backup` is set, first copies it to `<file>.bak`. |
 | `parseConcurrencyOptions` | `scripts/lib/bulk-io.ts` | Reads CLI flags and `AURA_CONCURRENCY`. |
-| Signal-map cache | `scripts/generate-trigger-weights.ts` | Caches `signal-mapping.json` by path, invalidated when its mtime or size changes. |
+| Signal-map cache | `scripts/generators/generate-trigger-weights.ts` | Caches `signal-mapping.json` by path, invalidated when its mtime or size changes. |
 
 `generate-trigger-weights.ts` and `normalize-percases.ts` use these helpers. Output of `generate-trigger-weights` is
 verified to be identical across concurrency levels (see Determinism).

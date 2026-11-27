@@ -100,7 +100,7 @@ The rewritten case must not copy wording, specific payloads, or harmful details 
 - Real cases (`real_cases/`) use `RC-<domain>-<NNN>`, for example `RC-M-001`.
 - `<domain>` is a single uppercase letter, and `<NNN>` is a sequence number of at least three digits.
 - The schema (`schemas/per-case-schema.json`) and `scripts/validators/validate-percases.ts` enforce the format. The prefix must be `RC-` for files under `real_cases/` (or `case_type: "real"`) and `SC-` otherwise.
-- `scripts/new-case-template.ts` generates IDs in this scheme. Use `-t real` to create a real case; the default is `synthetic`.
+- `scripts/generators/new-case-template.ts` generates IDs in this scheme. Use `-t real` to create a real case; the default is `synthetic`.
 
 
 ## 3. Storage Selection Rules (Full Text vs Pointer)

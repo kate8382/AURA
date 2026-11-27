@@ -10,9 +10,9 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { CONFIG_DIR } from '../lib/paths';
+import { CONFIG_DIR } from '../../lib/paths';
 
-import GenerateTriggerWeights from '../generate-trigger-weights';
+import GenerateTriggerWeights from '../../generators/generate-trigger-weights';
 
 describe('generate-trigger-weights preserves adapter routing', () => {
   let repoRoot: string;

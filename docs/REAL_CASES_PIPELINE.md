@@ -150,11 +150,11 @@ therefore be added to the mapping (step 6) before extraction can find it.
 ```bash
 # Synthetic: preview what would be added, then apply
 npm run normalize:percases:extract:dry
-node -r ts-node/register scripts/normalize-percases.ts synthetic_cases --extract-triggers
+node -r ts-node/register scripts/generators/normalize-percases.ts synthetic_cases --extract-triggers
 
 # Real: preview, then apply (writes into real_cases/ need the guard flag)
-node -r ts-node/register scripts/normalize-percases.ts --dir real_cases --dry-run --extract-triggers
-node -r ts-node/register scripts/normalize-percases.ts --dir real_cases --extract-triggers --allow-real-write
+node -r ts-node/register scripts/generators/normalize-percases.ts --dir real_cases --dry-run --extract-triggers
+node -r ts-node/register scripts/generators/normalize-percases.ts --dir real_cases --extract-triggers --allow-real-write
 ```
 
 - Existing triggers are never replaced, reordered or respelled. Extracted labels are appended.

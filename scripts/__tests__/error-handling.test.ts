@@ -4,8 +4,8 @@ import path from 'path';
 import { REPO_ROOT } from '../lib/paths';
 import { spawnSync } from 'child_process';
 import CrossCheckAdapter from '../policy/crossCheckAdapter';
-import GenerateTriggerWeights from '../generate-trigger-weights';
-import { RecalcConfidence } from '../recalc_confidence';
+import GenerateTriggerWeights from '../generators/generate-trigger-weights';
+import { RecalcConfidence } from '../generators/recalc_confidence';
 import { loadTriggerConfig } from '../core/config';
 import { MigrateCategories } from '../tools/migrate-categories';
 
@@ -44,7 +44,7 @@ describe('error handling policy', () => {
 
   test('normalize-percases exits 1 in --dry-run on invalid JSON but still processes other files', () => {
     writeCases();
-    const res = runScript('scripts/normalize-percases.ts', [tmp, '--dry-run']);
+    const res = runScript('scripts/generators/normalize-percases.ts', [tmp, '--dry-run']);
     expect(res.status).toBe(1);
     expect(res.stderr).toContain('[ERROR] invalid JSON');
     expect(res.stderr).toContain('broken.json');
@@ -54,7 +54,7 @@ describe('error handling policy', () => {
 
   test('recalc_confidence exits 1 in --dry-run on invalid JSON, reports the file, and leaves no temp files', () => {
     writeCases();
-    const res = runScript('scripts/recalc_confidence.ts', ['--dir', tmp, '--dry-run']);
+    const res = runScript('scripts/generators/recalc_confidence.ts', ['--dir', tmp, '--dry-run']);
     expect(res.status).toBe(1);
     expect(res.stderr).toContain('[ERROR] recalc failed');
     expect(res.stderr).toContain('broken.json');
@@ -64,7 +64,7 @@ describe('error handling policy', () => {
 
   test('JSON log format is machine-readable', () => {
     writeCases();
-    const res = runScript('scripts/recalc_confidence.ts', ['--dir', tmp, '--dry-run'], repoRoot, { AURA_LOG_FORMAT: 'json' });
+    const res = runScript('scripts/generators/recalc_confidence.ts', ['--dir', tmp, '--dry-run'], repoRoot, { AURA_LOG_FORMAT: 'json' });
     const entry = res.stderr.split('\n').filter(Boolean).map(line => JSON.parse(line)).find(e => e.level === 'error');
     expect(entry).toMatchObject({ level: 'error', message: 'recalc failed' });
     expect(entry.file).toContain('broken.json');

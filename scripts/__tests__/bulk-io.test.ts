@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import GenerateTriggerWeights, { clearSignalMapCache } from '../generate-trigger-weights';
+import GenerateTriggerWeights, { clearSignalMapCache } from '../generators/generate-trigger-weights';
 import {
   createWriteLimiter,
   MAX_CONCURRENCY,

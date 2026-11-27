@@ -2,7 +2,7 @@ import fsp from 'fs/promises';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { NormalizePerCases } from '../normalize-percases';
+import { NormalizePerCases } from '../../generators/normalize-percases';
 
 // Synthetic fixture texts with deterministic extraction behavior.
 const THESIS_TEXT =

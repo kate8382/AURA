@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
-import GenerateTriggerWeights, { clearSignalMapCache } from '../generate-trigger-weights';
+import GenerateTriggerWeights, { clearSignalMapCache } from '../generators/generate-trigger-weights';
 
 /**
  * Generates `caseCount` synthetic case JSON files in `targetDir` for benchmarking.
@@ -64,7 +64,7 @@ export async function runBulkIoBenchmark(caseCount = 200): Promise<void> {
     let normSeqMs: number | null = null;
     let normParMs: number | null = null;
     try {
-      const { NormalizePerCases } = await import('../normalize-percases');
+      const { NormalizePerCases } = await import('../generators/normalize-percases');
       clearSignalMapCache();
       const t2 = performance.now();
       await new NormalizePerCases(true).walkDir(casesSeq, { concurrency: 1, backup: false });

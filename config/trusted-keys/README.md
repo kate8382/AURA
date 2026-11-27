@@ -175,7 +175,7 @@ entries carry `verifier: "adapter:pgp-verify"`. Requirement IDs are routed via
 }
 ```
 
-`scripts/generate-trigger-weights.ts` preserves that key (and
+`scripts/generators/generate-trigger-weights.ts` preserves that key (and
 `writeCrossCheckAudit`) when it rewrites the weights file, and a regression test
 covers it.
 
