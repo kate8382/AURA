@@ -324,6 +324,11 @@ Unit tests for the scripts are located in `scripts/__tests__/` and include:
 - `scripts/__tests__/core/config.test.ts`
 - `scripts/__tests__/error-handling.test.ts`
 - `scripts/__tests__/core/logger.test.ts`
+- `scripts/__tests__/lib/paths.test.ts`
+- `scripts/__tests__/lib/case-id.test.ts`
+- `scripts/__tests__/lib/cases-cli.test.ts`
+- `scripts/__tests__/lib/bulk-io.test.ts`
+- `scripts/__tests__/lib/notice.test.ts`
 - `scripts/__tests__/check-error-handling.test.ts`
 - `scripts/__tests__/tools/contract-stability.test.ts`
 - `scripts/__tests__/generators/extract-triggers.test.ts`

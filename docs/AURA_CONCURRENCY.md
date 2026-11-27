@@ -35,7 +35,7 @@ with a `.bak` copy of the previous version on every run.
 - Per-file results are merged in sorted file order, so trigger counts and weights do not depend on which worker
   finishes first.
 - For `generate-trigger-weights`, running with `--concurrency 1` and `--concurrency 4` must produce identical output.
-  `scripts/__tests__/bulk-io.test.ts` checks this. No equivalent test exists yet for `normalize-percases`.
+  `scripts/__tests__/lib/bulk-io.test.ts` checks this. No equivalent test exists yet for `normalize-percases`.
 
 ## Safety rules
 
