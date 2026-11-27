@@ -1,9 +1,9 @@
 import fsSync from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
-import { logError, logWarn, runCli } from './core/logger';
-import { REPO_ROOT } from './lib/paths';
-import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_NAME, resolveCasesDir } from './lib/cases-cli';
+import { logError, logWarn, runCli } from '../core/logger';
+import { REPO_ROOT } from '../lib/paths';
+import { assertRealWriteAllowed, BENIGN_CASES_DIR, REAL_CASES_NAME, resolveCasesDir } from '../lib/cases-cli';
 import {
   createWriteLimiter,
   parseConcurrencyOptions,
@@ -11,7 +11,7 @@ import {
   walkJsonFilesAsync,
   writeFileWithBackup,
   WriteLimiter,
-} from './lib/bulk-io';
+} from '../lib/bulk-io';
 
 interface CachedSignalMap {
   mtimeMs: number;

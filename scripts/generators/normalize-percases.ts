@@ -1,12 +1,12 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { reorderCaseKeys, deriveSignalId } from './core/utils';
+import { reorderCaseKeys, deriveSignalId } from '../core/utils';
 import GenerateTriggerWeights from './generate-trigger-weights';
 import { DEFAULT_CONFIDENCE } from './recalc_confidence';
 import { getSharedExtractor, normalizeTriggerIdentity, defaultRepoRoot } from './extract-triggers';
-import { logError, runCli } from './core/logger';
-import { ValidatePerCases } from './validators/validate-percases';
-import { assertRealWriteAllowed, DEFAULT_CASES_DIR, getDirOption } from './lib/cases-cli';
+import { logError, runCli } from '../core/logger';
+import { ValidatePerCases } from '../validators/validate-percases';
+import { assertRealWriteAllowed, DEFAULT_CASES_DIR, getDirOption } from '../lib/cases-cli';
 import {
   BulkConcurrencyOptions,
   createWriteLimiter,
@@ -15,7 +15,7 @@ import {
   walkJsonFilesAsync,
   writeFileWithBackup,
   WriteLimiter,
-} from './lib/bulk-io';
+} from '../lib/bulk-io';
 
 type AnyObj = { [k: string]: any };
 

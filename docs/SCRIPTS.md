@@ -4,7 +4,7 @@ This document contains the detailed developer-oriented description of the genera
 confidence recalculation pipeline, and helper scripts. The main `README.md` contains only
 high-level commands and links to this file.
 
-1) Generator: `scripts/generate-trigger-weights.ts`
+1) Generator: `scripts/generators/generate-trigger-weights.ts`
 
 - Purpose: scan `synthetic_cases/`, normalize triggers, and compute per-trigger weights written to
   `config/trigger-weights.json`.
@@ -17,7 +17,7 @@ npm run gen:triggers
 CASES_DIR=synthetic_cases npm run gen:triggers
 npm run gen:triggers:apply   # run generator and apply `signal_ids` into case files (.bak created)
 npm run gen:triggers:real    # include real_cases/ in trigger statistics (--include-real)
-node -r ts-node/register scripts/generate-trigger-weights.ts --dir real_cases   # only real_cases/
+node -r ts-node/register scripts/generators/generate-trigger-weights.ts --dir real_cases   # only real_cases/
 ```
 
 **Repo paths:** the repository root and the `config/`, `schemas/`, `synthetic_cases/` and `real_cases/` directories are defined once in `scripts/lib/paths.ts` (`REPO_ROOT`, `CONFIG_DIR`, `SCHEMAS_DIR`, `SYNTHETIC_CASES_DIR`, `REAL_CASES_DIR`). Scripts and tests import these constants instead of computing paths from their own `__dirname`. `REPO_ROOT` assumes `paths.ts` stays in `scripts/lib/`. Paths taken from CLI arguments still resolve against `process.cwd()`. `resolveTrustStoreDir` (`scripts/policy/pgp/trustStore.ts`) walks up from its `startDir` and is intentionally unchanged.
@@ -58,16 +58,16 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
 - Use `gen:triggers:apply` only when you want `signal_ids` persisted into the case files for auditing
   or external integration.
 
-1a) Case template generator: `scripts/new-case-template.ts`
+1a) Case template generator: `scripts/generators/new-case-template.ts`
 
 - Creates a new case JSON with a canonical key order. IDs follow the scheme in
   [DATA_HANDLING_POLICY.md §2.5](./DATA_HANDLING_POLICY.md): `SC-<domain>-<NNN>` for synthetic cases (default)
   and `RC-<domain>-<NNN>` for real cases.
 - `-t, --type synthetic|real` selects the prefix. `-l <letter>` selects the domain letter, `-n <number>` or `-a` (auto-increment) selects the sequence.
-- Example: `node -r ts-node/register scripts/new-case-template.ts -o real_cases -l M -a -t real --allow-real-write`
+- Example: `node -r ts-node/register scripts/generators/new-case-template.ts -o real_cases -l M -a -t real --allow-real-write`
 - Step-by-step workflow for real cases (template, provenance, normalize, recalc, validate): [REAL_CASES_PIPELINE.md](./REAL_CASES_PIPELINE.md)
 
-2) Recalculator: `scripts/recalc_confidence.ts`
+2) Recalculator: `scripts/generators/recalc_confidence.ts`
 
 - Purpose: recompute `confidence` fields for cases using `config/trigger-weights.json` and
   other heuristic weights. The recalculator is written to be auditable: it records the raw
@@ -102,7 +102,7 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
   	ext{confidence} = 1 - e^{-0.3 \times 3.0} \approx 1 - e^{-0.75} \approx 0.59
   $$
 
-  - Implementation note: `scripts/recalc_confidence.ts` reads `normAlpha` from
+  - Implementation note: `scripts/generators/recalc_confidence.ts` reads `normAlpha` from
     `config/trigger-weights.json` and falls back to `1.0` when not present. It's recommended
     to set `normAlpha` explicitly in `config/trigger-weights.json` for reproducible results.
   - The recalculator also evaluates an operational `decision` for each case and writes
@@ -118,7 +118,7 @@ Recalculate benign confidence with `npm run recalc:confidence -- --dir benign_ca
       Shared types exported from that module: `CaseObj` (typed case shape consumed by adapters and `evaluateDecision`),
       `AdapterResult` and `AdapterFn` (adapter contract). `evaluateDecision.ts` exports `Decision` (`allow` | `review` | `block` | `pending`,
       matching `config/decision-vocabulary.json`) and `DecisionResult`. `scripts/core/utils.ts` `reorderCaseKeys` copies only own keys via `Object.defineProperty`, so a `__proto__` key cannot change the prototype.
-      Shared helpers: `scripts/lib/case-id.ts` exports `parseCaseId` (prefix and domain letter for a valid case ID), and `scripts/extract-triggers.ts` exports `normalizeTriggerIdentity`, which `recalc_confidence.ts` uses for trigger normalization.
+      Shared helpers: `scripts/lib/case-id.ts` exports `parseCaseId` (prefix and domain letter for a valid case ID), and `scripts/generators/extract-triggers.ts` exports `normalizeTriggerIdentity`, which `recalc_confidence.ts` uses for trigger normalization.
 
     - Question schema: every entry in `cross_check.questions` requires `id`, `title` and `type`.
       `id` is machine-readable and follows `q<N>-<kebab-slug>` (for example `q1-authorization-check`).
@@ -153,7 +153,7 @@ Usage examples:
 
 ```bash
 # dry-run
-node -r ts-node/register scripts/recalc_confidence.ts --dry-run --dir synthetic_cases
+node -r ts-node/register scripts/generators/recalc_confidence.ts --dry-run --dir synthetic_cases
 
 # apply changes
 npm run recalc:confidence -- --dir synthetic_cases
@@ -176,7 +176,7 @@ node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json --e
   recalculated case as JSON. A custom case path can be supplied as the first argument.
 - See `examples/README.md` and `examples/sample_case.json` for the demo input and expected output.
 
-4) Trigger extraction: `scripts/extract-triggers.ts` + `normalize-percases --extract-triggers`
+4) Trigger extraction: `scripts/generators/extract-triggers.ts` + `normalize-percases --extract-triggers`
 
 - Purpose: lightweight, deterministic, rule-based extraction of trigger candidates from
   `scenarios[].text` (Issue #8). English-only; no ML, embeddings, TF-IDF, or external NLP
@@ -211,8 +211,8 @@ node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json --e
 
 ```bash
 npm run normalize:percases:extract:dry   # preview additions, writes nothing
-node -r ts-node/register scripts/normalize-percases.ts synthetic_cases --extract-triggers --dry-run
-node -r ts-node/register scripts/normalize-percases.ts synthetic_cases --extract-triggers --apply-signal-ids
+node -r ts-node/register scripts/generators/normalize-percases.ts synthetic_cases --extract-triggers --dry-run
+node -r ts-node/register scripts/generators/normalize-percases.ts synthetic_cases --extract-triggers --apply-signal-ids
 ```
 
   Dry-run preview format: `[dry] WOULD ADD triggers <case_id> scenario <i>:` followed by
@@ -226,8 +226,8 @@ node -r ts-node/register scripts/normalize-percases.ts synthetic_cases --extract
   deliberately not an urgency cue (in the corpus it marks dispute/threat wording).
   Future directions (NOT implemented here; see Issue #9): TF-IDF weighting, embeddings,
   semantic similarity.
-- Tests: `scripts/__tests__/extract-triggers.test.ts` (rules, tokenization, scoring,
-  config validation) and `scripts/__tests__/normalize-percases-extract.test.ts`
+- Tests: `scripts/__tests__/generators/extract-triggers.test.ts` (rules, tokenization, scoring,
+  config validation) and `scripts/__tests__/generators/normalize-percases-extract.test.ts`
   (augmentation, dedup, dry-run, idempotency, signal-ID composition). Tests use temp
   dirs/fixtures; `synthetic_cases/` is never rewritten by this feature.
 
@@ -326,16 +326,16 @@ Unit tests for the scripts are located in `scripts/__tests__/` and include:
 - `scripts/__tests__/core/logger.test.ts`
 - `scripts/__tests__/check-error-handling.test.ts`
 - `scripts/__tests__/tools/contract-stability.test.ts`
-- `scripts/__tests__/extract-triggers.test.ts`
-- `scripts/__tests__/generate-trigger-weights.test.ts`
-- `scripts/__tests__/new-case-template.test.ts`
-- `scripts/__tests__/new-case-template.stdin.test.ts`
-- `scripts/__tests__/normalize-percases.unit.test.ts`
-- `scripts/__tests__/normalize-percases-extract.test.ts`
-- `scripts/__tests__/recalc_confidence.test.ts`
+- `scripts/__tests__/generators/extract-triggers.test.ts`
+- `scripts/__tests__/generators/generate-trigger-weights.test.ts`
+- `scripts/__tests__/generators/new-case-template.test.ts`
+- `scripts/__tests__/generators/new-case-template.stdin.test.ts`
+- `scripts/__tests__/generators/normalize-percases.unit.test.ts`
+- `scripts/__tests__/generators/normalize-percases-extract.test.ts`
+- `scripts/__tests__/generators/recalc_confidence.test.ts`
 - `scripts/__tests__/validators/validate-percases.test.ts`
 - `scripts/__tests__/validate-triggers.test.ts`
 
 Run the full test suite with `npm test`.
 
-Coverage thresholds are set per file in `jest.config.cjs` (no global threshold): `scripts/validators/validate-percases.ts` and `scripts/recalc_confidence.ts` must reach at least 85% statements and 75% branches. They are covered by `scripts/__tests__/validators/validate-percases.test.ts` and `scripts/__tests__/recalc_confidence.test.ts`. Check with `npx jest --coverage`.
+Coverage thresholds are set per file in `jest.config.cjs` (no global threshold): `scripts/validators/validate-percases.ts` and `scripts/generators/recalc_confidence.ts` must reach at least 85% statements and 75% branches. They are covered by `scripts/__tests__/validators/validate-percases.test.ts` and `scripts/__tests__/generators/recalc_confidence.test.ts`. Check with `npx jest --coverage`.

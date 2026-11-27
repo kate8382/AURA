@@ -4,7 +4,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { REPO_ROOT } from '../../lib/paths';
-import { NewCaseTemplate } from '../../new-case-template';
+import { NewCaseTemplate } from '../../generators/new-case-template';
 import { ValidatePerCases } from '../../validators/validate-percases';
 
 const repoRoot = REPO_ROOT;

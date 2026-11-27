@@ -2,13 +2,13 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import { execSync } from 'child_process';
-import { NormalizePerCases } from '../normalize-percases';
-import { deriveSignalId } from '../core/utils';
-import GenerateTriggerWeights from '../generate-trigger-weights';
+import { NormalizePerCases } from '../../generators/normalize-percases';
+import { deriveSignalId } from '../../core/utils';
+import GenerateTriggerWeights from '../../generators/generate-trigger-weights';
 
 describe('normalize-percases (unit)', () => {
   test('dry-run executes and reports actions', () => {
-    const cmd = 'node -r ts-node/register scripts/normalize-percases.ts synthetic_cases --dry-run';
+    const cmd = 'node -r ts-node/register scripts/generators/normalize-percases.ts synthetic_cases --dry-run';
     const out = execSync(cmd, { encoding: 'utf8' });
     expect(out).toMatch(/\[dry\] WOULD|Dry-run mode/);
   });

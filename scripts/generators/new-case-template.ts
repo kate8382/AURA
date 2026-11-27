@@ -1,8 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 import readline from 'readline';
-import { assertRealWriteAllowed, BENIGN_CASES_DIR, BENIGN_CLARIFY_DIR } from './lib/cases-cli';
-import { CASE_PREFIX, CaseKind } from './lib/case-id';
+import { assertRealWriteAllowed, BENIGN_CASES_DIR, BENIGN_CLARIFY_DIR } from '../lib/cases-cli';
+import { CASE_PREFIX, CaseKind } from '../lib/case-id';
 
 // NewCaseTemplate - класс для создания шаблона нового кейса с каноническим порядком ключей.
 export class NewCaseTemplate {

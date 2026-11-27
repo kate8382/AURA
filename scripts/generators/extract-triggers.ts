@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import GenerateTriggerWeights from './generate-trigger-weights';
-import { REPO_ROOT } from './lib/paths';
+import { REPO_ROOT } from '../lib/paths';
 
 /**
  * extract-triggers

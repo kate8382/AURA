@@ -6,7 +6,7 @@ import { assertRealWriteAllowed, getDirOption, isRealCasesPath, resolveCasesDir 
 const base = REPO_ROOT;
 
 const runTemplateCli = (args: string[]) =>
-  spawnSync(process.execPath, ['-r', 'ts-node/register', path.join(base, 'scripts', 'new-case-template.ts'), ...args], {
+  spawnSync(process.execPath, ['-r', 'ts-node/register', path.join(base, 'scripts', 'generators', 'new-case-template.ts'), ...args], {
     cwd: base,
     encoding: 'utf8',
     timeout: 60000

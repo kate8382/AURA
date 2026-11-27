@@ -8,8 +8,8 @@ import {
   loadExtractionConfigFile,
   normalizeStopwords,
   tokenize,
-} from '../extract-triggers';
-import { REPO_ROOT } from '../lib/paths';
+} from '../../generators/extract-triggers';
+import { REPO_ROOT } from '../../lib/paths';
 
 // Representative real repository scenario text (copied snippets from synthetic_cases).
 const MOVIE_SCRIPT_TEXT =

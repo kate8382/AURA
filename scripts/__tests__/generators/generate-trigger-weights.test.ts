@@ -2,7 +2,7 @@ import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
 import os from 'os';
-import GenerateTriggerWeights, { generateSignalIds } from '../generate-trigger-weights';
+import GenerateTriggerWeights, { generateSignalIds } from '../../generators/generate-trigger-weights';
 
 describe('generate-trigger-weights script', () => {
   test('generates config from sample synthetic_cases', async () => {

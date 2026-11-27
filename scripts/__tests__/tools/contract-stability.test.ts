@@ -7,7 +7,7 @@ import { generateSignalHash, canonicalize } from '../../tools/generate-signal-ha
 import { getImpliedActions } from '../../tools/consumers/signal-action-consumer';
 import { getNegativeLabel } from '../../tools/consumers/shape-metadata-consumer';
 import { sameShape, calculateFalsePositiveRate } from '../../tools/trial-engine';
-import { NormalizePerCases } from '../../normalize-percases';
+import { NormalizePerCases } from '../../generators/normalize-percases';
 import { getErrorCount, resetErrorCount } from '../../core/logger';
 
 describe('contract-stability', () => {

@@ -2,8 +2,8 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { extractTriggers } from '../scripts/extract-triggers';
-import { RecalcConfidence } from '../scripts/recalc_confidence';
+import { extractTriggers } from '../scripts/generators/extract-triggers';
+import { RecalcConfidence } from '../scripts/generators/recalc_confidence';
 
 async function main() {
   const argv = process.argv.slice(2);

@@ -1,4 +1,4 @@
-import { extractTriggers } from '../extract-triggers';
+import { extractTriggers } from '../../generators/extract-triggers';
 
 describe('extract-triggers: golden/regression suite', () => {
   test('benign text -> no triggers', () => {

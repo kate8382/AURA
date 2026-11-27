@@ -5,9 +5,9 @@ import { REPO_ROOT } from '../lib/paths';
 import { spawnSync } from 'child_process';
 import Ajv from 'ajv';
 import CrossCheckAdapter from '../policy/crossCheckAdapter';
-import GenerateTriggerWeights from '../generate-trigger-weights';
-import { NormalizePerCases } from '../normalize-percases';
-import { RecalcConfidence } from '../recalc_confidence';
+import GenerateTriggerWeights from '../generators/generate-trigger-weights';
+import { NormalizePerCases } from '../generators/normalize-percases';
+import { RecalcConfidence } from '../generators/recalc_confidence';
 
 const repoRoot = REPO_ROOT;
 const readJson = (p: string) => JSON.parse(fs.readFileSync(p, 'utf8'));
@@ -173,8 +173,8 @@ describe('recalc pipeline integration', () => {
     const env = { ...process.env };
     delete env.CASES_DIR;
 
-    const recalc = spawnSync(process.execPath, ['-r', 'ts-node/register', 'scripts/recalc_confidence.ts', '--dry-run', '--file', casePath], { cwd: repoRoot, env, encoding: 'utf8' });
-    const normalize = spawnSync(process.execPath, ['-r', 'ts-node/register', 'scripts/normalize-percases.ts', tmp, '--dry-run', '--extract-triggers'], { cwd: repoRoot, env, encoding: 'utf8' });
+    const recalc = spawnSync(process.execPath, ['-r', 'ts-node/register', 'scripts/generators/recalc_confidence.ts', '--dry-run', '--file', casePath], { cwd: repoRoot, env, encoding: 'utf8' });
+    const normalize = spawnSync(process.execPath, ['-r', 'ts-node/register', 'scripts/generators/normalize-percases.ts', tmp, '--dry-run', '--extract-triggers'], { cwd: repoRoot, env, encoding: 'utf8' });
 
     expect(recalc.status).toBe(0);
     expect(recalc.stdout).toContain('Dry-run: files not modified.');
