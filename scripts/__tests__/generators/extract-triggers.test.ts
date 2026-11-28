@@ -8,6 +8,7 @@ import {
   loadExtractionConfigFile,
   normalizeStopwords,
   tokenize,
+  tokenizeRaw,
 } from '../../generators/extract-triggers';
 import { REPO_ROOT } from '../../lib/paths';
 
@@ -129,6 +130,12 @@ describe('extract-triggers: tokenization and substring protection', () => {
       'taught',
       'student',
     ]);
+  });
+
+  test('Unicode letters stay inside tokens (diacritics and Cyrillic)', () => {
+    expect(tokenizeRaw('café')).toEqual(['café']);
+    expect(tokenizeRaw('бомба')).toEqual(['бомба']);
+    expect(tokenizeRaw('Бомба, café!')).toEqual(['бомба', 'café']);
   });
 
   test('research must not match researcher; student must not match students', () => {
