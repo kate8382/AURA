@@ -57,6 +57,28 @@ describe('fuzzyKey: separators, leet and repeats', () => {
   });
 });
 
+describe('fuzzyKey: extended confusables and known limits', () => {
+  test('extended homoglyphs fold to their Latin lookalikes', () => {
+    expect(fuzzyKey('ɡun')).toBe('gun');
+    expect(fuzzyKey('ıℓ')).toBe('il');
+    expect(fuzzyKey('ꭰ')).toBe('d');
+    expect(fuzzyKey('Ꭰ')).toBe('d');
+  });
+
+  test('space-separated words merge after collapseSeparators (documented limit)', () => {
+    expect(fuzzyKey('make a bomb')).toBe('makeabomb');
+    expect(fuzzyKey('the bomb')).toBe('thebomb');
+  });
+
+  test('digits in mixed Latin tokens are partly folded (documented limit)', () => {
+    expect(fuzzyKey('abc123')).toBe('abci2e');
+  });
+
+  test('repeated kana are collapsed to one character (documented limit)', () => {
+    expect(fuzzyKey('ううう')).toBe('う');
+  });
+});
+
 describe('unicodeTokenize', () => {
   test('splits on non-letter/non-digit runs and drops empty tokens', () => {
     expect(unicodeTokenize('  café, бомба!! [ALERT: ] 42 ')).toEqual(['café', 'бомба', 'ALERT', '42']);

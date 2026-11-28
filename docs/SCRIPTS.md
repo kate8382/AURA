@@ -200,8 +200,8 @@ node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json --e
     key for obfuscated text. Steps, in order: `NFKC` → lowercase → `collapseSeparators`
     (`.`, `_`, `-`, `*`, `·`, `•`, quotes and whitespace between two letters/digits are
     removed) → `foldConfusables` → `foldLeet` → `collapseRepeats`.
-    - `foldConfusables` uses a fixed table of 22 visually identical glyphs
-      (homoglyphs, e.g. Cyrillic `а`/`о`/`е`/`р`/`с`/`х` and Greek `ο`/`α` → Latin). It is not
+    - `foldConfusables` uses a fixed table of 29 visually identical glyphs
+      (homoglyphs, e.g. Cyrillic `а`/`о`/`е`/`р`/`с`/`х`, Greek `ο`/`α`, and `ɡ`, `ı`, `ℓ`, `ꭰ`, `ѡ` → Latin). Keys are lowercase because folding runs after lowercasing. It is not
       a translator or transliterator: letters without a listed lookalike (e.g. Cyrillic `б`,
       `м`) are kept as is. So `б.о.м.б.а` and `бомба` produce the same key, but that key is not
       the Latin `bomba`; mixed-alphabet spellings are equal to each other, not to pure Latin.

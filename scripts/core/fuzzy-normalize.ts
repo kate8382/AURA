@@ -6,7 +6,7 @@
 const SEPARATOR_RUN = /(?<=[\p{L}\p{N}])[\s._\-*·•'"]+(?=[\p{L}\p{N}])/gu;
 const LEET_RUN = /[\p{L}\p{N}@$]+/gu;
 const REPEATED_LETTER = /(\p{L})\1+/gu;
-const WORD_SEGMENT_SPLIT = /[^\p{L}\p{N}]+/u;
+const UNICODE_WORD_BOUNDARY_SPLIT = /[^\p{L}\p{N}]+/u;
 
 const LEET_MAP: ReadonlyMap<string, string> = new Map([
   ['0', 'o'],
@@ -26,7 +26,9 @@ const CONFUSABLE_MAP: ReadonlyMap<string, string> = new Map([
   ['һ', 'h'], ['ԁ', 'd'], ['ԛ', 'q'], ['ѵ', 'v'], ['ӏ', 'l'],
   // Greek -> Latin
   ['α', 'a'], ['ι', 'i'], ['κ', 'k'], ['ν', 'v'], ['ο', 'o'],
-  ['ρ', 'p'], ['χ', 'x'],
+  ['ρ', 'p'], ['χ', 'x'], ['ϲ', 'c'],
+  // Other lookalikes (keys are lowercase, because folding runs after lowercasing)
+  ['ɡ', 'g'], ['ı', 'i'], ['ℓ', 'l'], ['ɑ', 'a'], ['ꭰ', 'd'], ['ѡ', 'w'],
 ]);
 
 function collapseSeparators(s: string): string {
@@ -72,5 +74,5 @@ export function fuzzyKey(s: string): string {
 
 /** Split on any non-letter, non-digit run (Unicode-aware); drops empty tokens. */
 export function unicodeTokenize(s: string): string[] {
-  return s.split(WORD_SEGMENT_SPLIT).filter((t) => t.length > 0);
+  return s.split(UNICODE_WORD_BOUNDARY_SPLIT).filter((t) => t.length > 0);
 }
