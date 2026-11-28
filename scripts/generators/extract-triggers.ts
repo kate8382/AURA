@@ -139,12 +139,12 @@ export function normalizeText(text: string): string {
 
 /**
  * tokenizeRaw
- * Split normalized text into alphanumeric tokens. Brackets, punctuation, and
- * placeholder markers (e.g. `[ALERT: ]`) act as separators and are tolerated.
+ * Split normalized text into Unicode letter/digit tokens. Brackets, punctuation,
+ * and placeholder markers (e.g. `[ALERT: ]`) act as separators and are tolerated.
  */
 export function tokenizeRaw(text: string): string[] {
   return normalizeText(text)
-    .split(/[^a-z0-9]+/)
+    .split(/[^\p{L}\p{N}]+/u)
     .filter((t) => t.length > 0);
 }
 

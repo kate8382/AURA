@@ -194,7 +194,25 @@ node -r ts-node/register examples/simple-recalc.ts examples/sample_case.json --e
     match `researcher`, `student` does not match `students`, `scrape` does not match
     `scraper`. Morphological variants are listed explicitly in config (no stemming).
   - Stopword-aware tokenizer (configurable stopwords; tolerates punctuation and
-    bracketed placeholders such as `[ALERT: ]`).
+    bracketed placeholders such as `[ALERT: ]`). Tokens are Unicode letter/digit runs
+    (`/[^\p{L}\p{N}]+/u`), so `café` stays `['café']` and `бомба` stays `['бомба']`.
+  - Fuzzy key (`fuzzyKey` in `scripts/core/fuzzy-normalize.ts`): a deterministic comparison
+    key for obfuscated text. Steps, in order: `NFKC` → lowercase → `collapseSeparators`
+    (`.`, `_`, `-`, `*`, `·`, `•`, quotes and whitespace between two letters/digits are
+    removed) → `foldConfusables` → `foldLeet` → `collapseRepeats`.
+    - `foldConfusables` uses a fixed table of 29 visually identical glyphs
+      (homoglyphs, e.g. Cyrillic `а`/`о`/`е`/`р`/`с`/`х`, Greek `ο`/`α`, and `ɡ`, `ı`, `ℓ`, `ꭰ`, `ѡ` → Latin). Keys are lowercase because folding runs after lowercasing. It is not
+      a translator or transliterator: letters without a listed lookalike (e.g. Cyrillic `б`,
+      `м`) are kept as is. So `б.о.м.б.а` and `бомба` produce the same key, but that key is not
+      the Latin `bomba`; mixed-alphabet spellings are equal to each other, not to pure Latin.
+    - `foldLeet` (`0→o 1→i 3→e 4→a 5→s 7→t @→a $→s`) is applied only in runs made of ASCII
+      characters that contain a Latin letter.
+    - `collapseRepeats` merges runs of the same letter (`bbbomb` → `bomb`); distinct words
+      such as `book`/`bomb` or `bok`/`bom` stay distinct.
+  - `unicodeTokenize` splits on runs of non-letter, non-digit characters (`\p{L}`, `\p{N}`).
+    CJK limitation: ideographs, kana and hangul are kept as whole characters, but CJK text
+    has no spaces, so a phrase without punctuation stays one token. Word segmentation for
+    CJK is out of scope for `[3.2]`.
   - Scoring fallback: per-trigger weak-cue token overlap. A trigger fires only when at
     least `minMatches` (default 2) distinct cues co-occur AND the matched fraction reaches
     `threshold` (default 0.5), so a single generic word can never create a trigger alone.
